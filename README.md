@@ -7,7 +7,7 @@ git-cms-merge-topic jshlee:gem-vfatv3
 git clone git@github.com:giovanni-mocellin/gemqc8.git
 mv gemqc8/* .
 rm -rf gemqc8
-scram b -j 12
+scram b -j 4
 cd Analysis/GEMQC8/test
 cmsRun runGEMCosmicStand_sim.py
 ```
