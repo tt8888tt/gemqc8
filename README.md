@@ -1,9 +1,17 @@
 # gemqc8
-```
-scram p -n gemcrs CMSSW CMSSW_10_5_0_pre1
-cd CMSSW_10_5_0_pre1/src
+```bash
+scram p -n QC8Test CMSSW CMSSW_10_5_0_pre2
+cd QC8Test/src
 cmsenv
-git cms-init
-git clone git@github.com:gem-sw/gemqc8.git
-scram b -j 8
+git-cms-merge-topic jshlee:gem-vfatv3
+git clone git@github.com:giovanni-mocellin/gemqc8.git
+mv gemqc8/* .
+rm -rf gemqc8
+scram b -j 12
+cd Analysis/GEMQC8/test
+cmsRun runGEMCosmicStand_sim.py
+```
+or
+```bash
+cmsRun runGEMCosmicStand_data_test.py
 ```
