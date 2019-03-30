@@ -32,31 +32,31 @@ if __name__ == '__main__':
 
   # Generate configuration file
   config_creator.configMaker(run_number)
-  time.sleep(1)
+  time.sleep(3)
   
   # Generate geometry files
   geometry_files_creator.geomMaker(run_number)
-  time.sleep(1)
+  time.sleep(3)
   
   # Compiling after the generation of the geometry files
-  scramCommand = "scramv1 b -j 8"
+  scramCommand = "scramv1 b -j 4"
   scramming = subprocess.Popen(scramCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=srcPath)
   while scramming.poll() is None:
     line = scramming.stdout.readline()
     print(line)
   print scramming.stdout.read()
   scramming.communicate()
-  time.sleep(1)
+  time.sleep(3)
 
   # Running the CMSSW code
-  runCommand = "cmsRun runGEMCosmicStand_sim.py"
+  runCommand = "cmsRun runGEMCosmicStand_data.py "+run_number
   running = subprocess.Popen(runCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
   while running.poll() is None:
     line = running.stdout.readline()
     print(line)
   print running.stdout.read()
   running.communicate()
-  time.sleep(1)
+  time.sleep(3)
   
   #  # Creating folder outside the CMMSW release to put the output files and plots
   outDirName = "Results_QC8_run_"+run_number
@@ -69,7 +69,7 @@ if __name__ == '__main__':
   resDirCommand = "mkdir "+outDirName
   resDir = subprocess.Popen(resDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=resDirPath)
   resDir.communicate()
-  time.sleep(1)
+  time.sleep(3)
   
   # Create folders for ouput plots per chamber
   SuperChType = runConfig.StandConfiguration
@@ -79,7 +79,7 @@ if __name__ == '__main__':
       plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i)
       plotsDirChamber = subprocess.Popen(plotsDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
       plotsDirChamber.communicate()
-  time.sleep(1)
+  time.sleep(3)
 
   # Selecting the correct output file, changing the name and moving to the output folder
   out_name = 'out_run_'
@@ -90,12 +90,12 @@ if __name__ == '__main__':
   mvCommand = "mv temp_" + out_name + " " + out_name
   moving = subprocess.Popen(mvCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
   moving.communicate()
-  time.sleep(1)
+  time.sleep(3)
 
   mvToDirCommand = "mv " + out_name + " " + resDirPath+outDirName + "/" + out_name
   movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
   movingToDir.communicate()
-  time.sleep(1)
+  time.sleep(3)
   
   # Efficiency computation & output
   effCommand = "root -l -q " + runPath + "efficiency_calculation.c(" + run_number + ",\"" + runPath + "\")"
@@ -105,4 +105,4 @@ if __name__ == '__main__':
     print(line)
   print efficiency.stdout.read()
   efficiency.communicate()
-  time.sleep(1)
+  time.sleep(3)

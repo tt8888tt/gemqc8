@@ -3,6 +3,7 @@
 # Revision: 1.19
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v
 # with command line options: SingleMuPt100_cfi -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,L1Reco,RECO --conditions auto:run2_mc --magField 38T_PostLS1 --datatier GEN-SIM --geometry GEMCosmicStand --eventcontent FEVTDEBUGHLT --era phase2_muon -n 100 --fileout out_reco.root
+
 import datetime
 print datetime.datetime.now()
 import FWCore.ParameterSet.Config as cms
@@ -12,7 +13,10 @@ import configureRun_cfi as runConfig
 import FWCore.ParameterSet.VarParsing as VarParsing
 options = VarParsing.VarParsing('analysis')
 
-options.register("runNum",1,
+import sys
+run_number = sys.argv[1]
+
+options.register("runNum",run_number,
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
                  "Run number")
@@ -100,15 +104,18 @@ if nIdxJob < 0: nIdxJob = 0
 
 
 import os
-fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run000078/"
+fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run"
+  for i in range(8-len(run_number)):
+    fpath = fpath + '0'
+  fpath = fpath + run_number + "/"
 # Input source
 process.source = cms.Source(
                             "GEMLocalModeDataSource",
                             fileNames = cms.untracked.vstring ([fpath+x for x in os.listdir(fpath) if x.endswith(".dat")]),
                             skipEvents=cms.untracked.uint32(0),
-                            fedId = cms.untracked.int32(1472 ),  # which fedID to assign
+                            fedId = cms.untracked.int32(1472),  # which fedID to assign
                             hasFerolHeader = cms.untracked.bool(False),
-                            runNumber = cms.untracked.int32(71),
+                            runNumber = cms.untracked.int32(run_number),
                             )
 process.options = cms.untracked.PSet(
                                      SkipEvent = cms.untracked.vstring('ProductNotFound')
