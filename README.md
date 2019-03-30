@@ -9,9 +9,5 @@ mv gemqc8/* .
 rm -rf gemqc8
 scram b -j 4
 cd Analysis/GEMQC8/test
-cmsRun runGEMCosmicStand_sim.py
-```
-or
-```bash
-cmsRun runGEMCosmicStand_data_test.py
+python launcher_data.py 71 xslxTOcsv=OFF
 ```
