@@ -104,9 +104,9 @@ strOutput = "out_reco_MC.root" if nIdxJob >= 0 else runConfig.OutputFileName
 if nIdxJob < 0: nIdxJob = 0
 
 fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run"
-for i in range(6-len(run_number)):
+for i in range(6-len(str(run_number))):
   fpath = fpath + '0'
-  fpath = fpath + run_number + "/"
+fpath = fpath + str(run_number) + "/"
 # Input source
 process.source = cms.Source(
                             "GEMLocalModeDataSource",
