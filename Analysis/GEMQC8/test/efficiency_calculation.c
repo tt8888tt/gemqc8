@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <TLatex.h>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -244,6 +245,7 @@ void efficiency_calculation(int run, string configDir)
     digi2D[c]->SetTitle(namename.c_str());
     digi2D[c]->GetXaxis()->SetTitle("Strip Number");
     digi2D[c]->GetYaxis()->SetTitle("ieta");
+    digi2D[c]->SetLogz();
     digi2D[c]->Draw("colz");
     digi2D[c]->Write(namename.c_str());
     namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Digi_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
@@ -261,7 +263,6 @@ void efficiency_calculation(int run, string configDir)
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
     
-    
   }
   
   // Plot of efficiency per layer
@@ -275,6 +276,8 @@ void efficiency_calculation(int run, string configDir)
     eff2D[row*2]->SetMinimum(0.70);
     eff2D[row*2]->SetMaximum(1.0);
     eff2D[row*2]->SetStats(0);
+    eff2D[row*2]->GetXaxis()->SetTitle("#phi partition");
+    eff2D[row*2]->GetYaxis()->SetTitle("#eta partition");
     eff2D[row*2]->Draw("colz TEXT0");
     col_1_2->Draw("SAME");
     col_2_3->Draw("SAME");
