@@ -16,12 +16,12 @@ def configMaker(run_number):
 					sys.exit('StandGeometryConfiguration file has something wrong: run rumber not matching...')
 
 	in_name = 'run'
-	for i in range(8-len(run_number)):
+	for i in range(6-len(run_number)):
 	    in_name = in_name + '0'
 	in_name = in_name + run_number + '_Dummy_Dummy_2018.dat'
 
 	out_name = 'out_run_'
-	for i in range(8-len(run_number)):
+	for i in range(6-len(run_number)):
 	    out_name = out_name + '0'
 	out_name = out_name + run_number + '.root'
 

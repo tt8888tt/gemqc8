@@ -1,8 +1,8 @@
-RunNumber = 1
+RunNumber = 71
 
 # Input and output files name definition
-InputFileName = 'run00000001_Dummy_Dummy_2018.dat'
-OutputFileName = 'out_run_00000001.root'
+InputFileName = 'run000071_Dummy_Dummy_2018.dat'
+OutputFileName = 'out_run_000071.root'
 
 # Parameters definition
 minClusterSize = 1

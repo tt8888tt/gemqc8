@@ -30,14 +30,14 @@ if __name__ == '__main__':
     fileToBeConverted = runPath + "StandAlignmentValues_run" + run_number + ".xlsx"
     excel_to_csv.conversion(fileToBeConverted)
 
-  # Generate configuration file
-  config_creator.configMaker(run_number)
-  time.sleep(3)
-  
-  # Generate geometry files
-  geometry_files_creator.geomMaker(run_number)
-  time.sleep(3)
-  
+#  # Generate configuration file
+#  config_creator.configMaker(run_number)
+#  time.sleep(3)
+#
+#  # Generate geometry files
+#  geometry_files_creator.geomMaker(run_number)
+#  time.sleep(3)
+
   # Compiling after the generation of the geometry files
   scramCommand = "scramv1 b -j 4"
   scramming = subprocess.Popen(scramCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=srcPath)
@@ -49,7 +49,7 @@ if __name__ == '__main__':
   time.sleep(3)
 
   # Running the CMSSW code
-  runCommand = "cmsRun runGEMCosmicStand_data.py "+run_number
+  runCommand = "cmsRun runGEMCosmicStand_data.py"
   running = subprocess.Popen(runCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
   while running.poll() is None:
     line = running.stdout.readline()
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
   # Selecting the correct output file, changing the name and moving to the output folder
   out_name = 'out_run_'
-  for i in range(8-len(run_number)):
+  for i in range(6-len(run_number)):
     out_name = out_name + '0'
   out_name = out_name + run_number + '.root'
 

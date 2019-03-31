@@ -4,6 +4,8 @@
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v
 # with command line options: SingleMuPt100_cfi -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,L1Reco,RECO --conditions auto:run2_mc --magField 38T_PostLS1 --datatier GEN-SIM --geometry GEMCosmicStand --eventcontent FEVTDEBUGHLT --era phase2_muon -n 100 --fileout out_reco.root
 
+import sys
+import os
 import datetime
 print datetime.datetime.now()
 import FWCore.ParameterSet.Config as cms
@@ -13,8 +15,7 @@ import configureRun_cfi as runConfig
 import FWCore.ParameterSet.VarParsing as VarParsing
 options = VarParsing.VarParsing('analysis')
 
-import sys
-run_number = sys.argv[1]
+run_number = runConfig.RunNumber
 
 options.register("runNum",run_number,
                  VarParsing.VarParsing.multiplicity.singleton,
@@ -102,11 +103,9 @@ nIdxJob = int(options.idxJob)
 strOutput = "out_reco_MC.root" if nIdxJob >= 0 else runConfig.OutputFileName
 if nIdxJob < 0: nIdxJob = 0
 
-
-import os
 fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run"
-  for i in range(8-len(run_number)):
-    fpath = fpath + '0'
+for i in range(6-len(run_number)):
+  fpath = fpath + '0'
   fpath = fpath + run_number + "/"
 # Input source
 process.source = cms.Source(
