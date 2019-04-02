@@ -25,7 +25,7 @@ void efficiency_calculation(int run, string configDir)
   // Getting the root file
   
   string filename = "out_run_";
-  for (int i=0; i<(8-to_string(run).size()); i++)
+  for (int i=0; i<(6-to_string(run).size()); i++)
   {
     filename += "0";
   }
