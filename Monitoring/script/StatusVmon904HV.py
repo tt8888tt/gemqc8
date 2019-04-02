@@ -113,11 +113,24 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		
 		#print("indexB="+str(indexB)+" indexC="+str(indexC)) 
 		#th1List.append(NameB+" "+NameC) 
-		Imonh1 = ROOT.TH1F("HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",100,-10,10)	
+
+		#set bin size
+		IMinHV = -10		#uA
+		IMaxHV = 10  		#uA
+		IResolutionHV = 0.02 	#uA
+		INbinHV = int((IMaxHV - IMinHV)/IResolutionHV) 
+		
+		Imonh1 = ROOT.TH1F("HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1", INbinHV, IMinHV, IMaxHV)	
 		Imonh1.GetXaxis().SetTitle("I [uA]")
                 Imonh1.GetYaxis().SetTitle("counts")
-		
-		Vmonh1 = ROOT.TH1F("HV_VmonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_VmonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",100,0,2000)	
+
+		#set bin size	
+		VMinHV = -50		#V
+                VMaxHV = 2000  		#V
+                VResolutionHV = 0.02 	#V
+                VNbinHV = int((VMaxHV - VMinHV)/VResolutionHV) 
+	
+		Vmonh1 = ROOT.TH1F("HV_VmonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_VmonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",VNbinHV,VMinHV,VMaxHV)	
 		Vmonh1.GetXaxis().SetTitle("V [V]")
                 Vmonh1.GetYaxis().SetTitle("counts")
 

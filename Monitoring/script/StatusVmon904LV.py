@@ -98,12 +98,26 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         firstDir.cd()
 	
 	#print("indexB="+str(indexB))
-	#th1List.append(NameB)                                                                                                                                         
-        Imonh1 = ROOT.TH1F("LV_ImonChamber"+chamberList[indexB]+"_TH1","LV_ImonChamber"+chamberList[indexB]+"_TH1",100,10,10)	
-        Imonh1.GetXaxis().SetTitle("I [uA]")
+	#th1List.append(NameB)                                                                                        
+
+	#set bin size
+	IMinLV = -10		#A
+	IMaxLV = 10		#A
+	IResolutionLV = 0.01	#A
+	INbinLV = int((IMaxLV-IMinLV)/IResolutionLV) 
+                                                 
+        Imonh1 = ROOT.TH1F("LV_ImonChamber"+chamberList[indexB]+"_TH1","LV_ImonChamber"+chamberList[indexB]+"_TH1",INbinLV,IMinLV,IMaxLV)
+        Imonh1.GetXaxis().SetTitle("I [A]")
         Imonh1.GetYaxis().SetTitle("counts")
-        		
-        Vmonh1 = ROOT.TH1F("LV_VmonChamber"+chamberList[indexB]+"_TH1","LV_VmonChamber"+chamberList[indexB]+"_TH1",100,0,2000)	
+        
+
+	#set bin size
+        VMinLV = -50		#V
+        VMaxLV = 200		#V
+        VResolutionLV = 0.005	#V
+        VNbinLV = int((VMaxLV-VMinLV)/VResolutionLV) 
+		
+        Vmonh1 = ROOT.TH1F("LV_VmonChamber"+chamberList[indexB]+"_TH1","LV_VmonChamber"+chamberList[indexB]+"_TH1",VNbinLV,VMinLV,VMaxLV)
         Vmonh1.GetXaxis().SetTitle("V [V]")
         Vmonh1.GetYaxis().SetTitle("counts")
         
@@ -258,7 +272,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         Imontg1.SetName("LV_ImonChamber"+chamberList[indexB]+"_time")
         Imontg1.SetTitle("LV_ImonChamber"+chamberList[indexB]+"_time")
         Imontg1.GetXaxis().SetTitle("time [s]")
-        Imontg1.GetYaxis().SetTitle("Imon "+chamberList[indexB]+" [uA]")
+        Imontg1.GetYaxis().SetTitle("Imon "+chamberList[indexB]+" [A]")
         #Imontg1.Draw("ACP")
                                                                                                          
         #ImonTgraph1List += [Imontg1]
