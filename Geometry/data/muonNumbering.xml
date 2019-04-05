@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<DDDefinition xmlns="http://www.cern.ch/cms/DDL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.cern.ch/cms/DDL ../../../DetectorDescription/Schema/DDLSchema.xsd">
+ <ConstantsSection label="muonconstants">
+  <Constant name="xml_starts_with_copyno" value="1"/>
+  <Constant name="level" value="1000"/>
+  <Constant name="level2" value="0"/>
+  <Constant name="super" value="100"/>
+  <Constant name="base" value="1"/>
+  <Constant name="me_station0" value="[level2]"/>
+  <Constant name="me_station1" value="[level2]"/>
+  <Constant name="me_station2" value="[level2]"/>
+  <Constant name="me_station3" value="[level2]"/>
+  <Constant name="me_station4" value="[level2]"/>
+  <Constant name="me_station5" value="[level2]"/>
+  <Constant name="me_station6" value="[level2]"/>
+  <Constant name="me_station7" value="[level2]"/>
+  <Constant name="me_station8" value="[level2]"/>
+  <Constant name="me_station9" value="[level2]"/>
+  <Constant name="me_station10" value="[level2]"/>
+  <Constant name="me_station11" value="[level2]"/>
+  <Constant name="me_station12" value="[level2]"/>
+  <Constant name="me_station13" value="[level2]"/>
+  <Constant name="me_station14" value="[level2]"/>
+  <Constant name="mg_region" value="1*[level]"/>
+  <Constant name="mg_station" value="2*[level]"/> 
+  <Constant name="mg_ring" value="5*[level]"/>
+  <Constant name="mg_sector" value="4*[level]"/>
+  <Constant name="mg_roll" value="5*[level]"/>
+ </ConstantsSection>
+ <SpecParSection label="muonregionnumbering" eval="true">
+  <SpecPar name="MuonCommonNumbering">
+   <PartSelector path="//MUON"/>
+   <Parameter name="OnlyForMuonNumbering" value="justputsomethingheretonotfind" eval="false"/>
+   <Parameter name="xml_starts_with_copyno" value="[xml_starts_with_copyno]"/>
+   <Parameter name="level" value="[level]"/>
+   <Parameter name="super" value="[super]"/>
+   <Parameter name="base" value="[base]"/>
+   <Parameter name="mg_region"     value="[mg_region]"/>
+   <Parameter name="mg_station"    value="[mg_station]"/>
+   <Parameter name="mg_ring"       value="[mg_ring]"/>
+   <Parameter name="mg_sector"     value="[mg_sector]"/>
+   <Parameter name="mg_roll"       value="[mg_roll]"/>
+   <Parameter name="me_station0"    value="[me_station0]"/> 
+   <Parameter name="me_station1"    value="[me_station1]"/> 
+   <Parameter name="me_station2"    value="[me_station2]"/> 
+   <Parameter name="me_station3"    value="[me_station3]"/> 
+   <Parameter name="me_station4"    value="[me_station4]"/> 
+   <Parameter name="me_station5"    value="[me_station5]"/> 
+   <Parameter name="me_station6"    value="[me_station6]"/> 
+   <Parameter name="me_station7"    value="[me_station7]"/> 
+   <Parameter name="me_station8"    value="[me_station8]"/> 
+   <Parameter name="me_station9"    value="[me_station9]"/> 
+   <Parameter name="me_station10"    value="[me_station10]"/> 
+   <Parameter name="me_station11"    value="[me_station11]"/> 
+   <Parameter name="me_station12"    value="[me_station12]"/> 
+   <Parameter name="me_station13"    value="[me_station13]"/> 
+   <Parameter name="me_station14"    value="[me_station14]"/> 
+  </SpecPar>
+ </SpecParSection>
+
+ <SpecParSection label="muonendcapnumbering" eval="true">
+  <SpecPar name="MuonEndcapStation1">
+    <PartSelector path="//cms:MUON"/>
+   <Parameter name="CopyNoTag" value="[mg_station]"/>
+   <Parameter name="CopyNoOffset" value="2*[super]"/>    
+  </SpecPar>
+  <SpecPar name="MuonEndcapStation2">
+    <PartSelector path="//cms:MUON"/>
+   <Parameter name="CopyNoTag" value="[mg_station]"/>
+   <Parameter name="CopyNoOffset" value="2*[super]"/>    
+  </SpecPar>
+
+
+ </SpecParSection>
+
+
+
+ <SpecParSection label="muonGEMnumbering" eval="true">
+  <SpecPar name="MuonGEMEndcap">
+   <PartSelector path="//GEMBox11.*"/>
+   <Parameter name="CopyNoTag" value="[mg_ring]"/>
+   <Parameter name="CopyNoOffset" value="1*[super]"/>
+  </SpecPar>
+  <SpecPar name="MuonGEMEndcap2">
+   <PartSelector path="//GEMBox11.*"/>
+   <Parameter name="CopyNoTag" value="[mg_ring]"/>
+   <Parameter name="CopyNoOffset" value="2*[super]"/>
+  </SpecPar>
+  <SpecPar name="MuonGEMEndcap3">
+   <PartSelector path="//GEMBox11.*"/>
+   <Parameter name="CopyNoTag" value="[mg_ring]"/>
+   <Parameter name="CopyNoOffset" value="3*[super]"/>
+  </SpecPar>
+  <SpecPar name="MuonGEMSector">
+   <PartSelector path="//GEMBox11.*"/>
+   <Parameter name="CopyNoTag" value="[mg_sector]"/>
+   <Parameter name="CopyNoOffset" value="4*[super]"/>
+  </SpecPar>
+  <SpecPar name="MuonGEMSector2">
+   <PartSelector path="//GEMBox11.*"/>
+   <Parameter name="CopyNoTag" value="[mg_sector]"/>
+   <Parameter name="CopyNoOffset" value="5*[super]"/>
+  </SpecPar>
+
+
+  <SpecPar name="MuonGEMChamber">
+   <PartSelector path="//GHA.*"/>
+   <Parameter name="CopyNoTag" value="[mg_roll]"/>
+   <Parameter name="CopyNoOffset" value="6*[super]"/>
+  </SpecPar>
+ </SpecParSection>
+
+
+</DDDefinition>

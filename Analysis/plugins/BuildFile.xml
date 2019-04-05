@@ -1,0 +1,12 @@
+<library file="*.cc" name="AnalysisGEMQC8Plugin">
+  <use name="FWCore/Framework"/>
+  <use name="gemqc8/Analysis"/>
+  <use name="gemqc8/Reconstruction"/>
+  <use name="Geometry/GEMGeometry"/>
+  <use name="Validation/MuonGEMHits"/>
+  <use name="Validation/MuonGEMRecHits"/>
+  <use name="DQMServices/Core"/>
+  <use name="RecoMuon/CosmicMuonProducer"/>
+  <use name="HepMC"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
