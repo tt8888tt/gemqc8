@@ -58,6 +58,7 @@ private:
   TH3D *digiStrips;
   TH2D *digisPerEvtPerCh;
   TH3D *recHits3D;
+  TH3D *recHits2DPerLayer;
   TH1D *recHitsPerEvt;
   TH1D *clusterSize;
   TH1D *residualPhi;

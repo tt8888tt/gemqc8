@@ -78,6 +78,7 @@ gemcrValidation::gemcrValidation(const edm::ParameterSet& cfg): GEMBaseValidatio
   digiStrips = fs->make<TH3D>("digiStrips","digi per strip",384,0,384,8,0,8,30,0,30);
   digisPerEvtPerCh = fs->make<TH2D>("digisPerEvtPerCh","digis per event per chamber",30,0,30,20,0,20);
   recHits3D = fs->make<TH3D>("recHits3D","recHits 3D map",200,-100,100,156,-61,95,83,-12,154); // volume defined by the scintillators
+  recHits2DPerLayer = fs->make<TH3D>("recHitsPerLayer","recHits per layer",200,-100,100,8,0,8,10,0,10);
   recHitsPerEvt = fs->make<TH1D>("recHitsPerEvt","recHits per event",1000,0,1000);
   clusterSize = fs->make<TH1D>("clusterSize","clusterSize",10,0,10);
   residualPhi = fs->make<TH1D>("residualPhi","residualPhi",400,-5,5);
@@ -248,6 +249,11 @@ void gemcrValidation::analyze(const edm::Event& e, const edm::EventSetup& iSetup
     
     GlobalPoint recHitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
     recHits3D->Fill(recHitGP.x(),recHitGP.y(),recHitGP.z());
+    
+    GEMDetId hitID((*rechit).rawId());
+    int chIdRecHit = hitID.chamberId().chamber() + hitID.chamberId().layer() - 2;
+    recHits2DPerLayer->Fill(recHitGP.x(),hitID.roll(),chIdRecHit % 10);
+    
     nrecHit++;
   }
   

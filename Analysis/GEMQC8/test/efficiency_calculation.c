@@ -56,9 +56,9 @@ void efficiency_calculation(int run, string configDir)
   for (int ch=0; ch<30; ch++)
   {
     sprintf(name,"Eff_Numerator_ch_%u",ch);
-    num1D[ch] = new TH1D(name,"",24,0,24);
+    num1D[ch] = new TH1D(name,"",24,-0.5,23.5);
     sprintf(name,"Eff_Denominator_ch_%u",ch);
-    denom1D[ch] = new TH1D(name,"",24,0,24);
+    denom1D[ch] = new TH1D(name,"",24,-0.5,23.5);
     eff1D[ch] = new TGraphAsymmErrors;
     
     for (int eta=0; eta<8; eta++)
@@ -78,9 +78,9 @@ void efficiency_calculation(int run, string configDir)
   for (int row=0; row<5; row++)
   {
     namename = "Efficiency_row_" + to_string(row+1) + "_B";
-    eff2D[row*2] = new TH2D(namename.c_str(),"",9,0,9,8,0,8);
+    eff2D[row*2] = new TH2D(namename.c_str(),"",9,-0.5,8.5,8,-0.5,7.5);
     namename = "Efficiency_row_" + to_string(row+1) + "_T";
-    eff2D[(row*2)+1] = new TH2D(namename.c_str(),"",9,0,9,8,0,8);
+    eff2D[(row*2)+1] = new TH2D(namename.c_str(),"",9,-0.5,8.5,8,-0.5,7.5);
   }
   for (int layer=0; layer<10; layer++)
   {
@@ -109,7 +109,7 @@ void efficiency_calculation(int run, string configDir)
   for (int ch=0; ch<30; ch++)
   {
     sprintf(name,"Digi_ch_%u",ch);
-    digi2D[ch] = new TH2D(name,"",384,0,384,8,0,8);
+    digi2D[ch] = new TH2D(name,"",384,0,384,8,-0.5,7.5);
     
     for (int eta=0; eta<8; eta++)
     {
@@ -131,11 +131,37 @@ void efficiency_calculation(int run, string configDir)
   for (int ch=0; ch<30; ch++)
   {
     sprintf(name,"DigiMultiplicity_ch_%u",ch);
-    nDigis[ch] = new TH1D(name,"",20,0,20);
+    nDigis[ch] = new TH1D(name,"",20,-0.5,19.5);
     
     for (int mult=1; mult<20; mult++)
     {
       nDigis[ch]->SetBinContent((mult+1),digiMultPerCh->GetBinContent(ch+1,mult+1));
+    }
+  }
+  
+  // Getting rechHits per layer histrogram
+  
+  TH3D *recHitsPerLayer = (TH3D*)infile->Get("gemcrValidation/recHits2DPerLayer");
+  
+  // rechHits plots per chamber
+  
+  TH2D *recHits2D[10];
+  for (int row=0; row<5; row++)
+  {
+    namename = "recHits_row_" + to_string(row+1) + "_B";
+    recHits2D[row*2] = new TH2D(namename.c_str(),"",384,0,384,8,-0.5,7.5);
+    namename = "recHits_row_" + to_string(row+1) + "_T";
+    recHits2D[(row*2)+1] = new TH2D(namename.c_str(),"",384,0,384,8,-0.5,7.5);
+  }
+  
+  for (int layer=0; layer<10; layer++)
+  {
+    for (int eta=1; eta<=8; eta++)
+    {
+      for (int phi=1; phi<=384; phi++)
+      {
+        recHits2D[layer]->SetBinContent(phi,eta,recHitsPerLayer->GetBinContent(phi,eta,layer+1));
+      }
     }
   }
   
@@ -265,7 +291,42 @@ void efficiency_calculation(int run, string configDir)
     
   }
   
-  // Plot of efficiency per layer
+  // Plots of recHits per layer
+  
+  for (int layer=0; layer<10; layer++)
+  {
+    for (int eta=1; eta<=8; eta++)
+    {
+      for (int phi=1; phi<=384; phi++)
+      {
+        recHits2D[layer]->SetBinContent(phi,eta,recHitsPerLayer->GetBinContent(phi,eta,layer+1));
+      }
+    }
+  }
+  
+  for (int row=0; row<5; row++)
+  {
+    namename = "recHits_Row_" + to_string(row+1) + "_B";
+    recHits2D[row*2]->SetTitle(namename.c_str());
+    recHits2D[row*2]->SetStats(0);
+    recHits2D[row*2]->GetXaxis()->SetTitle("x [cm]");
+    recHits2D[row*2]->GetYaxis()->SetTitle("#eta partition");
+    recHits2D[row*2]->Draw("colz TEXT0");
+    namename = "recHits_Row_" + to_string(row+1) + "_B.png";
+    Canvas->SaveAs(namename.c_str());
+    Canvas->Clear();
+    namename = "recHits_Row_" + to_string(row+1) + "_T";
+    recHits2D[(row*2)+1]->SetTitle(namename.c_str());
+    recHits2D[(row*2)+1]->SetStats(0);
+    recHits2D[(row*2)+1]->GetXaxis()->SetTitle("x [cm]");
+    recHits2D[(row*2)+1]->GetYaxis()->SetTitle("#eta partition");
+    recHits2D[(row*2)+1]->Draw("colz TEXT0");
+    namename = "recHits_Row_" + to_string(row+1) + "_T.png";
+    Canvas->SaveAs(namename.c_str());
+    Canvas->Clear();
+  }
+  
+  // Plots of efficiency per layer
   
   for (int row=0; row<5; row++)
   {
@@ -286,9 +347,11 @@ void efficiency_calculation(int run, string configDir)
     Canvas->Clear();
     namename = "Efficiency_Row_" + to_string(row+1) + "_T";
     eff2D[(row*2)+1]->SetTitle(namename.c_str());
-    eff2D[row*2+1]->SetMinimum(0.70);
-    eff2D[row*2+1]->SetMaximum(1.0);
-    eff2D[row*2+1]->SetStats(0);
+    eff2D[(row*2)+1]->SetMinimum(0.70);
+    eff2D[(row*2)+1]->SetMaximum(1.0);
+    eff2D[(row*2)+1]->SetStats(0);
+    eff2D[(row*2)+1]->GetXaxis()->SetTitle("#phi partition");
+    eff2D[(row*2)+1]->GetYaxis()->SetTitle("#eta partition");
     eff2D[(row*2)+1]->Draw("colz TEXT0");
     col_1_2->Draw("SAME");
     col_2_3->Draw("SAME");
