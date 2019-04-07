@@ -87,7 +87,12 @@ VmonTgraph1List = []
 SmonTgraph1List = []
 
 ChannelMapList = [ "Top_G3Bot", "Top_G3Top", "Top_G2Bot", "Top_G2Top", "Top_G1Bot", "Top_G1Top", "Top_Drift", "Bot_G3Bot", "Bot_G3Top", "Bot_G2Bot", "Bot_G2Top", "Bot_G1Bot", "Bot_G1Top", "Bot_Drift"]
+
+#MainframeMapList and BoardMapList lists follow the order of ChamberMapList
 ChamberMapList = [ "1_1", "1_2", "1_3", "2_1", "2_2", "2_3", "3_1", "3_2", "3_3", "4_1", "4_2", "4_3", "5_1", "5_2", "5_3" ]
+MainframeMapList = [ "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe", "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe" ]
+BoardMapList = [ "board00", "board01", "board02", "board03", "board04", "board05", "board06", "board07", "board08", "board10", "board14", "board15", "board11", "board12", "board13" ]
+
 
 channelList = [ "G3Bot", "G3Top", "G2Bot", "G2Top", "G1Bot", "G1Top", "Drift"]
 
@@ -174,10 +179,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 					board = "board0"+str(indexTB) #board in the format board04
 				elif indexTB >= 10:
 					board = "board"+str(indexTB) #board in the format board04
-			indexTB = indexTB +1
 			if isMatch == True:
 				break
-		
+
+			indexTB = indexTB +1
+
+
+	
 		#print("board", board)
 		
 		#add 7 for bot chambers (from 7 to 13), top (0-6)
@@ -191,16 +199,22 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		elif indexTC >=10:
 			channel = "channel0"+str(indexTC)
 
-		print (board, " ", channel)
+		#indexTB is the posiion in the list when the required chamber is found
+		print (MainframeMapList[indexTB], " ", BoardMapList[indexTB], " ", channel)
+		#print (board, " ", channel)
 		len(chamberList)
 		len(channelList)
 		
 		#print ("counter:", counter)
 		
 		# this 3 parameters can be input to the script
-		imon_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.iMon'"
-		vmon_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.vMon'"
-		status_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.status'"
+		
+		imon_name="'cms_gem_dcs_1:CAEN/"+MainframeMapList[indexTB]+"/"+BoardMapList[indexTB]+"/"+channel+".actual.iMon'"
+                vmon_name="'cms_gem_dcs_1:CAEN/"+MainframeMapList[indexTB]+"/"+BoardMapList[indexTB]+"/"+channel+".actual.vMon'"
+                status_name="'cms_gem_dcs_1:CAEN/"+MainframeMapList[indexTB]+"/"+BoardMapList[indexTB]+"/"+channel+".actual.status'"
+		#imon_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.iMon'"
+		#vmon_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.vMon'"
+		#status_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.status'"
 
 		#this is the connection to DB, and the contact point to DB should be input to the script 
 		#to avoid the have explicitely the pw in the script (lo schema e' il primo campo, la parte a destra e' il server) 
@@ -295,6 +309,14 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 #print(imonOnlyI)
                 
                 #rescale the negative times
+		if (len(imonOnlyT))==0:
+			print("imonOnlyT lenght", len(imonOnlyT))
+			print("------------------------------------------------------------------")
+			print("ERROR: there are no data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
+			print("------------------------------------------------------------------")
+			continue
+			
+
                 negativeStartI = imonOnlyT[0]
                 if imonOnlyT[0] < 0:
                 	for iterTimeI in range(len(imonOnlyT)):
