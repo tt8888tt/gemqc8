@@ -1,5 +1,5 @@
-#ifndef gemcrValidation_H
-#define gemcrValidation_H
+#ifndef HotDeadStripsQC8_H
+#define HotDeadStripsQC8_H
 
 #include "Validation/MuonGEMHits/interface/GEMBaseValidation.h"
 #include <DataFormats/GEMRecHit/interface/GEMRecHit.h>
@@ -27,66 +27,27 @@
 #include <TFile.h>
 #include <TTree.h>
 
-class gemcrValidation : public GEMBaseValidation
+class HotDeadStripsQC8 : public GEMBaseValidation
 {
 public:
-  explicit gemcrValidation( const edm::ParameterSet& );
-  ~gemcrValidation();
-  void bookHistograms(DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
+  explicit HotDeadStripsQC8( const edm::ParameterSet& );
+  ~HotDeadStripsQC8();
   void analyze(const edm::Event& e, const edm::EventSetup&) override;
-  int findIndex(GEMDetId id_);
-  int findVFAT(float x, float a, float b);
   const GEMGeometry* initGeometry(edm::EventSetup const & iSetup);
-  double maxCLS, minCLS,maxRes, trackChi2, trackResY, trackResX, MulSigmaOnWindow;
-  std::vector<std::string> SuperChamType;
-  std::vector<double> vecChamType;
-  bool makeTrack, isMC;
 private:
   const GEMGeometry* GEMGeometry_;
   
   std::vector<GEMChamber> gemChambers;
   int n_ch;
-  MuonServiceProxy* theService;
-  CosmicMuonSmoother* theSmoother;
-  KFUpdator* theUpdator;
-  edm::EDGetToken InputTagToken_, InputTagToken_RH, InputTagToken_TR, InputTagToken_TS, InputTagToken_TJ, InputTagToken_TI, InputTagToken_TT, InputTagToken_DG, InputTagToken_US;
   
-  TH1D *goodVStriggeredEvts;
-  TH3D *hitsVFATnum;
-  TH3D *hitsVFATdenom;
+  edm::EDGetToken InputTagToken_, InputTagToken_DG;
+  
   TH3D *digiStrips;
-  TH2D *digisPerEvtPerCh;
-  TH3D *recHits3D;
-  TH3D *recHits2DPerLayer;
-  TH1D *recHitsPerEvt;
-  TH1D *clusterSize;
-  TH1D *residualPhi;
-  TH1D *residualEta;
-  TH1D *recHitsPerTrack;
   
   TTree *tree;
   int run;
   int lumi;
   int nev;
-  int nDigisPerCh[30];
-  int nrecHit;
-  int nTraj;
-  float trajTheta;
-  float trajPhi;
-  float trajX;
-  float trajY;
-  float trajZ;
-  float trajPx;
-  float trajPy;
-  float trajPz;
-  float testTrajHitX[30];
-  float testTrajHitY[30];
-  float testTrajHitZ[30];
-  float confTestHitX[30];
-  float confTestHitY[30];
-  float confTestHitZ[30];
-  int nTrajHit; // number of trajHits
-  int nTrajRecHit; // number of confirmed trajHits
 };
 
 #endif
