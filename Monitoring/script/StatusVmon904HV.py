@@ -289,6 +289,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#create a TGraph for Imon (I vs time)
 		if len(imonOnlyT) != len(imonOnlyI):
 			print ("filling vector different lenght")
+			file = open("HVErr.log", "w")
+                        file.write("ERROR: imonOnlyT and imonOnlyV have different lenght")
+                        file.close()
 
 		#sort the array of imonOnlyT and the imonOnlyV
                 #in the case the query is not executed in order (negative times)
@@ -313,11 +316,11 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		if (len(imonOnlyT))==0:
 			print("imonOnlyT lenght", len(imonOnlyT))
 			print("------------------------------------------------------------------")
-			print("ERROR: there are no data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
+			print("ERROR: there are no I current data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
 			print("------------------------------------------------------------------")
 		
 			file = open("HVErr.log", "w") 
-			file.write("ERROR: there are no data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
+			file.write("ERROR: there are no I current data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
 			file.close() 
 			
 				
@@ -414,7 +417,21 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                                                                                                                 
                 #print(vmonOnlyT)
                 #print(vmonOnlyV)
+               
+		if (len(vmonOnlyT))==0:
+			print("vmonOnlyT lenght", len(vmonOnlyT))
+                	print("------------------------------------------------------------------")
+                	print("ERROR: there are no HV voltage data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
+                	print("------------------------------------------------------------------")
                 
+                	file = open("HVErr.log", "w") 
+                	file.write("ERROR: there are no HV voltage data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
+                	file.close() 
+                	
+                		
+                	continue
+
+ 
                 #rescale the negative times
                 negativeStartV = vmonOnlyT[0]
                 if vmonOnlyT[0] < 0:
@@ -643,7 +660,23 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#print(smonOnlyT)
 		#print(smonOnlyS)
 		#print(SmonMeaningList)
-		
+	
+
+		if (len(smonOnlyT))==0:
+                	print("smonOnlyT lenght", len(smonOnlyT))
+                	print("------------------------------------------------------------------")
+                	print("ERROR: there are no status data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
+                	print("------------------------------------------------------------------")
+                
+                	file = open("HVErr.log", "w") 
+                	file.write("ERROR: there are no status data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
+                	file.close() 
+                	
+                		
+                	continue
+
+
+	
 		#rescale the negative times
 		negativeStart = smonOnlyT[0]
 		if smonOnlyT[0] < 0:

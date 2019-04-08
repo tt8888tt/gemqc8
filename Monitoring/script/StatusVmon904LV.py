@@ -1,5 +1,6 @@
 import cx_Oracle
 import ROOT
+import os
 import time
 from operator import itemgetter
 from array import array
@@ -234,6 +235,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 	#create a TGraph for Imon (I vs time)
         if len(imonOnlyT) != len(imonOnlyI):
         	print ("filling vector different lenght")
+		file = open("LVErr.log", "w")
+                file.write("ERROR: imonOnlyT and imonOnlyV have different lenght")
+                file.close()
                                                                                                          
         #sort the array of imonOnlyT and the imonOnlyV
         #in the case the query is not executed in order (negative times)
@@ -255,6 +259,21 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         #print(imonOnlyI)
         
         #rescale the negative times
+
+	if (len(imonOnlyT))==0:
+        	print("imonOnlyT lenght", len(imonOnlyT))
+        	print("------------------------------------------------------------------")
+        	print("ERROR: there are no I current data for chamber "+ chamberList[indexB])
+        	print("------------------------------------------------------------------")
+        
+        	file = open("LVErr.log", "w") 
+        	file.write("ERROR: there are no I current data for chamber "+ chamberList[indexB]) 
+        	file.close() 
+        	
+        		
+        	continue
+
+
         negativeStartI = imonOnlyT[0]
         if imonOnlyT[0] < 0:
         	for iterTimeI in range(len(imonOnlyT)):
@@ -320,6 +339,10 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 	#create a TGraph for Imon (V vs time)
         if len(vmonOnlyT) != len(vmonOnlyV):
         	print ("filling vector different lenght")
+		file = open("LVErr.log", "w")
+                file.write("ERROR: vmonOnlyT and vmonOnlyV have different lenght")
+                file.close()
+
                                                                                                          
         #sort the array of vmonOnlyT and the vmonOnlyV
         #in the case the query is not executed in order (negative times)
@@ -341,6 +364,21 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         #print(vmonOnlyV)
         
         #rescale the negative times
+
+	if (len(vmonOnlyT))==0:
+        	print("vmonOnlyT lenght", len(vmonOnlyT))
+        	print("------------------------------------------------------------------")
+        	print("ERROR: there are no LV voltage data for chamber "+ chamberList[indexB])
+        	print("------------------------------------------------------------------")
+        
+        	file = open("LVErr.log", "w") 
+        	file.write("ERROR: there are no LV voltage data for chamber "+ chamberList[indexB]) 
+        	file.close() 
+        	
+        		
+        	continue
+
+
         negativeStartV = vmonOnlyT[0]
         if vmonOnlyT[0] < 0:
         	for iterTimeV in range(len(vmonOnlyT)):
@@ -628,6 +666,10 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         #tgraph status
         if len(smonOnlyT) != len( smonOnlyS ):
         	print("!!!!!error tgraph status: filling with lists of different lenght!!!!!")
+		file = open("LVErr.log", "w")
+                file.write("ERROR: smonOnlyT and smonOnlyS have different lenght")
+                file.close()
+
                                                                                                                                        
         #sort the array of smonOnly and the smonOnly
         #in the case the query is not executed in order (negative times)
@@ -651,6 +693,21 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         #print(SmonMeaningList)
         
         #rescale the negative times
+
+	if (len(smonOnlyT))==0:
+        	print("smonOnlyT lenght", len(smonOnlyT))
+        	print("------------------------------------------------------------------")
+        	print("ERROR: there are no status data for chamber "+ chamberList[indexB])
+        	print("------------------------------------------------------------------")
+        
+        	file = open("LVErr.log", "w") 
+        	file.write("ERROR: there are no status data for chamber "+ chamberList[indexB]) 
+        	file.close() 
+        	
+        		
+        	continue
+
+
         negativeStart = smonOnlyT[0]
         if smonOnlyT[0] < 0:
         	for iterTime in range(len(smonOnlyT)):
