@@ -39,7 +39,7 @@ if __name__ == '__main__':
   time.sleep(1)
   
   # Compiling after the generation of the geometry files
-  scramCommand = "scramv1 b -j 8"
+  scramCommand = "scram build -j 4"
   scramming = subprocess.Popen(scramCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=srcPath)
   while scramming.poll() is None:
     line = scramming.stdout.readline()
@@ -59,7 +59,7 @@ if __name__ == '__main__':
   time.sleep(1)
   
   #  # Creating folder outside the CMMSW release to put the output files and plots
-  outDirName = "Results_QC8_run_"+run_number
+  outDirName = "Results_QC8_sim_"+run_number
   #---# Remove old version if want to recreate
   if (os.path.exists(resDirPath+outDirName)):
     rmDirCommand = "rm -rf "+outDirName

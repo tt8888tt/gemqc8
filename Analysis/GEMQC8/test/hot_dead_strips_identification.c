@@ -20,7 +20,7 @@
 
 using namespace std;
 
-void efficiency_calculation(int run, string configDir)
+void hot_dead_strips_identification(int run, string configDir)
 {
   // Getting the root file
   
@@ -39,68 +39,31 @@ void efficiency_calculation(int run, string configDir)
   
   TTree *tree = (TTree*)infile->Get("gemcrValidation/tree");
   
-  // Getting the 3D numerator & denominator
-  
-  TH3D *num3D = (TH3D*)infile->Get("gemcrValidation/hitsVFATnum");
-  TH3D *denom3D = (TH3D*)infile->Get("gemcrValidation/hitsVFATdenom");
-  
-  // Generating 1D histograms (num, denom, eff) for the 30 chambers
-  
-  char *name = new char[40];
-  string namename = "";
-  
-  TH1D *num1D[30];
-  TH1D *denom1D[30];
-  TGraphAsymmErrors *eff1D[30];
-  
-  for (int ch=0; ch<30; ch++)
-  {
-    sprintf(name,"Eff_Numerator_ch_%u",ch);
-    num1D[ch] = new TH1D(name,"",24,-0.5,23.5);
-    sprintf(name,"Eff_Denominator_ch_%u",ch);
-    denom1D[ch] = new TH1D(name,"",24,-0.5,23.5);
-    eff1D[ch] = new TGraphAsymmErrors;
-    
-    for (int eta=0; eta<8; eta++)
-    {
-      for (int phi=0; phi<3; phi++)
-      {
-        num1D[ch]->SetBinContent((8*(2-phi)+(7-eta)+1),num3D->GetBinContent(phi+1,eta+1,ch+1));
-        denom1D[ch]->SetBinContent((8*(2-phi)+(7-eta)+1),denom3D->GetBinContent(phi+1,eta+1,ch+1));
-      }
-    }
-    eff1D[ch]->Divide(num1D[ch],denom1D[ch]);
-  }
-  
-  // Generating 2D histograms for the 5*2 rows
-  
-  TH2D *eff2D[10];
-  for (int row=0; row<5; row++)
-  {
-    namename = "Efficiency_row_" + to_string(row+1) + "_B";
-    eff2D[row*2] = new TH2D(namename.c_str(),"",9,-0.5,8.5,8,-0.5,7.5);
-    namename = "Efficiency_row_" + to_string(row+1) + "_T";
-    eff2D[(row*2)+1] = new TH2D(namename.c_str(),"",9,-0.5,8.5,8,-0.5,7.5);
-  }
-  for (int layer=0; layer<10; layer++)
-  {
-    for (int eta=1; eta<=8; eta++)
-    {
-      for (int phi=1; phi<=3; phi++)
-      {
-        eff2D[layer]->SetBinContent(phi  ,eta,double(num3D->GetBinContent(phi,eta,layer+1))/
-                                    double(denom3D->GetBinContent(phi,eta,layer+1)));
-        eff2D[layer]->SetBinContent(phi+3,eta,double(num3D->GetBinContent(phi,eta,layer+11))/
-                                    double(denom3D->GetBinContent(phi,eta,layer+11)));
-        eff2D[layer]->SetBinContent(phi+6,eta,double(num3D->GetBinContent(phi,eta,layer+21))/
-                                    double(denom3D->GetBinContent(phi,eta,layer+21)));
-      }
-    }
-  }
-  
   // Getting 3D digi histogram
   
   TH3D *digi3D = (TH3D*)infile->Get("gemcrValidation/digiStrips");
+  
+  // Plot of digis per strip for each of the chambers
+  
+  TH1D *digisPerStripPerCh = new TH1F("digisPerStripPerCh","Digis per strip per chamber",10000000,0,10000000);
+  
+  TH1D *digisPerStripPerCh[30];
+  
+  for (int ch=0; ch<30; ch++)
+  {
+    sprintf(name,"DigisPerStrip_ch_%u",ch);
+    digisPerStripPerCh[ch] = new TH1D(name,"",10000000,0,10000000);
+    
+    for (int eta=0; eta<8; eta++)
+    {
+      for (int phi=0; phi<384; phi++)
+      {
+        digisPerStripPerCh[ch]->Fill(digi3D->GetBinContent(phi+1,eta+1,ch+1));
+      }
+    }
+  }
+  
+  // Here plot things, fit, identify 4sigma, cut, identify hot and then identify zeros... Finally all in the 2 tables
   
   // Digi plots per chamber
   
@@ -119,6 +82,8 @@ void efficiency_calculation(int run, string configDir)
       }
     }
   }
+  
+  // Here you have to check the distribution, fit it and find 4sigma value as a cut for hot strips
   
   // Getting digi multiplicity histogram
   

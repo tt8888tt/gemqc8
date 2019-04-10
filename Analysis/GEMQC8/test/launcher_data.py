@@ -11,10 +11,10 @@ if __name__ == '__main__':
   xlsx_csv_conversion_flag = sys.argv[2]
   
   # Different paths definition
-  srcPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0]+'QC8Test/src/'
-  pyhtonModulesPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
-  runPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
-  resDirPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0]
+  srcPath = os.path.abspath("launcher_data.py").split('QC8Test')[0]+'QC8Test/src/'
+  pyhtonModulesPath = os.path.abspath("launcher_data.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
+  runPath = os.path.abspath("launcher_data.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
+  resDirPath = os.path.abspath("launcher_data.py").split('QC8Test')[0]
   
   sys.path.insert(0,pyhtonModulesPath)
   
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 #  time.sleep(3)
 
   # Compiling after the generation of the geometry files
-  scramCommand = "scramv1 b -j 4"
+  scramCommand = "scram build -j 4"
   scramming = subprocess.Popen(scramCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=srcPath)
   while scramming.poll() is None:
     line = scramming.stdout.readline()
@@ -73,7 +73,7 @@ if __name__ == '__main__':
   
   # Create folders for ouput plots per chamber
   SuperChType = runConfig.StandConfiguration
-  effoutDir = os.path.abspath("launcher_sim.py").split('QC8Test')[0] + outDirName
+  effoutDir = os.path.abspath("launcher_data.py").split('QC8Test')[0] + outDirName
   for i in range (0,30):
     if (SuperChType[int(i/2)] != '0'):
       plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i)

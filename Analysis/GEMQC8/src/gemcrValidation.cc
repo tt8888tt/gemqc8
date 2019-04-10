@@ -1,40 +1,5 @@
 #include "Analysis/GEMQC8/interface/gemcrValidation.h"
 
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-
-#include "MagneticField/Engine/interface/MagneticField.h"
-#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
-
-#include "Geometry/GEMGeometry/interface/GEMSuperChamber.h"
-#include <Geometry/GEMGeometry/interface/GEMGeometry.h>
-#include <Geometry/Records/interface/MuonGeometryRecord.h>
-
-#include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/GeometrySurface/interface/Bounds.h"
-#include "DataFormats/GeometryVector/interface/LocalPoint.h"
-#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
-#include "DataFormats/TrajectorySeed/interface/PropagationDirection.h"
-#include "DataFormats/Math/interface/Vector.h"
-#include "DataFormats/Math/interface/Point3D.h"
-#include "DataFormats/Common/interface/RefToBase.h"
-#include "DataFormats/TrajectoryState/interface/PTrajectoryStateOnDet.h"
-#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
-
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "DataFormats/TrajectorySeed/interface/TrajectorySeed.h"
-#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
-#include "RecoMuon/TransientTrackingRecHit/interface/MuonTransientTrackingRecHit.h"
-#include "RecoMuon/TrackingTools/interface/MuonServiceProxy.h"
-
-#include "FWCore/Framework/interface/stream/EDProducer.h"
-
-#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
-
-#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
-
-#include "RecoMuon/CosmicMuonProducer/interface/HeaderForQC8.h"
-
 #include <iomanip>
 
 #include <TCanvas.h>
@@ -178,6 +143,13 @@ void gemcrValidation::analyze(const edm::Event& e, const edm::EventSetup& iSetup
   run = e.id().run();
   lumi = e.id().luminosityBlock();
   nev = e.id().event();
+  
+  edm::Timestamp ts_begin = e.getRun().beginTime();
+  t_begin = stampToReal(ts_begin);
+  edm::Timestamp ts_end = e.getRun().endTime();
+  t_end = stampToReal(ts_end);
+  
+  cout << nev << " " << t_begin << " " << t_end << endl;
   
   goodVStriggeredEvts->Fill(0);
   
