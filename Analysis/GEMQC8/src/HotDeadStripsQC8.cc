@@ -1,26 +1,5 @@
 #include "Analysis/GEMQC8/interface/HotDeadStripsQC8.h"
 
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-
-#include "Geometry/GEMGeometry/interface/GEMSuperChamber.h"
-#include <Geometry/GEMGeometry/interface/GEMGeometry.h>
-#include <Geometry/Records/interface/MuonGeometryRecord.h>
-
-#include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/GeometrySurface/interface/Bounds.h"
-#include "DataFormats/GeometryVector/interface/LocalPoint.h"
-#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
-#include "DataFormats/Math/interface/Vector.h"
-#include "DataFormats/Math/interface/Point3D.h"
-#include "DataFormats/Common/interface/RefToBase.h"
-
-#include "FWCore/Framework/interface/stream/EDProducer.h"
-
-#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
-
-#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
-
 #include <iomanip>
 
 #include <TCanvas.h>
