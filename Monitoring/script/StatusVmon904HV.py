@@ -233,17 +233,17 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 
 		# this a tytpical query to extract the ELEMENT_ID from the  ELEMENT_NAME.
 		# iMon element
-		query = "select ELEMENT_ID from ELEMENTS where ELEMENT_NAME="+imon_name
+		query = "select ELEMENT_ID from ELEMENTS_ALL where ELEMENT_NAME="+imon_name
 		cur.execute(query)
 		imon_id = cur.fetchone()[0];
 
 		# vMon element
-		query = "select ELEMENT_ID from ELEMENTS where ELEMENT_NAME="+vmon_name
+		query = "select ELEMENT_ID from ELEMENTS_ALL where ELEMENT_NAME="+vmon_name
 		cur.execute(query)
 		vmon_id = cur.fetchone()[0];
 		
 		# status element
-		query = "select ELEMENT_ID from ELEMENTS where ELEMENT_NAME="+status_name
+		query = "select ELEMENT_ID from ELEMENTS_ALL where ELEMENT_NAME="+status_name
 		cur.execute(query)
 		status_id = cur.fetchone()[0];
 
