@@ -159,9 +159,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 	#print ("counter:", counter)
         
         # this 3 parameters can be input to the script
-	imon_name="'cms_gem_dcs_1:CAEN/904_Shared_mainframe/branchController00/easyCrate0/easy"+board+"/"+channel+".actual.iMon'"
-	vmon_name="'cms_gem_dcs_1:CAEN/904_Shared_mainframe/branchController00/easyCrate0/easy"+board+"/"+channel+".actual.vMon'"
-	status_name="'cms_gem_dcs_1:CAEN/904_Shared_mainframe/branchController00/easyCrate0/easy"+board+"/"+channel+".actual.status'"
+	imon_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/branchController14/easyCrate0/easy"+board+"/"+channel+".actual.iMon'"
+	vmon_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/branchController14/easyCrate0/easy"+board+"/"+channel+".actual.vMon'"
+	status_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/branchController14/easyCrate0/easy"+board+"/"+channel+".actual.status'"
                                                                                                                            
         #this is the connection to DB, and the contact point to DB should be input to the script 
         #to avoid the have explicitely the pw in the script (lo schema e' il primo campo, la parte a destra e' il server) 
