@@ -7,7 +7,7 @@
 using namespace std;
 using namespace edm;
 
-HotDeadStripsQC8::HotDeadStripsQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cfg)
+HotDeadStripsQC8::HotDeadStripsQC8(const edm::ParameterSet& cfg, edm::EventSetup const & iSetup): GEMBaseValidation(cfg)
 {
   time_t rawTime;
   time(&rawTime);
@@ -62,8 +62,6 @@ HotDeadStripsQC8::~HotDeadStripsQC8() {
 
 void HotDeadStripsQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
   
-  g_nEvt++;
-  
   run = e.id().run();
   lumi = e.id().luminosityBlock();
   nev = e.id().event();
@@ -71,7 +69,7 @@ void HotDeadStripsQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetu
   theService->update(iSetup);
   
   // digis
-
+  
   edm::Handle<GEMDigiCollection> digis;
   e.getByToken( this->InputTagToken_DG, digis);
   int nNumDigi = 0;

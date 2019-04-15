@@ -16,6 +16,7 @@
 #include "DataFormats/TrajectorySeed/interface/PropagationDirection.h"
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeed.h"
 #include "DataFormats/TrajectoryState/interface/PTrajectoryStateOnDet.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -64,11 +65,9 @@ public:
   std::vector<std::string> SuperChamType;
   std::vector<double> vecChamType;
   bool makeTrack, isMC;
-private:
+  
   const GEMGeometry* GEMGeometry_;
   
-  void beginRun(edm::Run const&, edm::EventSetup const&) override;
-  void endRun(edm::Run const&, edm::EventSetup const&) override;
   static double stampToReal(edm::Timestamp time) {
     return time.unixTime() + time.microsecondOffset()*1e-6;
   }
@@ -79,6 +78,8 @@ private:
   CosmicMuonSmoother* theSmoother;
   KFUpdator* theUpdator;
   edm::EDGetToken InputTagToken_, InputTagToken_RH, InputTagToken_TR, InputTagToken_TS, InputTagToken_TJ, InputTagToken_TI, InputTagToken_TT, InputTagToken_DG, InputTagToken_US;
+  
+private:
   
   TH1D *goodVStriggeredEvts;
   TH3D *hitsVFATnum;

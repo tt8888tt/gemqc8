@@ -51,17 +51,19 @@
 class HotDeadStripsQC8 : public GEMBaseValidation
 {
 public:
-  explicit HotDeadStripsQC8( const edm::ParameterSet& );
+  explicit HotDeadStripsQC8(const edm::ParameterSet&, const edm::EventSetup&);
   ~HotDeadStripsQC8();
   void analyze(const edm::Event& e, const edm::EventSetup&) override;
   const GEMGeometry* initGeometry(edm::EventSetup const & iSetup);
-private:
   const GEMGeometry* GEMGeometry_;
-  
   std::vector<GEMChamber> gemChambers;
-  int n_ch;
-  
+  MuonServiceProxy* theService;
+  CosmicMuonSmoother* theSmoother;
+  KFUpdator* theUpdator;
   edm::EDGetToken InputTagToken_, InputTagToken_DG;
+  
+private:
+  int n_ch;
   
   TH3D *digiStrips;
   
