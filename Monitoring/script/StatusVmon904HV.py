@@ -257,6 +257,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		imonRec=[]
 		imonOnlyT = array ( 'd' )
 		imonOnlyI = array ( 'd' )
+		imonOnlyTDate = array ( 'd' )
 		contatoreI = 0
 		isNotEmptyImon = False
 		for result in curimon:
@@ -281,7 +282,34 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   #lists with only I and t
 		   imonOnlyT.append(tot_secondsImon)
 		   imonOnlyI.append(result[1])
-		   
+		   imonOnlyTDate.append(4.) #an any float number
+		  
+		   #print currentTsImon
+                   year = str(currentTsImon)[0:4]
+                   #print year
+                   month = str(currentTsImon)[5:7]
+                   #print month
+                   day = str(currentTsImon)[8:10]
+                   #print day
+                   hour = str(currentTsImon)[11:13]
+                   #print hour
+                   minute = str(currentTsImon)[14:16]
+                   #print minute
+                   second = str(currentTsImon)[17:19]
+                   #print second
+                   micro = str(currentTsImon)[20:]
+                   #print micro
+                                                                                                       
+                   #longString = ROOT.TString( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+                   longList =str( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+                                                                                                       
+                   da1 = ROOT.TDatime( longList )
+                                                                                                       
+                   imonOnlyTDate[-1] = da1.Convert()
+
+
+
+
                    contatoreI=contatoreI+1
 
 		ImonTh1List[counter].Write()
@@ -298,7 +326,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 #pair the time with status and the meaning list
                 SortListI = []
                 for sortCountI in range(len(imonOnlyT)):
-                	internalListI = (imonOnlyT[sortCountI], imonOnlyI[sortCountI])
+                	internalListI = (imonOnlyT[sortCountI], imonOnlyI[sortCountI], imonOnlyTDate[sortCountI])
                 	SortListI.append(internalListI)
                                                                                                                 
                 #print(SortListI)
@@ -308,9 +336,11 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 for refillI in range(len(imonOnlyT)):
                 	imonOnlyT[refillI]=SortListI[refillI][0]
                 	imonOnlyI[refillI]=SortListI[refillI][1]
+                	imonOnlyTDate[refillI]=SortListI[refillI][2]
                                                                                                                 
                 #print(imonOnlyT)
                 #print(imonOnlyI)
+		#print(imonOnlyTDate)
                 
                 #rescale the negative times
 		if (len(imonOnlyT))==0:
@@ -326,6 +356,31 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 				
 			continue
 			
+		#put the imonOnlyTDate in the correct root format
+		#for idxDate in range(len(imonOnlyTDate)):
+	#		print imonOnlyTDate[idxDate]
+	#		year = str(imonOnlyTDate[idxDate])[0:4]
+	#		print year
+	#		month = str(imonOnlyTDate[idxDate])[5:7]
+	#		print month
+	#		day = str(imonOnlyTDate[idxDate])[8:10]
+        #                print day
+	#		hour = str(imonOnlyTDate[idxDate])[11:13]
+        #                print hour
+	#		minute = str(imonOnlyTDate[idxDate])[14:16]
+        #                print minute
+	#		second = str(imonOnlyTDate[idxDate])[17:19]
+        #                print second
+	#		micro = str(imonOnlyTDate[idxDate])[20:]
+	#		print micro
+
+			#longString = ROOT.TString( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+	#		longList =str( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+		
+	#		da1 = ROOT.TDatime( longList )
+
+	#		imonOnlyTDate[idxDate] = da1.Convert()
+
 
                 negativeStartI = imonOnlyT[0]
                 if imonOnlyT[0] < 0:
@@ -335,7 +390,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 
 
 		#Imontg1 = ROOT.TGraph(n,x,y); x and y is the name of arrays with numbers of time and I
-		Imontg1 = ROOT.TGraph(len(imonOnlyT),imonOnlyT,imonOnlyI)
+		Imontg1 = ROOT.TGraph(len(imonOnlyT),imonOnlyTDate,imonOnlyI)
    		Imontg1.SetLineColor(2)
 		Imontg1.SetLineWidth(4)
 		Imontg1.SetMarkerColor(4)
@@ -343,9 +398,12 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		Imontg1.SetMarkerSize(1)
 		Imontg1.SetName("HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_time")
 		Imontg1.SetTitle("HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_time")
-		Imontg1.GetXaxis().SetTitle("time [s]")
+		#Imontg1.GetXaxis().SetTitle("time [s]")
 		Imontg1.GetYaxis().SetTitle("Imon "+chamberList[indexB]+" "+channelList[indexC]+" [uA]")
 		#Imontg1.Draw("ACP")
+		Imontg1.GetXaxis().SetTimeDisplay(1)
+		Imontg1.GetXaxis().SetTimeFormat("#splitline{%y-%m-%d}{%H:%M:%S}%F1970-01-01 00:00:00")
+		Imontg1.GetXaxis().SetLabelOffset(0.025)
 
 		#ImonTgraph1List += [Imontg1]
 		ImonTgraph1List.append(Imontg1)
