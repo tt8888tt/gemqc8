@@ -18,7 +18,6 @@ if __name__ == '__main__':
   
   sys.path.insert(0,pyhtonModulesPath)
   
-  import configureRun_cfi as runConfig
   import config_creator
   import geometry_files_creator
   
@@ -72,6 +71,7 @@ if __name__ == '__main__':
   time.sleep(1)
   
   # Create folders for ouput plots per chamber
+  import configureRun_cfi as runConfig
   SuperChType = runConfig.StandConfiguration
   effoutDir = os.path.abspath("launcher_sim.py").split('QC8Test')[0] + outDirName
   for i in range (0,30):
