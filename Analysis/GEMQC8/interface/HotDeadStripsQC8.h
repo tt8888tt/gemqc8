@@ -16,6 +16,7 @@
 #include "DataFormats/TrajectorySeed/interface/PropagationDirection.h"
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeed.h"
 #include "DataFormats/TrajectoryState/interface/PTrajectoryStateOnDet.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -45,25 +46,29 @@
 #include <Geometry/GEMGeometry/interface/GEMGeometry.h>
 #include <Geometry/Records/interface/MuonGeometryRecord.h>
 
+#include "RecoMuon/CosmicMuonProducer/interface/HeaderForQC8.h"
+
 #include <TFile.h>
 #include <TTree.h>
 
 class HotDeadStripsQC8 : public GEMBaseValidation
 {
-public:
-  explicit HotDeadStripsQC8(const edm::ParameterSet&, const edm::EventSetup&);
+  public:
+  
+  explicit HotDeadStripsQC8( const edm::ParameterSet& );
   ~HotDeadStripsQC8();
+  void bookHistograms(DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
   void analyze(const edm::Event& e, const edm::EventSetup&) override;
   const GEMGeometry* initGeometry(edm::EventSetup const & iSetup);
   const GEMGeometry* GEMGeometry_;
   std::vector<GEMChamber> gemChambers;
+  int n_ch;
   MuonServiceProxy* theService;
   CosmicMuonSmoother* theSmoother;
   KFUpdator* theUpdator;
-  edm::EDGetToken InputTagToken_, InputTagToken_DG;
+  edm::EDGetToken InputTagToken_, InputTagToken_RH, InputTagToken_TR, InputTagToken_TS, InputTagToken_TJ, InputTagToken_TI, InputTagToken_TT, InputTagToken_DG, InputTagToken_US;
   
-private:
-  int n_ch;
+  private:
   
   TH3D *digiStrips;
   

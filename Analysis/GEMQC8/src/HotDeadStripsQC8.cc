@@ -7,7 +7,7 @@
 using namespace std;
 using namespace edm;
 
-HotDeadStripsQC8::HotDeadStripsQC8(const edm::ParameterSet& cfg, edm::EventSetup const & iSetup): GEMBaseValidation(cfg)
+HotDeadStripsQC8::HotDeadStripsQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cfg)
 {
   time_t rawTime;
   time(&rawTime);
@@ -15,6 +15,7 @@ HotDeadStripsQC8::HotDeadStripsQC8(const edm::ParameterSet& cfg, edm::EventSetup
   InputTagToken_DG = consumes<GEMDigiCollection>(cfg.getParameter<edm::InputTag>("gemDigiLabel"));
   edm::ParameterSet serviceParameters = cfg.getParameter<edm::ParameterSet>("ServiceParameters");
   theService = new MuonServiceProxy(serviceParameters);
+  theUpdator = new KFUpdator();
   time(&rawTime);
   
   edm::Service<TFileService> fs;
@@ -23,8 +24,20 @@ HotDeadStripsQC8::HotDeadStripsQC8(const edm::ParameterSet& cfg, edm::EventSetup
   
   digiStrips = fs->make<TH3D>("digiStrips","digi per strip",384,0,384,8,0,8,30,0,30);
   
-  // Geometry definition
+  // Tree branches declaration
   
+  tree = fs->make<TTree>("tree", "Tree for QC8");
+  tree->Branch("run",&run,"run/I");
+  tree->Branch("lumi",&lumi,"lumi/I");
+  tree->Branch("ev",&nev,"ev/I");
+  
+  printf("End of HotDeadStripsQC8::HotDeadStripsQC8() at %s\n", asctime(localtime(&rawTime)));
+}
+
+void HotDeadStripsQC8::bookHistograms(DQMStore::IBooker & ibooker, edm::Run const & Run, edm::EventSetup const & iSetup ) {
+  time_t rawTime;
+  time(&rawTime);
+  printf("Begin of HotDeadStripsQC8::bookHistograms() at %s\n", asctime(localtime(&rawTime)));
   GEMGeometry_ = initGeometry(iSetup);
   if ( GEMGeometry_ == nullptr) return ;
   
@@ -38,8 +51,9 @@ HotDeadStripsQC8::HotDeadStripsQC8(const edm::ParameterSet& cfg, edm::EventSetup
     }
   }
   n_ch = gemChambers.size();
+  time(&rawTime);
   
-  printf("End of HotDeadStripsQC8::HotDeadStripsQC8() at %s\n", asctime(localtime(&rawTime)));
+  printf("End of HotDeadStripsQC8::bookHistograms() at %s\n", asctime(localtime(&rawTime)));
 }
 
 const GEMGeometry* HotDeadStripsQC8::initGeometry(edm::EventSetup const & iSetup) {
@@ -57,7 +71,7 @@ const GEMGeometry* HotDeadStripsQC8::initGeometry(edm::EventSetup const & iSetup
 }
 
 HotDeadStripsQC8::~HotDeadStripsQC8() {
-  printf("Successfully done!");
+  printf("Done!");
 }
 
 void HotDeadStripsQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){

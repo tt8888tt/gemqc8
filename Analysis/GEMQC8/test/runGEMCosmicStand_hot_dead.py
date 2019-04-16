@@ -161,16 +161,18 @@ process.gemRecHits = cms.EDProducer("GEMRecHitProducer",
 
 fScale = 1.0
 
+process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
+
 # Validation
 process.HotDeadStripsQC8 = cms.EDProducer('HotDeadStripsQC8',
-                                         process.MuonServiceProxy,
-                                         verboseSimHit = cms.untracked.int32(1),
-                                         genVtx = cms.InputTag("generator","unsmeared", "RECO"),
-                                         recHitsInputLabel = cms.InputTag('gemRecHits'),
-                                         gemDigiLabel = cms.InputTag("muonGEMDigis","","RECO"),
-                                         nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
-                                         RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
-                                         )
+                                          process.MuonServiceProxy,
+                                          verboseSimHit = cms.untracked.int32(1),
+                                          genVtx = cms.InputTag("generator","unsmeared", "RECO"),
+                                          recHitsInputLabel = cms.InputTag('gemRecHits'),
+                                          gemDigiLabel = cms.InputTag("muonGEMDigis","","RECO"),
+                                          nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
+                                          RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
+                                          )
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('temp_'+strOutput)
@@ -183,7 +185,7 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.rawTOhits_step,
-                                process.hot_dead_step_step,
+                                process.hot_dead_step,
                                 process.endjob_step
                                 )
 
