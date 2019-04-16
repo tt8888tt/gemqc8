@@ -94,6 +94,12 @@ void gemcrValidation::bookHistograms(DQMStore::IBooker & ibooker, edm::Run const
   }
   n_ch = gemChambers.size();
   time(&rawTime);
+  
+  t_begin = stampToReal(Run.beginTime());
+  t_end = stampToReal(Run.endTime());
+  
+  cout << t_begin << " " << t_end << endl;
+  
   printf("End of gemcrValidation::bookHistograms() at %s\n", asctime(localtime(&rawTime)));
 }
 
@@ -143,13 +149,6 @@ void gemcrValidation::analyze(const edm::Event& e, const edm::EventSetup& iSetup
   run = e.id().run();
   lumi = e.id().luminosityBlock();
   nev = e.id().event();
-  
-  edm::Timestamp ts_begin = e.getRun().beginTime();
-  t_begin = stampToReal(ts_begin);
-  edm::Timestamp ts_end = e.getRun().endTime();
-  t_end = stampToReal(ts_end);
-  
-  cout << nev << " " << t_begin << " " << t_end << endl;
   
   goodVStriggeredEvts->Fill(0);
   
