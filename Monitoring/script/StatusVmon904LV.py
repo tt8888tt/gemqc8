@@ -270,6 +270,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         	file.write("ERROR: there are no I current data for chamber "+ chamberList[indexB]) 
         	file.close() 
         	
+		counter = counter + 1
         		
         	continue
 
@@ -374,7 +375,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         	file = open("LVErr.log", "w") 
         	file.write("ERROR: there are no LV voltage data for chamber "+ chamberList[indexB]) 
         	file.close() 
-        	
+        
+		counter = counter + 1
         		
         	continue
 
@@ -704,7 +706,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         	file.write("ERROR: there are no status data for chamber "+ chamberList[indexB]) 
         	file.close() 
         	
-        		
+		counter = counter + 1
+
         	continue
 
 

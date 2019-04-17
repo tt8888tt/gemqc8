@@ -359,7 +359,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			file.write("ERROR: there are no I current data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
 			file.close() 
 			
-				
+			counter = counter + 1
+	
 			continue
 			
 		#put the imonOnlyTDate in the correct root format
@@ -529,7 +530,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 	file = open("HVErr.log", "w") 
                 	file.write("ERROR: there are no HV voltage data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
                 	file.close() 
-                	
+                
+			counter = counter + 1 	
                 		
                 	continue
 
@@ -779,7 +781,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 	file.write("ERROR: there are no status data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
                 	file.close() 
                 	
-                		
+			counter = counter + 1
+                			
                 	continue
 
 
