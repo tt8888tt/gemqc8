@@ -83,9 +83,9 @@ SmonTh1List = []
 SmonMeaningListList = [] #a list of lists (one list for each channel of each board considered)
 			 # each of the inner lists has the meaning of the status
 
-ImonTgraph1List = []
-VmonTgraph1List = []
-SmonTgraph1List = []
+#ImonTgraph1List = []
+#VmonTgraph1List = []
+#SmonTgraph1List = []
 
 ChannelMapList = [ "Top_G3Bot", "Top_G3Top", "Top_G2Bot", "Top_G2Top", "Top_G1Bot", "Top_G1Top", "Top_Drift", "Bot_G3Bot", "Bot_G3Top", "Bot_G2Bot", "Bot_G2Top", "Bot_G1Bot", "Bot_G1Top", "Bot_Drift"]
 
@@ -206,7 +206,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		len(chamberList)
 		len(channelList)
 		
-		#print ("counter:", counter)
+		#print ("counter before query:", counter)
 		
 		# this 3 parameters can be input to the script
 		
@@ -413,9 +413,12 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		Imontg1.GetXaxis().SetTimeFormat("#splitline{%y-%m-%d}{%H:%M:%S}%F1970-01-01 00:00:00")
 		Imontg1.GetXaxis().SetLabelOffset(0.025)
 
+		#print ("counter before I", counter)
+
 		#ImonTgraph1List += [Imontg1]
-		ImonTgraph1List.append(Imontg1)
-		ImonTgraph1List[counter].Write()	
+		#ImonTgraph1List.append(Imontg1)
+		#ImonTgraph1List[counter].Write()	
+		Imontg1.Write()
 
 		#fill Voltage
 		query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(vmon_id)+" and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
@@ -560,11 +563,12 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 Vmontg1.GetXaxis().SetTimeFormat("#splitline{%y-%m-%d}{%H:%M:%S}%F1970-01-01 00:00:00")
                 Vmontg1.GetXaxis().SetLabelOffset(0.025)
 
-
+		#print("counter before V = ", counter)
 
                 #VmonTgraph1List += [Vmontg1]
-                VmonTgraph1List.append(Vmontg1)
-                VmonTgraph1List[counter].Write()
+                #VmonTgraph1List.append(Vmontg1)
+                #VmonTgraph1List[counter].Write()
+		Vmontg1.Write()
 		
 		#status query
 		query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(status_id)+" and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
@@ -573,6 +577,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		statRec=[]
 		smonOnlyT = array ( 'd' )
 		smonOnlyS = array ( 'd' )
+		smonOnlyTDate = array ( 'd' )
 		smonOnlyBinStat = []
 		smonOnlyMeaningStat = []
 		contatoreS = 0
@@ -730,7 +735,37 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   smonOnlyT.append(tot_secondsSmon)
 		   smonOnlyS.append(channelStat)
 		   smonOnlyMeaningStat.append(extensibleStat)
-		   		   
+		   
+		   smonOnlyTDate.append(4.) #an any float number
+                                                                                                        
+                   #print currentTsVmon
+                   year = str(currentTsSmon)[0:4]
+                   #print year
+                   month = str(currentTsSmon)[5:7]
+                   #print month
+                   day = str(currentTsSmon)[8:10]
+                   #print day
+                   hour = str(currentTsSmon)[11:13]
+                   #print hour
+                   minute = str(currentTsSmon)[14:16]
+                   #print minute
+                   second = str(currentTsSmon)[17:]
+                   #print second
+                   micro = str(currentTsSmon)[20:]
+                   #print micro
+                                                                                                       
+                   #longString = ROOT.TString( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+                   longList = str( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+                                                                                                       
+                   da1 = ROOT.TDatime( longList )
+                                                                                                       
+                   smonOnlyTDate[-1] = da1.Convert()
+                                                                                                                                                                
+                   floatMicro = "0."+micro
+                   #print floatMicro
+                   smonOnlyTDate[contatoreS] = smonOnlyTDate[contatoreS] + float(floatMicro) #add microseconds to times (all ending with .0 because of Convert)
+
+		   
 		   #th1 for status
 		   SmonTh1List[counter].Fill(channelStat)
    
@@ -739,7 +774,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   
 		   
 		   contatoreS=contatoreS+1 
-		
+	
+		#print ("counter before S", counter)
+	
 		#th1 status
 		SmonTh1List[counter].Write()
 		
@@ -754,7 +791,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#pair the time with status and the meaning list
 		SortList = []
 		for sortCount in range(len(smonOnlyT)):
-			internalList = (smonOnlyT[sortCount], smonOnlyS[sortCount], SmonMeaningList[sortCount])
+			internalList = (smonOnlyT[sortCount], smonOnlyS[sortCount], SmonMeaningList[sortCount], smonOnlyTDate[sortCount])
 			SortList.append(internalList)
 
 		#print(SortList)
@@ -765,6 +802,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			smonOnlyT[refill]=SortList[refill][0]
 			smonOnlyS[refill]=SortList[refill][1]
 			SmonMeaningList[refill] = SortList[refill][2]
+			smonOnlyTDate[refill]=SortList[refill][3]
 	
 		#print(smonOnlyT)
 		#print(smonOnlyS)
@@ -795,7 +833,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#print(smonOnlyT)
 		
 		#Smontg1 = ROOT.TGraph(n,x,y); x and y is the name of arrays with numbers of time and V
-                Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyT,smonOnlyS)
+                Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyTDate,smonOnlyS)
                 Smontg1.SetLineColor(2)
                 Smontg1.SetLineWidth(4)
                 Smontg1.SetMarkerColor(4)
@@ -803,12 +841,17 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 Smontg1.SetMarkerSize(1)
                 Smontg1.SetName("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_time")
                 Smontg1.SetTitle("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_time")
-                Smontg1.GetXaxis().SetTitle("time [s]")
+                #Smontg1.GetXaxis().SetTitle("time [s]")
                 Smontg1.GetYaxis().SetTitle("status cathegory "+chamberList[indexB]+" "+channelList[indexC])
                 #Smontg1.Draw("ACP")
+		Smontg1.GetXaxis().SetTimeDisplay(1)
+                Smontg1.GetXaxis().SetTimeFormat("#splitline{%y-%m-%d}{%H:%M:%S}%F1970-01-01 00:00:00")
+                Smontg1.GetXaxis().SetLabelOffset(0.025)
 
-		SmonTgraph1List.append(Smontg1)
-                SmonTgraph1List[counter].Write()
+
+		#SmonTgraph1List.append(Smontg1)
+                #SmonTgraph1List[counter].Write()
+		Smontg1.Write()
 
 		#List with all status
 		SmonMeaningListList.append(SmonMeaningList)
