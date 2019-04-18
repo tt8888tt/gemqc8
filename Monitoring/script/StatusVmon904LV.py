@@ -264,9 +264,15 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         if len(imonOnlyT) != len(imonOnlyI):
         	print ("filling vector different lenght")
 		file = open("LVErr.log", "w")
-                file.write("ERROR: imonOnlyT and imonOnlyV have different lenght")
+                file.write("ERROR: imonOnlyT and imonOnlyI have different lenght")
                 file.close()
-                                                                                                         
+        
+	if len(imonOnlyTDate) != len(imonOnlyI):
+        	print ("filling vector different lenght")
+        	file = open("LVErr.log", "w")
+                file.write("ERROR: imonOnlyTDate and imonOnlyI have different lenght")
+                file.close()
+                                                                                                 
         #sort the array of imonOnlyT and the imonOnlyV
         #in the case the query is not executed in order (negative times)
         #pair the time with status and the meaning list
@@ -320,7 +326,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         Imontg1.SetMarkerSize(1)
         Imontg1.SetName("LV_ImonChamber"+chamberList[indexB]+"_time")
         Imontg1.SetTitle("LV_ImonChamber"+chamberList[indexB]+"_time")
-        Imontg1.GetXaxis().SetTitle("time [s]")
+        #Imontg1.GetXaxis().SetTitle("time [s]")
         Imontg1.GetYaxis().SetTitle("Imon "+chamberList[indexB]+" [A]")
         #Imontg1.Draw("ACP")
 	Imontg1.GetXaxis().SetTimeDisplay(1)
@@ -342,6 +348,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         vmonRec=[]
         vmonOnlyT = array ( 'd' )
         vmonOnlyV = array ( 'd' )
+        vmonOnlyTDate = array ( 'd' )
         contatoreV = 0
         isNotEmptyVmon = False
         for result in curvmon:
@@ -362,12 +369,40 @@ for indexB in range(len(chamberList)): #loop on the selected boards
            tot_milliVmon=tot_secondsVmon*1000.
            #print("totmilliVmon=", tot_milliVmon)
            #print(vmonRec[contatoreV])
-           contatoreV=contatoreV+1
         
            #lists with only V and t
 	   vmonOnlyT.append(tot_secondsVmon)
            vmonOnlyV.append(result[1])
-                                                                                                                                                                                                                   
+           
+	   vmonOnlyTDate.append(4.) #an any float number
+                                                                                                                                                        
+           #print currentTsVmon
+           year = str(currentTsVmon)[0:4]
+           #print year
+           month = str(currentTsVmon)[5:7]
+           #print month
+           day = str(currentTsVmon)[8:10]
+           #print day
+           hour = str(currentTsVmon)[11:13]
+           #print hour
+           minute = str(currentTsVmon)[14:16]
+           #print minute
+           second = str(currentTsVmon)[17:19]
+           #print second
+           micro = str(currentTsVmon)[20:26]
+           #print micro
+                                                                                               
+           #longString = ROOT.TString( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+           longList =str( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+                                                                                               
+           da1 = ROOT.TDatime( longList )
+                                                                                               
+           vmonOnlyTDate[-1] = da1.Convert()
+           floatMicro = "0."+micro
+           #print floatMicro
+           vmonOnlyTDate[contatoreV] = vmonOnlyTDate[contatoreV] + float(floatMicro) #add microseconds to times (all ending with .0 because of Convert)
+
+	   contatoreV = contatoreV+1                                                                                                                                                                                                        
         VmonTh1List[counter].Write()
 
 	#create a TGraph for Imon (V vs time)
@@ -377,13 +412,19 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 file.write("ERROR: vmonOnlyT and vmonOnlyV have different lenght")
                 file.close()
 
-                                                                                                         
+	if len(vmonOnlyTDate) != len(vmonOnlyV):                                              
+        	print ("filling vector different lenght")
+        	file = open("LVErr.log", "w")
+                file.write("ERROR: vmonOnlyTDate and vmonOnlyV have different lenght")
+                file.close()
+
+                                                                                                 
         #sort the array of vmonOnlyT and the vmonOnlyV
         #in the case the query is not executed in order (negative times)
         #pair the time with status and the meaning list
         SortListV = []
         for sortCountV in range(len(vmonOnlyT)):
-        	internalListV = (vmonOnlyT[sortCountV], vmonOnlyV[sortCountV])
+        	internalListV = (vmonOnlyT[sortCountV], vmonOnlyV[sortCountV], vmonOnlyTDate[sortCountV])
         	SortListV.append(internalListV)
                                                                                                         
         #print(SortListV)
@@ -393,6 +434,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         for refillV in range(len(vmonOnlyT)):
         	vmonOnlyT[refillV]=SortListV[refillV][0]
         	vmonOnlyV[refillV]=SortListV[refillV][1]
+        	vmonOnlyTDate[refillV]=SortListV[refillV][2]
                                                                                                         
         #print(vmonOnlyT)
         #print(vmonOnlyV)
@@ -422,7 +464,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                                                                                                          
                                                                                                          
         #Vmontg1 = ROOT.TGraph(n,x,y); x and y is the name of arrays with numbers of time and V
-        Vmontg1 = ROOT.TGraph(len(vmonOnlyT),vmonOnlyT,vmonOnlyV)
+        Vmontg1 = ROOT.TGraph(len(vmonOnlyT),vmonOnlyTDate,vmonOnlyV)
         Vmontg1.SetLineColor(2)
         Vmontg1.SetLineWidth(4)
         Vmontg1.SetMarkerColor(4)
@@ -430,10 +472,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         Vmontg1.SetMarkerSize(1)
         Vmontg1.SetName("LV_VmonChamber"+chamberList[indexB]+"_time")
         Vmontg1.SetTitle("LV_VmonChamber"+chamberList[indexB]+"_time")
-        Vmontg1.GetXaxis().SetTitle("time [s]")
+        #Vmontg1.GetXaxis().SetTitle("time [s]")
         Vmontg1.GetYaxis().SetTitle("Vmon "+chamberList[indexB]+" [V]")
         #Vmontg1.Draw("ACP")
-                                                                                                         
+	Vmontg1.GetXaxis().SetTimeDisplay(1)                                                           
+        Vmontg1.GetXaxis().SetTimeFormat("#splitline{%y-%m-%d}{%H:%M:%S}%F1970-01-01 00:00:00")
+        Vmontg1.GetXaxis().SetLabelOffset(0.025)
+                                                                                                 
         #VmonTgraph1List += [Vmontg1]
         #VmonTgraph1List.append(Vmontg1)
         #VmonTgraph1List[counter].Write()
@@ -464,6 +509,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         statRec=[]
         smonOnlyT = array ( 'd' )
         smonOnlyS = array ( 'd' )
+        smonOnlyTDate = array ( 'd' )
         smonOnlyBinStat = []
         smonOnlyMeaningStat = []
         contatoreS = 0
@@ -693,7 +739,35 @@ for indexB in range(len(chamberList)): #loop on the selected boards
            SmonMeaning = ("StatChamber"+chamberList[indexB], "time:"+str(result[0]), "Status:"+StatusMeaning )
            SmonMeaningList.append(SmonMeaning)
            
-           
+           smonOnlyTDate.append(4.) #an any float number
+                                                                                                                                          
+           #print currentTsSmon
+           year = str(currentTsSmon)[0:4]
+           #print year
+           month = str(currentTsSmon)[5:7]
+           #print month
+           day = str(currentTsSmon)[8:10]
+           #print day
+           hour = str(currentTsSmon)[11:13]
+           #print hour
+           minute = str(currentTsSmon)[14:16]
+           #print minute
+           second = str(currentTsSmon)[17:19]
+           #print second
+           micro = str(currentTsSmon)[20:26]
+           #print micro
+                                                                                               
+           #longString = ROOT.TString( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+           longList =str( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
+                                                                                               
+           da1 = ROOT.TDatime( longList )
+                                                                                               
+           smonOnlyTDate[-1] = da1.Convert()
+           floatMicro = "0."+micro
+           #print floatMicro
+           smonOnlyTDate[contatoreS] = smonOnlyTDate[contatoreS] + float(floatMicro) #add microseconds to times (all ending with .0 because of Convert)
+
+
            contatoreS=contatoreS+1 
         
         #th1 status
@@ -706,13 +780,19 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 file.write("ERROR: smonOnlyT and smonOnlyS have different lenght")
                 file.close()
 
+	if len(smonOnlyTDate) != len( smonOnlyS ):
+        	print("!!!!!error tgraph status: filling with lists of different lenght!!!!!")
+        	file = open("LVErr.log", "w")
+                file.write("ERROR: smonOnlyTDate and smonOnlyS have different lenght")
+                file.close()
+
                                                                                                                                        
         #sort the array of smonOnly and the smonOnly
         #in the case the query is not executed in order (negative times)
         #pair the time with status and the meaning list
         SortList = []
         for sortCount in range(len(smonOnlyT)):
-        	internalList = (smonOnlyT[sortCount], smonOnlyS[sortCount], SmonMeaningList[sortCount])
+        	internalList = (smonOnlyT[sortCount], smonOnlyS[sortCount], SmonMeaningList[sortCount], smonOnlyTDate[sortCount])
         	SortList.append(internalList)
                                                                                                                                        
         #print(SortList)
@@ -723,6 +803,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         	smonOnlyT[refill]=SortList[refill][0]
         	smonOnlyS[refill]=SortList[refill][1]
         	SmonMeaningList[refill] = SortList[refill][2]
+        	smonOnlyTDate[refill]=SortList[refill][3]
                                                                                                                                        
         #print(smonOnlyT)
         #print(smonOnlyS)
@@ -752,7 +833,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         #print(smonOnlyT)
         
         #Smontg1 = ROOT.TGraph(n,x,y); x and y is the name of arrays with numbers of time and V
-        Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyT,smonOnlyS)
+        Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyTDate,smonOnlyS)
         Smontg1.SetLineColor(2)
         Smontg1.SetLineWidth(4)
         Smontg1.SetMarkerColor(4)
@@ -760,10 +841,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         Smontg1.SetMarkerSize(1)
         Smontg1.SetName("LV_StatusChamber"+chamberList[indexB]+"_time")
         Smontg1.SetTitle("LV_StatusChamber"+chamberList[indexB]+"_time")
-        Smontg1.GetXaxis().SetTitle("time [s]")
+        #Smontg1.GetXaxis().SetTitle("time [s]")
         Smontg1.GetYaxis().SetTitle("status cathegory "+chamberList[indexB])
         #Smontg1.Draw("ACP")
-                                                                                                                                       
+	Smontg1.GetXaxis().SetTimeDisplay(1)                                                                    
+        Smontg1.GetXaxis().SetTimeFormat("#splitline{%y-%m-%d}{%H:%M:%S}%F1970-01-01 00:00:00")
+        Smontg1.GetXaxis().SetLabelOffset(0.025)
+                                                                                                                              
         #SmonTgraph1List.append(Smontg1)
         #SmonTgraph1List[counter].Write()
 	Smontg1.Write()

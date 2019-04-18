@@ -786,6 +786,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			file = open("HVErr.log", "w")
                         file.write("ERROR: smonOnlyT and smonOnlyS have different lenght")
                         file.close()
+
+		if len(smonOnlyTDate) != len( smonOnlyS ):
+                	print("!!!!!error tgraph status: filling with lists of different lenght!!!!!")
+                	file = open("HVErr.log", "w")
+                        file.write("ERROR: smonOnlyTDate and smonOnlyS have different lenght")
+                        file.close()
+
 		#sort the array of smonOnly and the smonOnly
 		#in the case the query is not executed in order (negative times)
 		#pair the time with status and the meaning list
