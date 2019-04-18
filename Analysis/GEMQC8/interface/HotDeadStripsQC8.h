@@ -53,13 +53,13 @@
 
 class HotDeadStripsQC8 : public GEMBaseValidation
 {
-  public:
-  
+public:
+
   explicit HotDeadStripsQC8( const edm::ParameterSet& );
   ~HotDeadStripsQC8();
   void bookHistograms(DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
   void analyze(const edm::Event& e, const edm::EventSetup&) override;
-  const GEMGeometry* initGeometry(edm::EventSetup const & iSetup);
+  const GEMGeometry* initGeometry(edm::EventSetup const & iSetup);  
   const GEMGeometry* GEMGeometry_;
   std::vector<GEMChamber> gemChambers;
   int n_ch;
@@ -68,8 +68,8 @@ class HotDeadStripsQC8 : public GEMBaseValidation
   KFUpdator* theUpdator;
   edm::EDGetToken InputTagToken_, InputTagToken_DG;
   
-  private:
-  
+private:
+
   TH3D *digiStrips;
   
   TTree *tree;

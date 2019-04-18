@@ -164,10 +164,12 @@ fScale = 1.0
 process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
 
 # Validation
-process.HotDeadStripsQC8 = cms.EDProducer('HotDeadStripsQC8',
+process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
                                          process.MuonServiceProxy,
                                          verboseSimHit = cms.untracked.int32(1),
-                                         gemDigiLabel = cms.InputTag("muonGEMDigis","","RECO"),
+                                         recHitsInputLabel = cms.InputTag('gemRecHits'),
+                                         maxClusterSize = cms.double(runConfig.maxClusterSize),
+                                         minClusterSize = cms.double(runConfig.minClusterSize),
                                          nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
                                          RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
                                          )
@@ -178,12 +180,12 @@ process.TFileService = cms.Service("TFileService",
 
 # Path and EndPath definitions
 process.rawTOhits_step = cms.Path(process.muonGEMDigis+process.gemRecHits)
-process.hot_dead_step = cms.Path(process.HotDeadStripsQC8)
+process.fast_efficiency_step = cms.Path(process.FastEfficiencyQC8)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.rawTOhits_step,
-                                process.hot_dead_step,
+                                process.fast_efficiency_step,
                                 process.endjob_step
                                 )
 

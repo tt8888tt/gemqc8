@@ -25,7 +25,7 @@ void hot_dead_strips_identification(int run, string configDir)
   // Getting the root file
   
   string filename = "out_run_";
-  for (int i=0; i<(6-to_string(run).size()); i++)
+  for (unsigned int i=0; i<(6-to_string(run).size()); i++)
   {
     filename += "0";
   }
@@ -37,95 +37,57 @@ void hot_dead_strips_identification(int run, string configDir)
   
   // Getting the tree
   
-  TTree *tree = (TTree*)infile->Get("gemcrValidation/tree");
+  TTree *tree = (TTree*)infile->Get("HotDeadStripsQC8/tree");
   
   // Getting 3D digi histogram
   
-  TH3D *digi3D = (TH3D*)infile->Get("gemcrValidation/digiStrips");
-  
-  // Plot of digis per strip for each of the chambers
-  
-  TH1D *digisPerStripPerCh = new TH1F("digisPerStripPerCh","Digis per strip per chamber",10000000,0,10000000);
-  
-  TH1D *digisPerStripPerCh[30];
-  
-  for (int ch=0; ch<30; ch++)
-  {
-    sprintf(name,"DigisPerStrip_ch_%u",ch);
-    digisPerStripPerCh[ch] = new TH1D(name,"",10000000,0,10000000);
-    
-    for (int eta=0; eta<8; eta++)
-    {
-      for (int phi=0; phi<384; phi++)
-      {
-        digisPerStripPerCh[ch]->Fill(digi3D->GetBinContent(phi+1,eta+1,ch+1));
-      }
-    }
-  }
-  
-  // Here plot things, fit, identify 4sigma, cut, identify hot and then identify zeros... Finally all in the 2 tables
+  TH3D *digi3D = (TH3D*)infile->Get("HotDeadStripsQC8/digiStrips");
   
   // Digi plots per chamber
+  
+  char *name = new char[40];
+  string namename = "";
+  
+  long unsigned int max_digi_occupancy[30];
+  long unsigned int digi_occupancy[30];
   
   TH2D *digi2D[30];
   
   for (int ch=0; ch<30; ch++)
   {
+  	max_digi_occupancy[ch] = 0;
+  	digi_occupancy[ch] = 0;
+  	
     sprintf(name,"Digi_ch_%u",ch);
     digi2D[ch] = new TH2D(name,"",384,0,384,8,-0.5,7.5);
     
     for (int eta=0; eta<8; eta++)
     {
-      for (int phi=0; phi<384; phi++)
+      for (int strip=0; strip<384; strip++)
       {
-        digi2D[ch]->SetBinContent((phi+1),(eta+1),digi3D->GetBinContent(phi+1,eta+1,ch+1));
+        digi2D[ch]->SetBinContent((strip+1),(eta+1),digi3D->GetBinContent(strip+1,eta+1,ch+1));
+        digi_occupancy[ch] = digi3D->GetBinContent(strip+1,eta+1,ch+1);
+        if (digi_occupancy[ch] > max_digi_occupancy[ch]) max_digi_occupancy[ch] = digi_occupancy[ch];
       }
     }
+    
+    max_digi_occupancy[ch]++; // Just not to have histogram with 0 bins giving errors... Since it is only an upper limit on the histos, +1 doesn't really matter...
   }
   
-  // Here you have to check the distribution, fit it and find 4sigma value as a cut for hot strips
+  // Plot of digis per strip for each of the chambers
   
-  // Getting digi multiplicity histogram
-  
-  TH2D *digiMultPerCh = (TH2D*)infile->Get("gemcrValidation/digisPerEvtPerCh");
-  
-  // Digi plots per chamber
-  
-  TH1D *nDigis[30];
+	TH1D *digisPerStripPerCh[30];
   
   for (int ch=0; ch<30; ch++)
   {
-    sprintf(name,"DigiMultiplicity_ch_%u",ch);
-    nDigis[ch] = new TH1D(name,"",20,-0.5,19.5);
+    sprintf(name,"DigisPerStrip_ch_%u",ch);
+    digisPerStripPerCh[ch] = new TH1D(name,"",max_digi_occupancy[ch],0,max_digi_occupancy[ch]);
     
-    for (int mult=1; mult<20; mult++)
+    for (int eta=0; eta<8; eta++)
     {
-      nDigis[ch]->SetBinContent((mult+1),digiMultPerCh->GetBinContent(ch+1,mult+1));
-    }
-  }
-  
-  // Getting rechHits per layer histrogram
-  
-  TH3D *recHitsPerLayer = (TH3D*)infile->Get("gemcrValidation/recHits2DPerLayer");
-  
-  // rechHits plots per chamber
-  
-  TH2D *recHits2D[10];
-  for (int row=0; row<5; row++)
-  {
-    namename = "recHits_row_" + to_string(row+1) + "_B";
-    recHits2D[row*2] = new TH2D(namename.c_str(),"",384,0,384,8,-0.5,7.5);
-    namename = "recHits_row_" + to_string(row+1) + "_T";
-    recHits2D[(row*2)+1] = new TH2D(namename.c_str(),"",384,0,384,8,-0.5,7.5);
-  }
-  
-  for (int layer=0; layer<10; layer++)
-  {
-    for (int eta=1; eta<=8; eta++)
-    {
-      for (int phi=1; phi<=384; phi++)
+      for (int strip=0; strip<384; strip++)
       {
-        recHits2D[layer]->SetBinContent(phi,eta,recHitsPerLayer->GetBinContent(phi,eta,layer+1));
+        digisPerStripPerCh[ch]->Fill(digi3D->GetBinContent(strip+1,eta+1,ch+1));
       }
     }
   }
@@ -167,160 +129,128 @@ void hot_dead_strips_identification(int run, string configDir)
     chamberPos.push_back(ChPos);
   }
   
-  // Results for the 30 chambers
+  // Identification of value for being a dead (0) or hot (above 4 sigmas) strip per chamber
   
+  long int DeadStripLimitValue[30];
+  long int HotStripLimitValue[30];
+  
+  for (int ch=0; ch<30; ch++)
+	{
+		DeadStripLimitValue[ch] = 0;
+		HotStripLimitValue[ch] = max_digi_occupancy[ch];
+	}
+	  
   TCanvas *Canvas = new TCanvas("Canvas","Canvas",0,0,1000,800);
-  TF1 *target97 = new TF1("target97","0.97",0,24);
-  target97->SetLineColor(kRed);
   
-  ofstream outfile;
-  
-  for (int i=0; i<chamberPos.size(); i++)
+  for (unsigned int i=0; i<chamberPos.size(); i++)
   {
     int c = chamberPos[i];
     
-    // Plot num e denom per chamber
+    namename = "Digi_PerStrip_PerCh_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+    digisPerStripPerCh[c]->SetTitle(namename.c_str());
+    digisPerStripPerCh[c]->GetXaxis()->SetTitle("digisPerStripPerCh");
+    digisPerStripPerCh[c]->GetYaxis()->SetTitle("Counts");
+    digisPerStripPerCh[c]->Draw();
     
-    namename = "Denom_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
-    denom1D[c]->SetTitle(namename.c_str());
-    denom1D[c]->GetXaxis()->SetTitle("VFAT");
-    denom1D[c]->GetYaxis()->SetTitle("Counts");
-    denom1D[c]->Write(namename.c_str());
-    denom1D[c]->SetLineColor(kRed);
-    denom1D[c]->Draw();
-    namename = "Num_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
-    num1D[c]->SetTitle(namename.c_str());
-    num1D[c]->GetXaxis()->SetTitle("VFAT");
-    num1D[c]->GetYaxis()->SetTitle("Counts");
-    num1D[c]->Write(namename.c_str());
-    namename = "Num_Denom_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
-    num1D[c]->SetTitle(namename.c_str());
-    num1D[c]->SetLineColor(kBlue);
-    num1D[c]->Draw("SAME");
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Num_Denom_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+    TF1 *GaussFit = new TF1("GaussFit","gaus",1,max_digi_occupancy[c]);
+    digisPerStripPerCh[c]->Fit(GaussFit,"Q");
+    GaussFit->Draw("SAME");
+    
+    if ( (GaussFit->GetParameter(1) + 4*GaussFit->GetParameter(2)) > 0 )
+    	HotStripLimitValue[c] = int(GaussFit->GetParameter(1) + 4*GaussFit->GetParameter(2)); // Centroid of the gaussian + 4 sigmas
+    
+    digisPerStripPerCh[c]->Write(namename.c_str());
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Digi_PerStrip_PerCh_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
+    
+    delete GaussFit;
     Canvas->Clear();
+  }
+  
+  // Dead / Hot strips results in csv files
+  
+  ofstream deadfile;
+  string outFileName = "DeadStrips.csv";
+  deadfile.open(outFileName);
+  
+  ofstream hotfile;
+  outFileName = "HotStrips.csv";
+  hotfile.open(outFileName);
+  
+  string entry = "";
+  
+  entry = "RUN_NUMBER," + to_string(run) + "\n";
+  deadfile << entry;
+  hotfile << entry;
+  entry = "CH_SERIAL_NUMBER,GEM_NUM,POSITION,VFAT,CHANNEL,STRIP\n";
+  deadfile << entry;
+  hotfile << entry;
+  
+  for (unsigned int i=0; i<chamberPos.size(); i++)
+  {
+    int c = chamberPos[i];
     
-    // Plot efficiency per chamber
+    // Compose GEM_NUM
     
-    namename = "Efficiency_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
-    eff1D[c]->SetTitle(namename.c_str());
-    eff1D[c]->GetXaxis()->SetTitle("VFAT");
-    eff1D[c]->GetYaxis()->SetTitle("Efficiency");
-    eff1D[c]->GetYaxis()->SetRangeUser(0.7,1.0);
-    eff1D[c]->SetMarkerStyle(20);
-    eff1D[c]->Draw();
-    eff1D[c]->Write(namename.c_str());
-    target97->Draw("SAME");
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
-    Canvas->SaveAs(namename.c_str());
-    Canvas->Clear();
+    string GEM_NUM = "11";
+    if (c%2 == 0) GEM_NUM += "2"; // Even = Bottom
+    if (c%2 == 1) GEM_NUM += "1"; // Odd = Top
+    if (c < 10 && c%2 == 0) GEM_NUM += "0" + to_string(c+1);
+    if (c < 10 && c%2 == 1) GEM_NUM += "0" + to_string(c);
+    if (c >= 10 && c%2 == 0) GEM_NUM += to_string(c+1);
+    if (c >= 10 && c%2 == 1) GEM_NUM += to_string(c);
     
-    // Efficiency results in csv files
+    // Compose POSITION
     
-    string outFileName = "Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + ".csv";
-    outfile.open(outFileName);
-    double eff_value, error_value;
-    string entry;
-    for (int vfat=0; vfat<24; vfat++)
-    {
-      eff_value = eff1D[c]->GetY()[vfat];
-      error_value = (eff1D[c]->GetEYhigh()[vfat] + eff1D[c]->GetEYlow()[vfat]) / 2.0;
-      entry = chamberName[i] + "," + to_string(vfat) + "," + to_string(eff_value) + "," + to_string(error_value) + "," + to_string(run) + "\n";
-      outfile << entry;
-    }
-    outfile.close();
+    int ROW = int((c%10)/2)+1;
+    int COLUMN = int(c/10)+1;
+    string POSITION = "";
+    if (c%2 == 0) POSITION = to_string(ROW) + "/" + to_string(COLUMN) + "/B"; // Even = Bottom
+    if (c%2 == 1) POSITION = to_string(ROW) + "/" + to_string(COLUMN) + "/T"; // Odd = Top
     
-    // Plotting digi per chamber
+    for (int eta=0; eta<8; eta++)
+		{
+		  for (int strip=0; strip<384; strip++)
+		  {
+		  	// Calculate VFAT
+		  	
+		  	int phi = int(strip/128);
+		  	int VFAT = 8*phi+(7-eta);
+		  	
+		  	// Check if strip is dead or hot
+		  	
+		    if (digi2D[c]->GetBinContent(strip+1,eta+1) == DeadStripLimitValue[c])
+		    {
+		    	entry = chamberName[i] + "," + GEM_NUM + "," + POSITION + "," + to_string(VFAT) + "," + to_string(-1) + "," + to_string(strip) + "\n";
+		    	deadfile << entry;
+		    	continue;
+		    }
+		    if (digi2D[c]->GetBinContent(strip+1,eta+1) > HotStripLimitValue[c])
+		    {
+		    	entry = chamberName[i] + "," + GEM_NUM + "," + POSITION + "," + to_string(VFAT) + "," + to_string(-1) + "," + to_string(strip) + "\n";
+		    	hotfile << entry;
+		    }
+		  }
+		}
+  }
+  
+  deadfile.close();
+  hotfile.close();
+  
+  // Plotting 2D digi occupancy
+  
+  for (unsigned int i=0; i<chamberPos.size(); i++)
+  {
+    int c = chamberPos[i];
+    
     namename = "Digi_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
     digi2D[c]->SetTitle(namename.c_str());
     digi2D[c]->GetXaxis()->SetTitle("Strip Number");
     digi2D[c]->GetYaxis()->SetTitle("ieta");
-    digi2D[c]->SetLogz();
+    Canvas->SetLogz();
     digi2D[c]->Draw("colz");
     digi2D[c]->Write(namename.c_str());
     namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Digi_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
-    Canvas->SaveAs(namename.c_str());
-    Canvas->Clear();
-    
-    // Plotting number of digis per chamber
-    namename = "NumberOfDigis_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
-    nDigis[c]->SetTitle(namename.c_str());
-    nDigis[c]->GetXaxis()->SetTitle("Digi Multiplicity");
-    nDigis[c]->GetYaxis()->SetTitle("Counts");
-    nDigis[c]->Draw();
-    nDigis[c]->Write(namename.c_str());
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/NumberOfDigis_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
-    Canvas->SaveAs(namename.c_str());
-    Canvas->Clear();
-    
-  }
-  
-  // Plots of recHits per layer
-  
-  for (int layer=0; layer<10; layer++)
-  {
-    for (int eta=1; eta<=8; eta++)
-    {
-      for (int phi=1; phi<=384; phi++)
-      {
-        recHits2D[layer]->SetBinContent(phi,eta,recHitsPerLayer->GetBinContent(phi,eta,layer+1));
-      }
-    }
-  }
-  
-  for (int row=0; row<5; row++)
-  {
-    namename = "recHits_Row_" + to_string(row+1) + "_B";
-    recHits2D[row*2]->SetTitle(namename.c_str());
-    recHits2D[row*2]->SetStats(0);
-    recHits2D[row*2]->GetXaxis()->SetTitle("x [cm]");
-    recHits2D[row*2]->GetYaxis()->SetTitle("#eta partition");
-    recHits2D[row*2]->Draw("colz TEXT0");
-    namename = "recHits_Row_" + to_string(row+1) + "_B.png";
-    Canvas->SaveAs(namename.c_str());
-    Canvas->Clear();
-    namename = "recHits_Row_" + to_string(row+1) + "_T";
-    recHits2D[(row*2)+1]->SetTitle(namename.c_str());
-    recHits2D[(row*2)+1]->SetStats(0);
-    recHits2D[(row*2)+1]->GetXaxis()->SetTitle("x [cm]");
-    recHits2D[(row*2)+1]->GetYaxis()->SetTitle("#eta partition");
-    recHits2D[(row*2)+1]->Draw("colz TEXT0");
-    namename = "recHits_Row_" + to_string(row+1) + "_T.png";
-    Canvas->SaveAs(namename.c_str());
-    Canvas->Clear();
-  }
-  
-  // Plots of efficiency per layer
-  
-  for (int row=0; row<5; row++)
-  {
-    TLine *col_1_2 = new TLine(3,0,3,8);
-    TLine *col_2_3 = new TLine(6,0,6,8);
-    namename = "Efficiency_Row_" + to_string(row+1) + "_B";
-    eff2D[row*2]->SetTitle(namename.c_str());
-    eff2D[row*2]->SetMinimum(0.70);
-    eff2D[row*2]->SetMaximum(1.0);
-    eff2D[row*2]->SetStats(0);
-    eff2D[row*2]->GetXaxis()->SetTitle("#phi partition");
-    eff2D[row*2]->GetYaxis()->SetTitle("#eta partition");
-    eff2D[row*2]->Draw("colz TEXT0");
-    col_1_2->Draw("SAME");
-    col_2_3->Draw("SAME");
-    namename = "Efficiency_Row_" + to_string(row+1) + "_B.png";
-    Canvas->SaveAs(namename.c_str());
-    Canvas->Clear();
-    namename = "Efficiency_Row_" + to_string(row+1) + "_T";
-    eff2D[(row*2)+1]->SetTitle(namename.c_str());
-    eff2D[(row*2)+1]->SetMinimum(0.70);
-    eff2D[(row*2)+1]->SetMaximum(1.0);
-    eff2D[(row*2)+1]->SetStats(0);
-    eff2D[(row*2)+1]->GetXaxis()->SetTitle("#phi partition");
-    eff2D[(row*2)+1]->GetYaxis()->SetTitle("#eta partition");
-    eff2D[(row*2)+1]->Draw("colz TEXT0");
-    col_1_2->Draw("SAME");
-    col_2_3->Draw("SAME");
-    namename = "Efficiency_Row_" + to_string(row+1) + "_T.png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
   }

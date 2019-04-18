@@ -1,5 +1,5 @@
-#ifndef gemcrValidation_H
-#define gemcrValidation_H
+#ifndef FastEfficiencyQC8_H
+#define FastEfficiencyQC8_H
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -51,74 +51,33 @@
 #include <TFile.h>
 #include <TTree.h>
 
-class gemcrValidation : public GEMBaseValidation
+class FastEfficiencyQC8 : public GEMBaseValidation
 {
 public:
-  explicit gemcrValidation( const edm::ParameterSet& );
-  ~gemcrValidation();
+
+  explicit FastEfficiencyQC8( const edm::ParameterSet& );
+  ~FastEfficiencyQC8();
   void bookHistograms(DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
   void analyze(const edm::Event& e, const edm::EventSetup&) override;
-  int findIndex(GEMDetId id_);
-  int findVFAT(float x, float a, float b);
-  const GEMGeometry* initGeometry(edm::EventSetup const & iSetup);
-  double maxCLS, minCLS, maxRes, trackChi2, trackResY, trackResX, MulSigmaOnWindow;
-  std::vector<std::string> SuperChamType;
-  std::vector<double> vecChamType;
-  bool makeTrack, isMC;
-  
+  const GEMGeometry* initGeometry(edm::EventSetup const & iSetup);  
   const GEMGeometry* GEMGeometry_;
-  
-  static double stampToReal(edm::Timestamp time) {
-    return time.unixTime() + time.microsecondOffset()*1e-6;
-  }
-  
   std::vector<GEMChamber> gemChambers;
   int n_ch;
+  double maxCLS, minCLS;
   MuonServiceProxy* theService;
   CosmicMuonSmoother* theSmoother;
   KFUpdator* theUpdator;
-  edm::EDGetToken InputTagToken_, InputTagToken_RH, InputTagToken_TR, InputTagToken_TS, InputTagToken_TJ, InputTagToken_TI, InputTagToken_TT, InputTagToken_DG, InputTagToken_US;
+  edm::EDGetToken InputTagToken_, InputTagToken_RH;
   
 private:
-  
-  TH1D *goodVStriggeredEvts;
-  TH3D *hitsVFATnum;
-  TH3D *hitsVFATdenom;
-  TH3D *digiStrips;
-  TH2D *digisPerEvtPerCh;
-  TH3D *recHits3D;
-  TH3D *recHits2DPerLayer;
-  TH1D *recHitsPerEvt;
-  TH3D *clusterSize;
-  TH1D *residualPhi;
-  TH1D *residualEta;
-  TH1D *recHitsPerTrack;
+
+  TH1D *numerator;
+  TH1D *denominator;
   
   TTree *tree;
   int run;
   int lumi;
   int nev;
-  double t_begin;
-  double t_end;
-  int nDigisPerCh[30];
-  int nrecHit;
-  int nTraj;
-  float trajTheta;
-  float trajPhi;
-  float trajX;
-  float trajY;
-  float trajZ;
-  float trajPx;
-  float trajPy;
-  float trajPz;
-  float testTrajHitX[30];
-  float testTrajHitY[30];
-  float testTrajHitZ[30];
-  float confTestHitX[30];
-  float confTestHitY[30];
-  float confTestHitZ[30];
-  int nTrajHit; // number of trajHits
-  int nTrajRecHit; // number of confirmed trajHits
 };
 
 #endif

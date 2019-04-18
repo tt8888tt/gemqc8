@@ -30,7 +30,7 @@ HotDeadStripsQC8::HotDeadStripsQC8(const edm::ParameterSet& cfg): GEMBaseValidat
   tree->Branch("run",&run,"run/I");
   tree->Branch("lumi",&lumi,"lumi/I");
   tree->Branch("ev",&nev,"ev/I");
-  
+    
   printf("End of HotDeadStripsQC8::HotDeadStripsQC8() at %s\n", asctime(localtime(&rawTime)));
 }
 

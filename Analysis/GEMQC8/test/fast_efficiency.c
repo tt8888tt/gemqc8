@@ -21,7 +21,7 @@
 
 using namespace std;
 
-void efficiency_calculation(int run, string configDir)
+void fast_efficiency(int run, string configDir)
 {
   // Getting the root file
   
@@ -38,12 +38,12 @@ void efficiency_calculation(int run, string configDir)
   
   // Getting the tree
   
-  TTree *tree = (TTree*)infile->Get("gemcrValidation/tree");
+  TTree *tree = (TTree*)infile->Get("FastEfficiency/tree");
   
   // Getting the 3D numerator & denominator
   
-  TH3D *num3D = (TH3D*)infile->Get("gemcrValidation/hitsVFATnum");
-  TH3D *denom3D = (TH3D*)infile->Get("gemcrValidation/hitsVFATdenom");
+  TH3D *num3D = (TH3D*)infile->Get("FastEfficiency/hitsVFATnum");
+  TH3D *denom3D = (TH3D*)infile->Get("FastEfficiency/hitsVFATdenom");
   
   // Generating 1D histograms (num, denom, eff) for the 30 chambers
   
@@ -101,7 +101,7 @@ void efficiency_calculation(int run, string configDir)
   
   // Getting 3D digi histogram
   
-  TH3D *digi3D = (TH3D*)infile->Get("gemcrValidation/digiStrips");
+  TH3D *digi3D = (TH3D*)infile->Get("FastEfficiency/digiStrips");
   
   // Digi plots per chamber
   
@@ -123,7 +123,7 @@ void efficiency_calculation(int run, string configDir)
   
   // Getting digi multiplicity histogram
   
-  TH2D *digiMultPerCh = (TH2D*)infile->Get("gemcrValidation/digisPerEvtPerCh");
+  TH2D *digiMultPerCh = (TH2D*)infile->Get("FastEfficiency/digisPerEvtPerCh");
   
   // Digi plots per chamber
   
@@ -142,7 +142,7 @@ void efficiency_calculation(int run, string configDir)
   
   // Getting rechHits per layer histrogram
   
-  TH3D *recHitsPerLayer = (TH3D*)infile->Get("gemcrValidation/recHits2DPerLayer");
+  TH3D *recHitsPerLayer = (TH3D*)infile->Get("FastEfficiency/recHits2DPerLayer");
   
   // rechHits plots per chamber
   
@@ -168,7 +168,7 @@ void efficiency_calculation(int run, string configDir)
   
   // Getting clusterSize 3D histogram
   
-  TH3D *clusterSize3D = (TH3D*)infile->Get("gemcrValidation/clusterSize");
+  TH3D *clusterSize3D = (TH3D*)infile->Get("FastEfficiency/clusterSize");
   
   // cluster size plots per chamber and per eta partition
   
