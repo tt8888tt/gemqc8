@@ -1,8 +1,12 @@
 # gemqc8
 ```
-cmsrel CMSSW_10_5_0_pre1
-cd CMSSW_10_5_0_pre1/src
+cmsrel CMSSW_10_5_0_pre2
+cd CMSSW_10_5_0_pre2/src
 cmsenv
+git cms-merge-topic jshlee:gem-vfatv3
+git cms-merge-topic hyunyong:10_5_0_pre2_QC8_Geo
 git clone git@github.com:gem-sw/gemqc8.git
-scram b -j8
+scram b -j12
+cd gemqc8/Analysis/test
+cmsRun runGEMCosmicStand_sim.py
 ```
