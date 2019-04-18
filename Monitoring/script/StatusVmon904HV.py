@@ -578,6 +578,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		smonOnlyT = array ( 'd' )
 		smonOnlyS = array ( 'd' )
 		smonOnlyTDate = array ( 'd' )
+		smonOnlyTDateString = []
 		smonOnlyBinStat = []
 		smonOnlyMeaningStat = []
 		contatoreS = 0
@@ -734,6 +735,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   #list S and T for the tgraph status vs time (millisecond int)
 		   smonOnlyT.append(tot_secondsSmon)
 		   smonOnlyS.append(channelStat)
+		   smonOnlyTDateString.append(str(currentTsSmon))
 		   smonOnlyMeaningStat.append(extensibleStat)
 		   
 		   smonOnlyTDate.append(4.) #an any float number
@@ -798,7 +800,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#pair the time with status and the meaning list
 		SortList = []
 		for sortCount in range(len(smonOnlyT)):
-			internalList = (smonOnlyT[sortCount], smonOnlyS[sortCount], SmonMeaningList[sortCount], smonOnlyTDate[sortCount])
+			internalList = (smonOnlyT[sortCount], smonOnlyS[sortCount], SmonMeaningList[sortCount], smonOnlyTDate[sortCount], smonOnlyTDateString[sortCount])
 			SortList.append(internalList)
 
 		#print(SortList)
@@ -810,6 +812,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			smonOnlyS[refill]=SortList[refill][1]
 			SmonMeaningList[refill] = SortList[refill][2]
 			smonOnlyTDate[refill]=SortList[refill][3]
+			smonOnlyTDateString[refill]=SortList[refill][4]
 	
 		#print(smonOnlyT)
 		#print(smonOnlyS)
@@ -868,15 +871,18 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		StatusTree = ROOT.TTree("HV_StatusTree"+chamberList[indexB]+"_"+channelList[indexC], "HV_StatusTree"+chamberList[indexB]+"_"+channelList[indexC]) 
 
 		smonRootTimes = ROOT.vector('float')()
+		smonRootTimesDate = ROOT.vector('string')()
 		smonRootBinStat	= ROOT.vector('string')()
 		smonRootMeaningStat = ROOT.vector('string')()
 		
-		StatusTree.Branch( 'TS', smonRootTimes )	
+		#StatusTree.Branch( 'TS', smonRootTimes )
+		StatusTree.Branch( 'TS', smonRootTimesDate )	
 		StatusTree.Branch( 'BinaryStat', smonRootBinStat )	
 		StatusTree.Branch( 'MeaningStat', smonRootMeaningStat )	
 
 		for lungh in range(len( smonOnlyT )):
 			smonRootTimes.push_back( smonOnlyT[lungh] )
+			smonRootTimesDate.push_back( smonOnlyTDateString[lungh] )
 			smonRootBinStat.push_back( smonOnlyBinStat[lungh] )
 			smonRootMeaningStat.push_back( smonOnlyMeaningStat[lungh] )
 
