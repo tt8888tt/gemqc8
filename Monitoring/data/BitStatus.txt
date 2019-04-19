@@ -1,0 +1,31 @@
+HV boards
+Bit 0 OFF/ON
+Bit 1 RUP
+Bit 2 RDW
+Bit 3 OVC
+Bit 4 OVV
+Bit 5 UVV
+Bit 6 External TRIP
+Bit 7 Channel in Max V 
+Bit 8 Channel in external Disable
+Bit 9 Channel in internal Trip
+Bit 10 Channel in calibration error
+Bit 11 Channel is unplugged
+
+LV boards (CAEN A3016 o A3016 HP)
+Bit 0: ON/OFF
+Bit 1: don’t care
+Bit 2: don’t care
+Bit 3: OverCurrent
+Bit 4: OverVoltage
+Bit 5: UnderVoltage
+Bit 6: don’t care
+Bit 7: Over HVmax
+Bit 8: don’t care
+Bit 9: Internal Trip
+Bit 10: Calibration Error
+Bit 11: Unplugged
+Bit 12: don’t care
+Bit 13: OverVoltage Protection
+Bit 14: Power Fail
+Bit 15: Temperature Error
