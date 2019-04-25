@@ -217,7 +217,7 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
       {
         float dProbChiNDF = smoothed.chiSquared()/float(smoothed.ndof());
         
-        if (fabs(maxChi2-1) > fabs(dProbChiNDF-1))
+        if ((dProbChiNDF > 0) && (dProbChiNDF < maxChi2))
         {
           maxChi2 = dProbChiNDF;
           bestTrajectory = smoothed;

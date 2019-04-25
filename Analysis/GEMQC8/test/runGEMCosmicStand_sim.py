@@ -127,7 +127,7 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
                                                                            ),
                                               eventAutoFlushCompressedSize = cms.untracked.int32(10485760),
                                               fileName = cms.untracked.string('file:'+strOutput),
-                                              outputCommands = cms.untracked.vstring( ('drop *')),
+                                              outputCommands = cms.untracked.vstring( ('keep *')),
                                               splitLevel = cms.untracked.int32(0)
                                               )
 

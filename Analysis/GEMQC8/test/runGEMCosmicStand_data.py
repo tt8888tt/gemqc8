@@ -116,9 +116,13 @@ process.source = cms.Source(
                             hasFerolHeader = cms.untracked.bool(False),
                             runNumber = cms.untracked.int32(run_number),
                             )
+
 process.options = cms.untracked.PSet(
-                                     SkipEvent = cms.untracked.vstring('ProductNotFound')
+                                     SkipEvent 				= cms.untracked.vstring('ProductNotFound'),
+																		 wantSummary      = cms.untracked.bool(True),
+																		 allowUnscheduled = cms.untracked.bool(False)
                                      )
+
 ############## DB file #################
 from CondCore.CondDB.CondDB_cfi import *
 CondDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb')
@@ -139,6 +143,21 @@ process.load('EventFilter.L1TRawToDigi.validationEventFilter_cfi')
 
 process.load('EventFilter.L1TRawToDigi.tmtFilter_cfi')
 process.tmtFilter.mpList = cms.untracked.vint32(options.mps)
+
+# Output definition
+process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
+																							SelectEvents = cms.untracked.PSet(
+																																								SelectEvents = cms.vstring('validation_step')
+																																								),
+																							dataset = cms.untracked.PSet(
+																																					 dataTier = cms.untracked.string('RECO'),
+																																					 filterName = cms.untracked.string('')
+																																					 ),
+																							eventAutoFlushCompressedSize = cms.untracked.int32(10485760),
+																							fileName = cms.untracked.string('file:'+strOutput),
+																							outputCommands = cms.untracked.vstring( ('keep *')),
+																							splitLevel = cms.untracked.int32(0)
+																							)
 
 # Additional output definition
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -224,13 +243,15 @@ process.rawTOhits_step = cms.Path(process.muonGEMDigis+process.gemRecHits)
 process.reconstruction_step = cms.Path(process.GEMCosmicMuonForQC8)
 process.validation_step = cms.Path(process.gemcrValidation)
 process.endjob_step = cms.EndPath(process.endOfProcess)
+process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.rawTOhits_step,
-                                process.reconstruction_step,
-                                process.validation_step,
-                                process.endjob_step
-                                )
+																process.reconstruction_step,
+																process.validation_step,
+																process.endjob_step,
+																process.FEVTDEBUGHLToutput_step
+																)
 
 # enable validation event filtering
 process.rawTOhits_step.remove(process.validationEventFilter)
