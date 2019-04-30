@@ -2,10 +2,12 @@ import csv
 import os, sys, io
 
 def configMaker(run_number):
+
+	configTablesPath = os.path.abspath("config_creator.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
 	
-	runPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
+	runPath = os.path.abspath("config_creator.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
 	
-	infileName = runPath + "StandGeometryConfiguration_run" + run_number + ".csv"
+	infileName = configTablesPath + "StandGeometryConfiguration_run" + run_number + ".csv"
 	
 	with open(infileName) as infile:
 		for line in infile:

@@ -10,8 +10,10 @@ def geomMaker(run_number):
 
 	if (runConfig.RunNumber!=int(run_number)):
 	    sys.exit('configureRun_cfi file has something wrong: run rumber not matching... Check it: ' + run_number)
+	    
+	alignmentTablesPath = os.path.abspath("geometry_files_creator.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
 
-	infileName = runPath + "StandAlignmentValues_run" + run_number + ".csv"
+	infileName = alignmentTablesPath + "StandAlignmentValues_run" + run_number + ".csv"
 
 	if (os.path.exists(infileName)):
 	    with open(infileName) as infile:
@@ -22,7 +24,7 @@ def geomMaker(run_number):
 	                if (line.split(',')[1]!=run_number):
 	                    sys.exit('StandAlignmentValues file has something wrong: run rumber not matching...')
 
-	geom_path = os.path.abspath("geometry_files_creator.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/'
+	geom_path = os.path.abspath("geometry_files_creator.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/GeometryFiles/'
 
 	dx = [0,0,0,0,0,\
 	        0,0,0,0,0,\

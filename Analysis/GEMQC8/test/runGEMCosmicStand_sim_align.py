@@ -102,7 +102,7 @@ for i in range(len(SuperChType)):
   column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
   if SuperChType[i]=='L' : size = 'L'
   if SuperChType[i]=='S' : size = 'S'
-  if SuperChType[i]!='0' : geomFile = 'Geometry/MuonCommonData/data/GEMQC8/gem11'+size+column_row+'.xml'
+  if SuperChType[i]!='0' : geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
   if SuperChType[i]!='0' : process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
 #if i!='13' : process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
 
@@ -233,7 +233,7 @@ process.AlignmentTrackRecoQC8.ServiceParameters.RPCLayers = cms.bool(False)
 
 fScale = 1.0
 
-process.AlignmentValidationQC8 = cms.EDProducer('AlignmentValidationQC8',
+process.AlignmentQC8 = cms.EDProducer('AlignmentQC8',
                                                 process.MuonServiceProxy,
                                                 verboseSimHit = cms.untracked.int32(1),
                                                 simInputLabel = cms.InputTag('g4SimHits',"MuonGEMHits"),
@@ -291,7 +291,7 @@ process.reconstruction_step = cms.Path(process.gemPacker+process.rawDataCollecto
 process.genfiltersummary_step = cms.EndPath(process.genFilterSummary)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
-process.validation_step = cms.Path(process.AlignmentValidationQC8)
+process.validation_step = cms.Path(process.AlignmentQC8)
 process.digitisation_step.remove(process.simEcalTriggerPrimitiveDigis)
 process.digitisation_step.remove(process.simEcalDigis)
 process.digitisation_step.remove(process.simEcalPreshowerDigis)

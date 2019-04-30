@@ -14,6 +14,8 @@ if __name__ == '__main__':
   srcPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0]+'QC8Test/src/'
   pyhtonModulesPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
   runPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
+  configTablesPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
+  alignmentTablesPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
   resDirPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0]
   
   sys.path.insert(0,pyhtonModulesPath)
@@ -24,9 +26,9 @@ if __name__ == '__main__':
   # Conversion from excel to csv files
   if (xlsx_csv_conversion_flag == "xlsxTOcsv=ON"):
     import excel_to_csv
-    fileToBeConverted = runPath + "StandGeometryConfiguration_run" + run_number + ".xlsx"
+    fileToBeConverted = configTablesPath + "StandGeometryConfiguration_run" + run_number + ".xlsx"
     excel_to_csv.conversion(fileToBeConverted)
-    fileToBeConverted = runPath + "StandAlignmentValues_run" + run_number + ".xlsx"
+    fileToBeConverted = alignmentTablesPath + "StandAlignmentValues_run" + run_number + ".xlsx"
     excel_to_csv.conversion(fileToBeConverted)
 
   # Generate configuration file
@@ -86,19 +88,19 @@ if __name__ == '__main__':
   for i in range(6-len(run_number)):
     out_name = out_name + '0'
   out_name = out_name + run_number + '.root'
-
-  mvCommand = "mv temp_" + out_name + " " + out_name
-  moving = subprocess.Popen(mvCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
-  moving.communicate()
+  
+  mvToDirCommand = "mv sim_" + out_name + " " + resDirPath+outDirName + "/sim_" + out_name
+  movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
+  movingToDir.communicate()
   time.sleep(1)
-
+  
   mvToDirCommand = "mv " + out_name + " " + resDirPath+outDirName + "/" + out_name
   movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
   movingToDir.communicate()
   time.sleep(1)
   
   # Efficiency computation & output
-  effCommand = "root -l -q " + runPath + "efficiency_calculation.c(" + run_number + ",\"" + runPath + "\")"
+  effCommand = "root -l -q " + runPath + "macro_validation.c(" + run_number + ",\"" + configTablesPath + "\")"
   efficiency = subprocess.Popen(effCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
   while efficiency.poll() is None:
     line = efficiency.stdout.readline()

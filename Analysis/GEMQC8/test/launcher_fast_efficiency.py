@@ -14,6 +14,8 @@ if __name__ == '__main__':
   srcPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/'
   pyhtonModulesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
   runPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
+  configTablesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
+  alignmentTablesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
   resDirPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]
   
   sys.path.insert(0,pyhtonModulesPath)
@@ -24,41 +26,41 @@ if __name__ == '__main__':
   # Conversion from excel to csv files
   if (xlsx_csv_conversion_flag == "xlsxTOcsv=ON"):
     import excel_to_csv
-    fileToBeConverted = runPath + "StandGeometryConfiguration_run" + run_number + ".xlsx"
+    fileToBeConverted = configTablesPath + "StandGeometryConfiguration_run" + run_number + ".xlsx"
     excel_to_csv.conversion(fileToBeConverted)
-    fileToBeConverted = runPath + "StandAlignmentValues_run" + run_number + ".xlsx"
+    fileToBeConverted = alignmentTablesPath + "StandAlignmentValues_run" + run_number + ".xlsx"
     excel_to_csv.conversion(fileToBeConverted)
 
-#  # Generate configuration file
-#  config_creator.configMaker(run_number)
-#  time.sleep(1)
-#
-#  # Generate geometry files
-#  geometry_files_creator.geomMaker(run_number)
-#  time.sleep(1)
+  # Generate configuration file
+  config_creator.configMaker(run_number)
+  time.sleep(1)
 
-  ## Compiling after the generation of the geometry files
-  #scramCommand = "scram build -j 4"
-  #scramming = subprocess.Popen(scramCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=srcPath)
-  #while scramming.poll() is None:
-    #line = scramming.stdout.readline()
-    #print(line)
-  #print scramming.stdout.read()
-  #scramming.communicate()
-  #time.sleep(1)
+  # Generate geometry files
+  geometry_files_creator.geomMaker(run_number)
+  time.sleep(1)
 
-  ## Running the CMSSW code
-  #runCommand = "cmsRun runGEMCosmicStand_hot_dead.py"
-  #running = subprocess.Popen(runCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
-  #while running.poll() is None:
-    #line = running.stdout.readline()
-    #print(line)
-  #print running.stdout.read()
-  #running.communicate()
-  #time.sleep(1)
+  # Compiling after the generation of the geometry files
+  scramCommand = "scram build -j 4"
+  scramming = subprocess.Popen(scramCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=srcPath)
+  while scramming.poll() is None:
+    line = scramming.stdout.readline()
+    print(line)
+  print scramming.stdout.read()
+  scramming.communicate()
+  time.sleep(1)
+
+  # Running the CMSSW code
+  runCommand = "cmsRun runGEMCosmicStand_fast_efficiency.py"
+  running = subprocess.Popen(runCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
+  while running.poll() is None:
+    line = running.stdout.readline()
+    print(line)
+  print running.stdout.read()
+  running.communicate()
+  time.sleep(1)
   
   #  # Creating folder outside the CMMSW release to put the output files and plots
-  outDirName = "Fast_Efficiency_QC8_run_"+run_number
+  outDirName = "Results_QC8_fast_efficiency_run_"+run_number
   #---# Remove old version if want to recreate
   if (os.path.exists(resDirPath+outDirName)):
     rmDirCommand = "rm -rf "+outDirName
@@ -86,19 +88,19 @@ if __name__ == '__main__':
   for i in range(6-len(run_number)):
     out_name = out_name + '0'
   out_name = out_name + run_number + '.root'
-
-  mvCommand = "mv temp_" + out_name + " " + out_name
-  moving = subprocess.Popen(mvCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
-  moving.communicate()
+  
+  mvToDirCommand = "mv fast_efficiency_" + out_name + " " + resDirPath+outDirName + "/fast_efficiency_" + out_name
+  movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
+  movingToDir.communicate()
   time.sleep(1)
-
+  
   mvToDirCommand = "mv " + out_name + " " + resDirPath+outDirName + "/" + out_name
   movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
   movingToDir.communicate()
   time.sleep(1)
   
   # Efficiency computation & output
-  effCommand = "root -l -q " + runPath + "fast_efficiency.c(" + run_number + ",\"" + runPath + "\")"
+  effCommand = "root -l -q " + runPath + "macro_fast_efficiency.c(" + run_number + ",\"" + configTablesPath + "\")"
   efficiency = subprocess.Popen(effCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
   while efficiency.poll() is None:
     line = efficiency.stdout.readline()

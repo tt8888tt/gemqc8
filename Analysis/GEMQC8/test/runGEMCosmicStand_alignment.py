@@ -26,7 +26,11 @@ options.register("eventsPerJob",-1,
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
                  "The number of events (in each file)")
-                 
+
+options.register("idxJob","-1",
+                 VarParsing.VarParsing.multiplicity.singleton,
+                 VarParsing.VarParsing.varType.string,
+                 "The index of this root file")
 options.register('mps',
                  '',
                  VarParsing.VarParsing.multiplicity.list,
@@ -40,15 +44,6 @@ options.parseArguments()
 SuperChType = runConfig.StandConfiguration
 
 print(SuperChType)
-
-# Define and find column type. Default is L. If it is found an S in a column, that column type becomes S.
-colType = ['L','L','L']
-for col in range(0,3):
-	for row in range(0,5):
-		if (SuperChType[col*5+row]=='S'):
-			colType[col] = 'S'
-
-print(colType)
 
 # Calculation of SuperChSeedingLayers from SuperChType
 SuperChSeedingLayers = []
@@ -102,12 +97,14 @@ for i in xrange(len(SuperChType)):
 
 # Config importation & settings
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.eventsPerJob))
+nIdxJob = int(options.idxJob)
+strOutput = "out_reco_MC.root" if nIdxJob >= 0 else runConfig.OutputFileName
+if nIdxJob < 0: nIdxJob = 0
 
 fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run"
 for i in range(6-len(str(run_number))):
   fpath = fpath + '0'
 fpath = fpath + str(run_number) + "/"
-
 # Input source
 process.source = cms.Source(
                             "GEMLocalModeDataSource",
@@ -117,26 +114,20 @@ process.source = cms.Source(
                             hasFerolHeader = cms.untracked.bool(False),
                             runNumber = cms.untracked.int32(run_number),
                             )
-			    
 process.options = cms.untracked.PSet(
                                      SkipEvent = cms.untracked.vstring('ProductNotFound')
                                      )
-				     
 ############## DB file #################
 from CondCore.CondDB.CondDB_cfi import *
 CondDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb')
-
-eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
-
-CondDB.connect = cms.string('sqlite_fip:Analysis/GEMQC8/data/EMapFiles/'+eMapFile)
+CondDB.connect = cms.string('sqlite_fip:Analysis/GEMQC8/data/GEMeMap.db')
 
 process.GEMCabling = cms.ESSource("PoolDBESSource",
                                   CondDB,
                                   toGet = cms.VPSet(cms.PSet(
                                                              record = cms.string('GEMeMapRcd'),
                                                              tag = cms.string('GEMeMap_v3')
-                                                             )
-                                                    )
+                                                             )),
                                   )
 ####################################
 
@@ -148,9 +139,6 @@ process.load('EventFilter.L1TRawToDigi.tmtFilter_cfi')
 process.tmtFilter.mpList = cms.untracked.vint32(options.mps)
 
 # Output definition
-
-strOutput = runConfig.OutputFileName
-
 process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
                                               SelectEvents = cms.untracked.PSet(
                                                                                 SelectEvents = cms.vstring('validation_step')
@@ -184,34 +172,77 @@ process.gemRecHits = cms.EDProducer("GEMRecHitProducer",
                                     gemDigiLabel = cms.InputTag("muonGEMDigis"),
                                     )
 
+# Reconstruction of muon track
+process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
+process.MuonServiceProxy.ServiceParameters.Propagators.append('StraightLinePropagator')
+
+process.GEMCosmicMuonForQC8 = cms.EDProducer("GEMCosmicMuonForQC8",
+                                             process.MuonServiceProxy,
+                                             gemRecHitLabel = cms.InputTag("gemRecHits"),
+                                             maxClusterSize = cms.double(runConfig.maxClusterSize),
+                                             minClusterSize = cms.double(runConfig.minClusterSize),
+                                             trackChi2 = cms.double(runConfig.trackChi2),
+                                             trackResX = cms.double(runConfig.trackResX),
+                                             trackResY = cms.double(runConfig.trackResY),
+                                             MulSigmaOnWindow = cms.double(runConfig.MulSigmaOnWindow),
+                                             SuperChamberType = cms.vstring(SuperChType),
+                                             SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
+                                             MuonSmootherParameters = cms.PSet(
+                                                                               PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),
+                                                                               PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
+                                                                               RescalingFactor = cms.double(5.0)
+                                                                               ),
+                                             )
+process.GEMCosmicMuonForQC8.ServiceParameters.GEMLayers = cms.untracked.bool(True)
+process.GEMCosmicMuonForQC8.ServiceParameters.CSCLayers = cms.untracked.bool(False)
+process.GEMCosmicMuonForQC8.ServiceParameters.RPCLayers = cms.bool(False)
+
 fScale = 1.0
 
-process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
-
 # Validation
-process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
+process.ValidationQC8 = cms.EDProducer('ValidationQC8',
                                          process.MuonServiceProxy,
                                          verboseSimHit = cms.untracked.int32(1),
+                                         simInputLabel = cms.InputTag('g4SimHits',"MuonGEMHits"),
+                                         genVtx = cms.InputTag("generator","unsmeared", "RECO"),
                                          recHitsInputLabel = cms.InputTag('gemRecHits'),
+                                         tracksInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         seedInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         trajInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         chNoInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         seedTypeInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         genParticleLabel = cms.InputTag('genParticles','','RECO'),
+                                         gemDigiLabel = cms.InputTag("muonGEMDigis","","RECO"),
+                                         nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
+                                         RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350),
                                          maxClusterSize = cms.double(runConfig.maxClusterSize),
                                          minClusterSize = cms.double(runConfig.minClusterSize),
-                                         nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
-                                         RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
+                                         maxResidual = cms.double(runConfig.maxResidual),
+                                         isMC = cms.bool(False),
+                                         SuperChamberType = cms.vstring(SuperChType),
+                                         SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
+                                         MuonSmootherParameters = cms.PSet(
+                                                                           PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),
+                                                                           PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
+                                                                           RescalingFactor = cms.double(5.0)
+                                                                           )
                                          )
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('fast_efficiency_'+strOutput)
+                                   fileName = cms.string('temp_'+strOutput)
                                    )
 
 # Path and EndPath definitions
 process.rawTOhits_step = cms.Path(process.muonGEMDigis+process.gemRecHits)
-process.fast_efficiency_step = cms.Path(process.FastEfficiencyQC8)
+process.reconstruction_step = cms.Path(process.GEMCosmicMuonForQC8)
+process.validation_step = cms.Path(process.ValidationQC8)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.rawTOhits_step,
-                                process.fast_efficiency_step,
+                                process.reconstruction_step,
+                                process.validation_step,
                                 process.endjob_step,
                                 process.FEVTDEBUGHLToutput_step
                                 )

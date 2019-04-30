@@ -26,7 +26,7 @@ options.register("eventsPerJob",-1,
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
                  "The number of events (in each file)")
-                 
+
 options.register('mps',
                  '',
                  VarParsing.VarParsing.multiplicity.list,
@@ -189,29 +189,27 @@ fScale = 1.0
 process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
 
 # Validation
-process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
+process.HotDeadStripsQC8 = cms.EDProducer('HotDeadStripsQC8',
                                          process.MuonServiceProxy,
                                          verboseSimHit = cms.untracked.int32(1),
-                                         recHitsInputLabel = cms.InputTag('gemRecHits'),
-                                         maxClusterSize = cms.double(runConfig.maxClusterSize),
-                                         minClusterSize = cms.double(runConfig.minClusterSize),
+                                         gemDigiLabel = cms.InputTag("muonGEMDigis","","RECO"),
                                          nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
                                          RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
                                          )
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('fast_efficiency_'+strOutput)
+                                   fileName = cms.string('hot_dead_strips_'+strOutput)
                                    )
 
 # Path and EndPath definitions
 process.rawTOhits_step = cms.Path(process.muonGEMDigis+process.gemRecHits)
-process.fast_efficiency_step = cms.Path(process.FastEfficiencyQC8)
+process.hot_dead_step = cms.Path(process.HotDeadStripsQC8)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.rawTOhits_step,
-                                process.fast_efficiency_step,
+                                process.hot_dead_step,
                                 process.endjob_step,
                                 process.FEVTDEBUGHLToutput_step
                                 )

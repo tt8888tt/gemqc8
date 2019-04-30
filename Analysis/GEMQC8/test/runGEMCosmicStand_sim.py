@@ -34,6 +34,15 @@ SuperChType = runConfig.StandConfiguration
 
 print(SuperChType)
 
+# Define and find column type. Default is L. If it is found an S in a column, that column type becomes S.
+colType = ['L','L','L']
+for col in range(0,3):
+	for row in range(0,5):
+		if (SuperChType[col*5+row]=='S'):
+			colType[col] = 'S'
+
+print(colType)
+
 # Calculation of SuperChSeedingLayers from SuperChType
 SuperChSeedingLayers = []
 
@@ -87,8 +96,8 @@ for i in xrange(len(SuperChType)):
   if SuperChType[i]=='L' : size = 'L'
   if SuperChType[i]=='S' : size = 'S'
   if SuperChType[i]!='0' :
-    geomFile = 'Analysis/GEMQC8/data/gem11'+size+column_row+'.xml'
-      print(geomFile)
+    geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
+    print(geomFile)
     if SuperChType[i]!='0' :
       process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
       print('-> Appended')
@@ -115,7 +124,7 @@ process.configurationMetadata = cms.untracked.PSet(
                                                    name = cms.untracked.string('Applications'),
                                                    version = cms.untracked.string('$Revision: 1.19 $')
                                                    )
-
+                                                   
 # Output definition
 process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
                                               SelectEvents = cms.untracked.PSet(
@@ -212,7 +221,7 @@ process.GEMCosmicMuonForQC8.ServiceParameters.RPCLayers = cms.bool(False)
 
 fScale = 1.0
 
-process.gemcrValidation = cms.EDProducer('gemcrValidation',
+process.ValidationQC8 = cms.EDProducer('ValidationQC8',
                                          process.MuonServiceProxy,
                                          verboseSimHit = cms.untracked.int32(1),
                                          simInputLabel = cms.InputTag('g4SimHits',"MuonGEMHits"),
@@ -241,7 +250,7 @@ process.gemcrValidation = cms.EDProducer('gemcrValidation',
                                          )
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('temp_'+strOutput)
+                                   fileName = cms.string('sim_'+strOutput)
                                    )
 
 process.rawDataCollector.RawCollectionList = cms.VInputTag(cms.InputTag("gemPacker"))
@@ -253,7 +262,7 @@ process.reconstruction_step = cms.Path(process.gemPacker+process.rawDataCollecto
 process.genfiltersummary_step = cms.EndPath(process.genFilterSummary)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
-process.validation_step = cms.Path(process.gemcrValidation)
+process.validation_step = cms.Path(process.ValidationQC8)
 process.digitisation_step.remove(process.simEcalTriggerPrimitiveDigis)
 process.digitisation_step.remove(process.simEcalDigis)
 process.digitisation_step.remove(process.simEcalPreshowerDigis)

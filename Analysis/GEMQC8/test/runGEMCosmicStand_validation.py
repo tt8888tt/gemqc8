@@ -26,7 +26,7 @@ options.register("eventsPerJob",-1,
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
                  "The number of events (in each file)")
-                 
+
 options.register('mps',
                  '',
                  VarParsing.VarParsing.multiplicity.list,
@@ -117,16 +117,18 @@ process.source = cms.Source(
                             hasFerolHeader = cms.untracked.bool(False),
                             runNumber = cms.untracked.int32(run_number),
                             )
-			    
+														
 process.options = cms.untracked.PSet(
                                      SkipEvent = cms.untracked.vstring('ProductNotFound')
                                      )
-				     
+																		 
 ############## DB file #################
 from CondCore.CondDB.CondDB_cfi import *
 CondDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb')
 
-eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
+#eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
+
+eMapFile = 'GEMeMap.db'
 
 CondDB.connect = cms.string('sqlite_fip:Analysis/GEMQC8/data/EMapFiles/'+eMapFile)
 
@@ -134,7 +136,8 @@ process.GEMCabling = cms.ESSource("PoolDBESSource",
                                   CondDB,
                                   toGet = cms.VPSet(cms.PSet(
                                                              record = cms.string('GEMeMapRcd'),
-                                                             tag = cms.string('GEMeMap_v3')
+																														 tag = cms.string('GEMeMap_v3')
+                                                             #tag = cms.string('GEMeMap_v6')
                                                              )
                                                     )
                                   )
@@ -184,34 +187,77 @@ process.gemRecHits = cms.EDProducer("GEMRecHitProducer",
                                     gemDigiLabel = cms.InputTag("muonGEMDigis"),
                                     )
 
+# Reconstruction of muon track
+process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
+process.MuonServiceProxy.ServiceParameters.Propagators.append('StraightLinePropagator')
+
+process.GEMCosmicMuonForQC8 = cms.EDProducer("GEMCosmicMuonForQC8",
+                                             process.MuonServiceProxy,
+                                             gemRecHitLabel = cms.InputTag("gemRecHits"),
+                                             maxClusterSize = cms.double(runConfig.maxClusterSize),
+                                             minClusterSize = cms.double(runConfig.minClusterSize),
+                                             trackChi2 = cms.double(runConfig.trackChi2),
+                                             trackResX = cms.double(runConfig.trackResX),
+                                             trackResY = cms.double(runConfig.trackResY),
+                                             MulSigmaOnWindow = cms.double(runConfig.MulSigmaOnWindow),
+                                             SuperChamberType = cms.vstring(SuperChType),
+                                             SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
+                                             MuonSmootherParameters = cms.PSet(
+                                                                               PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),
+                                                                               PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
+                                                                               RescalingFactor = cms.double(5.0)
+                                                                               ),
+                                             )
+process.GEMCosmicMuonForQC8.ServiceParameters.GEMLayers = cms.untracked.bool(True)
+process.GEMCosmicMuonForQC8.ServiceParameters.CSCLayers = cms.untracked.bool(False)
+process.GEMCosmicMuonForQC8.ServiceParameters.RPCLayers = cms.bool(False)
+
 fScale = 1.0
 
-process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
-
 # Validation
-process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
+process.ValidationQC8 = cms.EDProducer('ValidationQC8',
                                          process.MuonServiceProxy,
                                          verboseSimHit = cms.untracked.int32(1),
+                                         simInputLabel = cms.InputTag('g4SimHits',"MuonGEMHits"),
+                                         genVtx = cms.InputTag("generator","unsmeared", "RECO"),
                                          recHitsInputLabel = cms.InputTag('gemRecHits'),
+                                         tracksInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         seedInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         trajInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         chNoInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         seedTypeInputLabel = cms.InputTag('GEMCosmicMuonForQC8','','RECO'),
+                                         genParticleLabel = cms.InputTag('genParticles','','RECO'),
+                                         gemDigiLabel = cms.InputTag("muonGEMDigis","","RECO"),
+                                         nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
+                                         RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350),
                                          maxClusterSize = cms.double(runConfig.maxClusterSize),
                                          minClusterSize = cms.double(runConfig.minClusterSize),
-                                         nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
-                                         RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
+                                         maxResidual = cms.double(runConfig.maxResidual),
+                                         isMC = cms.bool(False),
+                                         SuperChamberType = cms.vstring(SuperChType),
+                                         SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
+                                         MuonSmootherParameters = cms.PSet(
+                                                                           PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),
+                                                                           PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
+                                                                           RescalingFactor = cms.double(5.0)
+                                                                           )
                                          )
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('fast_efficiency_'+strOutput)
+                                   fileName = cms.string('validation_'+strOutput)
                                    )
 
 # Path and EndPath definitions
 process.rawTOhits_step = cms.Path(process.muonGEMDigis+process.gemRecHits)
-process.fast_efficiency_step = cms.Path(process.FastEfficiencyQC8)
+process.reconstruction_step = cms.Path(process.GEMCosmicMuonForQC8)
+process.validation_step = cms.Path(process.ValidationQC8)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.rawTOhits_step,
-                                process.fast_efficiency_step,
+                                process.reconstruction_step,
+                                process.validation_step,
                                 process.endjob_step,
                                 process.FEVTDEBUGHLToutput_step
                                 )
