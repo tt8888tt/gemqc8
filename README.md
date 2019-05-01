@@ -1,10 +1,8 @@
 # gemqc8
 ```bash
-scram p -n QC8Test CMSSW CMSSW_10_5_0_pre2
+scram p -n QC8Test CMSSW CMSSW_10_6_0_pre4
 cd QC8Test/src
 cmsenv
-git-cms-merge-topic jshlee:gem-vfatv3
-scram b -j 4
 git clone git@github.com:giovanni-mocellin/gemqc8.git
 mv gemqc8/* .
 rm -rf gemqc8
