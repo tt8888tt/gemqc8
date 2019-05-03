@@ -71,6 +71,10 @@ public:
   
 private:
 
+	TH3D *recHits3D;
+  TH3D *recHits2DPerLayer;
+  TH3D *clusterSize;
+	
   TH1D *numerator;
   TH1D *denominator;
   

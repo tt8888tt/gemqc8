@@ -126,7 +126,9 @@ process.options = cms.untracked.PSet(
 from CondCore.CondDB.CondDB_cfi import *
 CondDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb')
 
-eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
+#eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
+
+eMapFile = 'GEMeMap.db'
 
 CondDB.connect = cms.string('sqlite_fip:Analysis/GEMQC8/data/EMapFiles/'+eMapFile)
 
@@ -134,7 +136,8 @@ process.GEMCabling = cms.ESSource("PoolDBESSource",
                                   CondDB,
                                   toGet = cms.VPSet(cms.PSet(
                                                              record = cms.string('GEMeMapRcd'),
-                                                             tag = cms.string('GEMeMap_v3')
+																														 tag = cms.string('GEMeMap_v3')
+                                                             #tag = cms.string('GEMeMap_v6')
                                                              )
                                                     )
                                   )
@@ -150,20 +153,6 @@ process.tmtFilter.mpList = cms.untracked.vint32(options.mps)
 # Output definition
 
 strOutput = runConfig.OutputFileName
-
-process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
-                                              SelectEvents = cms.untracked.PSet(
-                                                                                SelectEvents = cms.vstring('validation_step')
-                                                                                ),
-                                              dataset = cms.untracked.PSet(
-                                                                           dataTier = cms.untracked.string('RECO'),
-                                                                           filterName = cms.untracked.string('')
-                                                                           ),
-                                              eventAutoFlushCompressedSize = cms.untracked.int32(10485760),
-                                              fileName = cms.untracked.string('file:'+strOutput),
-                                              outputCommands = cms.untracked.vstring( ('keep *')),
-                                              splitLevel = cms.untracked.int32(0)
-                                              )
 
 # Additional output definition
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -207,13 +196,11 @@ process.TFileService = cms.Service("TFileService",
 process.rawTOhits_step = cms.Path(process.muonGEMDigis+process.gemRecHits)
 process.fast_efficiency_step = cms.Path(process.FastEfficiencyQC8)
 process.endjob_step = cms.EndPath(process.endOfProcess)
-process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.rawTOhits_step,
                                 process.fast_efficiency_step,
-                                process.endjob_step,
-                                process.FEVTDEBUGHLToutput_step
+                                process.endjob_step
                                 )
 
 # enable validation event filtering
