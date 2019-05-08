@@ -170,11 +170,11 @@ void macro_hot_dead_strips(int run, string configDir)
   // Dead / Hot strips results in csv files
   
   ofstream deadfile;
-  string outFileName = "DeadStrips.csv";
+  string outFileName = "DeadStrips_run_" + to_string(run) + ".csv";
   deadfile.open(outFileName);
   
   ofstream hotfile;
-  outFileName = "HotStrips.csv";
+  outFileName = "HotStrips_run_" + to_string(run) + ".csv";
   hotfile.open(outFileName);
   
   string entry = "";
