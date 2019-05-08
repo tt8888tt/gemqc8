@@ -1,12 +1,10 @@
 #!/bin/bash
 
-#  copyNAS2EOS_dat.sh
+# copyNAS2EOS_dat.sh
 #
-#Usage: Copy QC8 runs from NAS to EOS
-
-
-
-
+# Created by: Kalpanie Madara Liyanage
+#
+# Usage: Copy QC8 runs from NAS to EOS
 
 RUN=$1
 DIRECTORY=/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run$RUN
@@ -14,15 +12,12 @@ src=/data/bigdisk/GEM-Data-Taking/GE11_QC8/Cosmics/run$RUN
 COUNT=0
 COPY=0
 
-
 if [ ! -d "$DIRECTORY" ]; then
 echo "Creating Directory: "$DIRECTORY
 mkdir $DIRECTORY
 else
 echo "Existing Directory: "$DIRECTORY
 fi
-
-
 
 #Get the list of files to send
 FILES=$(ssh gemuser@gem904qc8daq ls ${src}"_Cosmic_CERNQC8"*".dat")
