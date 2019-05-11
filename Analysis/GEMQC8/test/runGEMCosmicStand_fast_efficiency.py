@@ -177,7 +177,7 @@ fScale = 1.0
 
 process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
 
-# Validation
+# Fast Efficiency
 process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
                                          process.MuonServiceProxy,
                                          verboseSimHit = cms.untracked.int32(1),

@@ -44,13 +44,14 @@ void macro_fast_efficiency(int run, string configDir)
   // Getting the tree
   
   TTree *tree = (TTree*)infile->Get("FastEfficiencyQC8/tree");
+	int nTotEvents= tree->GetEntries();
 	
 	// Declaration of name variables
 	
   char *name = new char[40];
   string namename = "";
 	
-	// Generating 1D histograms (num, denom, eff) for the chambers
+	// 1D histograms of num, denom, eff for the chambers
 	
   TH1D *num1D = (TH1D*)infile->Get("FastEfficiencyQC8/numerator");
   TH1D *denom1D = (TH1D*)infile->Get("FastEfficiencyQC8/denominator");
@@ -62,7 +63,7 @@ void macro_fast_efficiency(int run, string configDir)
 	
 	TH3D *recHitsPerLayer = (TH3D*)infile->Get("FastEfficiencyQC8/recHits2DPerLayer");
 	
-	// rechHits plots per chamber
+	// rechHits plots per layer
 	
 	TH2D *recHits2D[10];
 	for (int row=0; row<5; row++)
@@ -102,6 +103,56 @@ void macro_fast_efficiency(int run, string configDir)
 			for (int cls=0; cls<20; cls++)
 			{
 				clusterSize1D[ch][eta]->SetBinContent((cls+1),clusterSize3D->GetBinContent(ch+1,eta+1,cls+1));
+			}
+		}
+	}
+	
+	// Getting rechHits per ch per eta vs event number histrogram
+	
+	TH3D *recHitsPerEtaVsEvt = (TH3D*)infile->Get("FastEfficiencyQC8/nRecHitsPerEvtPerCh");
+	
+	TH2D *NrecHitsPerChVsEvt[30];
+	
+	for (unsigned int ch=0; ch<30; ch++)
+	{
+		sprintf(name,"NrecHitsVsEvent_ch_%u",ch);
+		NrecHitsPerChVsEvt[ch] = new TH2D(name,"",100000,0,10000000,8,0,8);
+		
+		for (unsigned int eta=0; eta<8; eta++)
+		{
+			for (int evt=0; evt<100000; evt++)
+			{
+				NrecHitsPerChVsEvt[ch]->SetBinContent((evt+1),(eta+1),recHitsPerEtaVsEvt->GetBinContent(evt+1,ch+1,eta+1));
+			}
+		}
+	}
+	
+	// Getting Delta_x recHits (test-reference)
+	
+	TH1D *D_x_recHits = (TH1D*)infile->Get("FastEfficiencyQC8/DxCorrespondingRecHits");
+	
+	// Getting Delta_iEta recHits (test-reference)
+	
+	TH1D *D_iEta_recHits = (TH1D*)infile->Get("FastEfficiencyQC8/DiEtaCorrespondingRecHits");
+	
+	// Getting occupancy of confirmed hits 3D histogram
+	
+	TH3D *occupacyConfHits3D = (TH3D*)infile->Get("FastEfficiencyQC8/occupancyIfConfirmedHits");
+	
+	// occupancy plots of confirmed hits per chamber
+	
+	TH2D *occupacyConfHits2D[30];
+	
+	for (int ch=0; ch<30; ch++)
+	{
+		sprintf(name,"occupacyConfHit_ch_%u",ch);
+		occupacyConfHits2D[ch] = new TH2D(name,"",384,0,384,8,-0.5,7.5);
+		
+		for (int eta=0; eta<8; eta++)
+		{
+			for (int phi=0; phi<384; phi++)
+			{
+				occupacyConfHits2D[ch]->SetBinContent((phi+1),(eta+1),occupacyConfHits3D->GetBinContent(phi+1,eta+1,ch+1));
 			}
 		}
 	}
@@ -178,6 +229,30 @@ void macro_fast_efficiency(int run, string configDir)
 	Canvas->SaveAs(namename.c_str());
 	Canvas->Clear();
 	
+	// Plot Delta_x of hits in the two GEMINI
+	
+	namename = "Delta_x_recHits_same_SC";
+	D_x_recHits->SetTitle(namename.c_str());
+	D_x_recHits->GetXaxis()->SetTitle("#Delta x");
+	D_x_recHits->GetYaxis()->SetTitle("Counts");
+	D_x_recHits->Draw();
+	D_x_recHits->Write(namename.c_str());
+	namename = "Delta_x_recHits_same_SC.png";
+	Canvas->SaveAs(namename.c_str());
+	Canvas->Clear();
+	
+	// Plot Delta_iEta of hits in the two GEMINI
+	
+	namename = "Delta_iEta_recHits_same_SC";
+	D_iEta_recHits->SetTitle(namename.c_str());
+	D_iEta_recHits->GetXaxis()->SetTitle("#Delta i#eta");
+	D_iEta_recHits->GetYaxis()->SetTitle("Counts");
+	D_iEta_recHits->Draw();
+	D_iEta_recHits->Write(namename.c_str());
+	namename = "Delta_iEta_recHits_same_SC.png";
+	Canvas->SaveAs(namename.c_str());
+	Canvas->Clear();
+	
 	// Plot Efficiency
 	
 	namename = "Efficiency";
@@ -209,8 +284,10 @@ void macro_fast_efficiency(int run, string configDir)
     entry = "ChamberName," + chamberName[i] + "\n";
     outfile << entry;
 		
-		double eff_value = eff1D->GetY()[c];
-		double error_value = (eff1D->GetEYhigh()[c] + eff1D->GetEYlow()[c]) / 2.0;
+		double eff_value = eff1D->GetY()[i];
+		double error_value = (eff1D->GetEYhigh()[i] + eff1D->GetEYlow()[i]) / 2.0;
+		
+		cout << c << ": " << eff_value << " +- " << error_value << endl;
 		
 		entry = "OverallEfficiency," + to_string(eff_value) + "\n";
 		outfile << entry;
@@ -233,6 +310,41 @@ void macro_fast_efficiency(int run, string configDir)
 			Canvas->SaveAs(namename.c_str());
 			Canvas->Clear();
 		}
+		
+		// Plotting number of recHits per chamber vs evt
+		
+		namename = "NrecHitsVsEvt_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		NrecHitsPerChVsEvt[c]->SetTitle(namename.c_str());
+		NrecHitsPerChVsEvt[c]->GetXaxis()->SetTitle("Evt Number");
+		NrecHitsPerChVsEvt[c]->GetYaxis()->SetTitle("ieta");
+		for (int y = 0; y < 8; y++)
+		{
+			NrecHitsPerChVsEvt[c]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+		}
+		NrecHitsPerChVsEvt[c]->GetXaxis()->SetRangeUser(0,nTotEvents);
+		NrecHitsPerChVsEvt[c]->Draw("colz");
+		NrecHitsPerChVsEvt[c]->Write(namename.c_str());
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/NrecHitsVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
+		
+		// Plotting occupancy of confirmed hits per chamber
+		
+		namename = "OccupacyConfHit_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		occupacyConfHits2D[c]->SetTitle(namename.c_str());
+		occupacyConfHits2D[c]->GetXaxis()->SetTitle("Strip Number");
+		occupacyConfHits2D[c]->GetYaxis()->SetTitle("ieta");
+		Canvas->SetLogz();
+		for (int y = 0; y < 8; y++)
+		{
+			occupacyConfHits2D[c]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+		}
+		occupacyConfHits2D[c]->Draw("colz");
+		occupacyConfHits2D[c]->Write(namename.c_str());
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/OccupacyConfHit_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
+		Canvas->SetLogz(0);
   }
   
   standConfigFile.close();

@@ -11,12 +11,12 @@ if __name__ == '__main__':
   xlsx_csv_conversion_flag = sys.argv[2]
   
   # Different paths definition
-  srcPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/'
-  pyhtonModulesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
-  runPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
-  configTablesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
-  alignmentTablesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
-  resDirPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]
+  srcPath = os.path.abspath("launcher_sim_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/'
+  pyhtonModulesPath = os.path.abspath("launcher_sim_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
+  runPath = os.path.abspath("launcher_sim_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
+  configTablesPath = os.path.abspath("launcher_sim_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
+  alignmentTablesPath = os.path.abspath("launcher_sim_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
+  resDirPath = os.path.abspath("launcher_sim_fast_efficiency.py").split('QC8Test')[0]
   
   sys.path.insert(0,pyhtonModulesPath)
   
@@ -50,7 +50,7 @@ if __name__ == '__main__':
   time.sleep(1)
 
   # Running the CMSSW code
-  runCommand = "cmsRun runGEMCosmicStand_fast_efficiency.py"
+  runCommand = "cmsRun runGEMCosmicStand_sim_fast_efficiency.py"
   running = subprocess.Popen(runCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
   while running.poll() is None:
     line = running.stdout.readline()
@@ -60,7 +60,7 @@ if __name__ == '__main__':
   time.sleep(1)
   
   #  # Creating folder outside the CMMSW release to put the output files and plots
-  outDirName = "Results_QC8_fast_efficiency_run_"+run_number
+  outDirName = "Results_QC8_sim_fast_efficiency_run_"+run_number
   #---# Remove old version if want to recreate
   if (os.path.exists(resDirPath+outDirName)):
     rmDirCommand = "rm -rf "+outDirName
