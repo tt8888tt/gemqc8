@@ -6,7 +6,7 @@
 #
 # Usage: Copy QC8 runs from NAS to EOS
 
-RUN=$1
+RUN=$(printf "%06d" $1)
 DIRECTORY=/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run$RUN
 src=/data/bigdisk/GEM-Data-Taking/GE11_QC8/Cosmics/run$RUN
 COUNT=0
