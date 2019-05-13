@@ -193,7 +193,7 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
         }
       }
     }
-    if (muRecHits.size()<3) continue;
+    if (muRecHits.size() < 3) continue;
     if (TCN < 3) continue;
 
     vector<TrajectorySeed> trajSeedsBody;
