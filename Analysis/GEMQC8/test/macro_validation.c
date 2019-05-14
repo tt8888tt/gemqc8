@@ -248,7 +248,7 @@ void macro_validation(int run, string configDir)
 		
 		// Plot num e denom per chamber
 		
-		namename = "Denom_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		namename = "Denom_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		denom1D[c]->SetTitle(namename.c_str());
 		denom1D[c]->GetXaxis()->SetTitle("VFAT");
 		denom1D[c]->GetYaxis()->SetTitle("Counts");
@@ -260,17 +260,18 @@ void macro_validation(int run, string configDir)
 		num1D[c]->GetXaxis()->SetTitle("VFAT");
 		num1D[c]->GetYaxis()->SetTitle("Counts");
 		num1D[c]->Write(namename.c_str());
-		namename = "Num_Denom_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		namename = "Num_Denom_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		num1D[c]->SetTitle(namename.c_str());
 		num1D[c]->SetLineColor(kBlue);
 		num1D[c]->Draw("SAME");
+		num1D[c]->SetTitle(namename.c_str());
 		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Num_Denom_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
 		
 		// Plot efficiency per chamber
 		
-		namename = "Efficiency_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		namename = "Efficiency_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		eff1D[c]->SetTitle(namename.c_str());
 		eff1D[c]->GetXaxis()->SetTitle("VFAT");
 		eff1D[c]->GetYaxis()->SetTitle("Efficiency");
@@ -317,7 +318,7 @@ void macro_validation(int run, string configDir)
 		
 		for (unsigned int eta=0; eta<8; eta++)
 		{
-			namename = "ClusterSize_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1);
+			namename = "ClusterSize_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + "_run_" + to_string(run);
 			clusterSize1D[c][eta]->SetTitle(namename.c_str());
 			clusterSize1D[c][eta]->GetXaxis()->SetTitle("ClusterSize");
 			clusterSize1D[c][eta]->GetYaxis()->SetTitle("Counts");
@@ -330,7 +331,7 @@ void macro_validation(int run, string configDir)
 		
 		// Plotting digi per chamber
 		
-		namename = "Digi_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		namename = "Digi_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		digi2D[c]->SetTitle(namename.c_str());
 		digi2D[c]->GetXaxis()->SetTitle("Strip Number");
 		digi2D[c]->GetYaxis()->SetTitle("ieta");
@@ -348,7 +349,7 @@ void macro_validation(int run, string configDir)
 		
 		// Plotting number of digis per chamber
 		
-		namename = "NumberOfDigis_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		namename = "NumberOfDigis_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		nDigis[c]->SetTitle(namename.c_str());
 		nDigis[c]->GetXaxis()->SetTitle("Digi Multiplicity");
 		nDigis[c]->GetYaxis()->SetTitle("Counts");
@@ -364,7 +365,7 @@ void macro_validation(int run, string configDir)
 	
 	for (int row=0; row<5; row++)
 	{
-		namename = "recHits_Row_" + to_string(row+1) + "_B";
+		namename = "recHits_Row_" + to_string(row+1) + "_B" + "_run_" + to_string(run);
 		recHits2D[row*2]->SetTitle(namename.c_str());
 		recHits2D[row*2]->SetStats(0);
 		recHits2D[row*2]->GetXaxis()->SetTitle("x [cm]");
@@ -377,7 +378,7 @@ void macro_validation(int run, string configDir)
 		namename = "recHits_Row_" + to_string(row+1) + "_B.png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
-		namename = "recHits_Row_" + to_string(row+1) + "_T";
+		namename = "recHits_Row_" + to_string(row+1) + "_T" + "_run_" + to_string(run);
 		recHits2D[(row*2)+1]->SetTitle(namename.c_str());
 		recHits2D[(row*2)+1]->SetStats(0);
 		recHits2D[(row*2)+1]->GetXaxis()->SetTitle("x [cm]");
@@ -398,7 +399,7 @@ void macro_validation(int run, string configDir)
 	{
 		TLine *col_1_2 = new TLine(2.5,-0.5,2.5,7.5);
 		TLine *col_2_3 = new TLine(5.5,-0.5,5.5,7.5);
-		namename = "Efficiency_Row_" + to_string(row+1) + "_B";
+		namename = "Efficiency_Row_" + to_string(row+1) + "_B" + "_run_" + to_string(run);
 		eff2D[row*2]->SetTitle(namename.c_str());
 		eff2D[row*2]->SetMinimum(min_eff);
 		eff2D[row*2]->SetMaximum(max_eff);
@@ -419,7 +420,7 @@ void macro_validation(int run, string configDir)
 		namename = "Efficiency_Row_" + to_string(row+1) + "_B.png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
-		namename = "Efficiency_Row_" + to_string(row+1) + "_T";
+		namename = "Efficiency_Row_" + to_string(row+1) + "_T" + "_run_" + to_string(run);
 		eff2D[(row*2)+1]->SetTitle(namename.c_str());
 		eff2D[(row*2)+1]->SetMinimum(min_eff);
 		eff2D[(row*2)+1]->SetMaximum(max_eff);

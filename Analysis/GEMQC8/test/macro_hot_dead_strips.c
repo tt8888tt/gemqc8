@@ -146,7 +146,7 @@ void macro_hot_dead_strips(int run, string configDir)
   {
     int c = chamberPos[i];
     
-    namename = "Digi_PerStrip_PerCh_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+    namename = "Digi_PerStrip_PerCh_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digisPerStripPerCh[c]->SetTitle(namename.c_str());
     digisPerStripPerCh[c]->GetXaxis()->SetTitle("digisPerStripPerCh");
     digisPerStripPerCh[c]->GetYaxis()->SetTitle("Counts");
@@ -243,7 +243,7 @@ void macro_hot_dead_strips(int run, string configDir)
   {
     int c = chamberPos[i];
     
-    namename = "Digi_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+    namename = "Digi_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digi2D[c]->SetTitle(namename.c_str());
     digi2D[c]->GetXaxis()->SetTitle("Strip Number");
     digi2D[c]->GetYaxis()->SetTitle("ieta");

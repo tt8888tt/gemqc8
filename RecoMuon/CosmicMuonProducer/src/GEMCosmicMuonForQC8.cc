@@ -412,7 +412,7 @@ Trajectory GEMCosmicMuonForQC8::makeTrajectory(TrajectorySeed seed, MuonTransien
     consRecHits.push_back(muRecHits[rAndhitV[i].second]);
   }
 
-  if (consRecHits.size() <3) return Trajectory();
+  if (consRecHits.size() < 3) return Trajectory();
   vector<Trajectory> fitted = theSmoother->trajectories(seed, consRecHits, tsos);
   if ( fitted.size() <= 0 ) return Trajectory();
   

@@ -209,29 +209,30 @@ void macro_fast_efficiency(int run, string configDir)
 	
 	// Plot Numerator e Denominator
 	
-	namename = "Denominator";
+	namename = "Denominator_run_" + to_string(run);
 	denom1D->SetTitle(namename.c_str());
 	denom1D->GetXaxis()->SetTitle("Chamber position");
 	denom1D->GetYaxis()->SetTitle("Counts");
 	denom1D->Write(namename.c_str());
 	denom1D->SetLineColor(kRed);
 	denom1D->Draw();
-	namename = "Numerator";
+	namename = "Numerator_run_" + to_string(run);
 	num1D->SetTitle(namename.c_str());
 	num1D->GetXaxis()->SetTitle("Chamber position");
 	num1D->GetYaxis()->SetTitle("Counts");
 	num1D->Write(namename.c_str());
-	namename = "Num_Denom";
+	namename = "Num_Denom_run_" + to_string(run);
 	num1D->SetTitle(namename.c_str());
 	num1D->SetLineColor(kBlue);
 	num1D->Draw("SAME");
+	num1D->SetTitle(namename.c_str());
 	namename = "Num_Denom_Chambers_Fast_Efficiency.png";
 	Canvas->SaveAs(namename.c_str());
 	Canvas->Clear();
 	
 	// Plot Delta_x of hits in the two GEMINI
 	
-	namename = "Delta_x_recHits_same_SC";
+	namename = "Delta_x_recHits_same_SC_run_" + to_string(run);
 	D_x_recHits->SetTitle(namename.c_str());
 	D_x_recHits->GetXaxis()->SetTitle("#Delta x");
 	D_x_recHits->GetYaxis()->SetTitle("Counts");
@@ -243,7 +244,7 @@ void macro_fast_efficiency(int run, string configDir)
 	
 	// Plot Delta_iEta of hits in the two GEMINI
 	
-	namename = "Delta_iEta_recHits_same_SC";
+	namename = "Delta_iEta_recHits_same_SC_run_" + to_string(run);
 	D_iEta_recHits->SetTitle(namename.c_str());
 	D_iEta_recHits->GetXaxis()->SetTitle("#Delta i#eta");
 	D_iEta_recHits->GetYaxis()->SetTitle("Counts");
@@ -255,7 +256,7 @@ void macro_fast_efficiency(int run, string configDir)
 	
 	// Plot Efficiency
 	
-	namename = "Efficiency";
+	namename = "Efficiency_run_" + to_string(run);
 	eff1D->SetTitle(namename.c_str());
 	eff1D->GetXaxis()->SetTitle("Chamber position");
 	eff1D->GetYaxis()->SetTitle("Efficiency");
@@ -300,7 +301,7 @@ void macro_fast_efficiency(int run, string configDir)
 		
 		for (unsigned int eta=0; eta<8; eta++)
 		{
-			namename = "ClusterSize_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1);
+			namename = "ClusterSize_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + "_run_" + to_string(run);
 			clusterSize1D[c][eta]->SetTitle(namename.c_str());
 			clusterSize1D[c][eta]->GetXaxis()->SetTitle("ClusterSize");
 			clusterSize1D[c][eta]->GetYaxis()->SetTitle("Counts");
@@ -313,7 +314,7 @@ void macro_fast_efficiency(int run, string configDir)
 		
 		// Plotting number of recHits per chamber vs evt
 		
-		namename = "NrecHitsVsEvt_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		namename = "NrecHitsVsEvt_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		NrecHitsPerChVsEvt[c]->SetTitle(namename.c_str());
 		NrecHitsPerChVsEvt[c]->GetXaxis()->SetTitle("Evt Number");
 		NrecHitsPerChVsEvt[c]->GetYaxis()->SetTitle("ieta");
@@ -330,7 +331,7 @@ void macro_fast_efficiency(int run, string configDir)
 		
 		// Plotting occupancy of confirmed hits per chamber
 		
-		namename = "OccupacyConfHit_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]);
+		namename = "OccupacyConfHit_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		occupacyConfHits2D[c]->SetTitle(namename.c_str());
 		occupacyConfHits2D[c]->GetXaxis()->SetTitle("Strip Number");
 		occupacyConfHits2D[c]->GetYaxis()->SetTitle("ieta");
@@ -353,7 +354,7 @@ void macro_fast_efficiency(int run, string configDir)
 	
 	for (int row=0; row<5; row++)
 	{
-		namename = "recHits_Row_" + to_string(row+1) + "_B";
+		namename = "recHits_Row_" + to_string(row+1) + "_B" + "_run_" + to_string(run);
 		recHits2D[row*2]->SetTitle(namename.c_str());
 		recHits2D[row*2]->SetStats(0);
 		recHits2D[row*2]->GetXaxis()->SetTitle("x [cm]");
@@ -366,7 +367,7 @@ void macro_fast_efficiency(int run, string configDir)
 		namename = "recHits_Row_" + to_string(row+1) + "_B.png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
-		namename = "recHits_Row_" + to_string(row+1) + "_T";
+		namename = "recHits_Row_" + to_string(row+1) + "_T" + "_run_" + to_string(run);
 		recHits2D[(row*2)+1]->SetTitle(namename.c_str());
 		recHits2D[(row*2)+1]->SetStats(0);
 		recHits2D[(row*2)+1]->GetXaxis()->SetTitle("x [cm]");
