@@ -8,5 +8,6 @@ mv gemqc8/* .
 rm -rf gemqc8
 scram b -j 4
 cd Analysis/GEMQC8/test
-python launcher_validation.py 71 xslxTOcsv=OFF
+python launcher_fast_efficiency.py 123 xslxTOcsv=OFF
+python launcher_validation.py 123 xslxTOcsv=OFF
 ```
