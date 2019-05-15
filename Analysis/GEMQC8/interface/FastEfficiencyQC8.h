@@ -82,6 +82,9 @@ private:
 	
   TH1D *numerator;
   TH1D *denominator;
+	
+	TH2D *numeratorPerEvt;
+	TH2D *denominatorPerEvt;
   
   TTree *tree;
   int run;

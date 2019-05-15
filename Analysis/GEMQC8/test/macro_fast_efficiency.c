@@ -26,7 +26,6 @@ void macro_fast_efficiency(int run, string configDir)
 	// Setting variables for min and max displayed efficiency (to be tuned in the analysis if things go wrong...)
 	const float min_eff = 0.00;
 	const float max_eff = 1.00;
-	const float targetEfficiency = 0.70;
 	
   // Getting the root file
   
@@ -58,6 +57,16 @@ void macro_fast_efficiency(int run, string configDir)
 	
   TGraphAsymmErrors *eff1D = new TGraphAsymmErrors;
 	eff1D->Divide(num1D,denom1D);
+	
+	// 2D histograms of num, denom, eff for the chambers vs evt number
+	
+	TH2D *num2DvsEvt = (TH2D*)infile->Get("FastEfficiencyQC8/numeratorPerEvt");
+  TH2D *denom2DvsEvt = (TH2D*)infile->Get("FastEfficiencyQC8/denominatorPerEvt");
+	
+	TH2D *eff2DvsEvt = new TH2D("eff2DvsEvt","",2000,0,12000000,30,-0.5,29.5);
+	
+	eff2DvsEvt = (TH2D*)num2DvsEvt->Clone();
+  eff2DvsEvt->Divide(denom2DvsEvt);
 	
 	// Getting rechHits per layer histrogram
 	
@@ -202,12 +211,12 @@ void macro_fast_efficiency(int run, string configDir)
   // Results for the 30 chambers
   
   TCanvas *Canvas = new TCanvas("Canvas","Canvas",0,0,1000,800);
-  TF1 *targetLine = new TF1("targetLine",targetEfficiency,0,30);
+  TF1 *targetLine = new TF1("targetLine","0.90",0,30);
   targetLine->SetLineColor(kRed);
   
   ofstream outfile;
 	
-	// Plot Numerator e Denominator
+	// Plot Numerator and Denominator
 	
 	namename = "Denominator_run_" + to_string(run);
 	denom1D->SetTitle(namename.c_str());
@@ -227,6 +236,32 @@ void macro_fast_efficiency(int run, string configDir)
 	num1D->Draw("SAME");
 	num1D->SetTitle(namename.c_str());
 	namename = "Num_Denom_Chambers_Fast_Efficiency.png";
+	Canvas->SaveAs(namename.c_str());
+	Canvas->Clear();
+	
+	// Plot Numerator vs evt number
+	
+	namename = "Numerator_vs_evt_run_" + to_string(run);
+	num2DvsEvt->SetTitle(namename.c_str());
+	num2DvsEvt->GetXaxis()->SetTitle("Evt number");
+	num2DvsEvt->GetYaxis()->SetTitle("Chamber position");
+	num2DvsEvt->GetXaxis()->SetRangeUser(0,nTotEvents);
+	num2DvsEvt->Draw("colz");
+	num2DvsEvt->Write(namename.c_str());
+	namename = "Numerator_Vs_Evt_Chambers_Fast_Efficiency.png";
+	Canvas->SaveAs(namename.c_str());
+	Canvas->Clear();
+	
+	// Plot Denominator vs evt number
+	
+	namename = "Denominator_vs_evt_run_" + to_string(run);
+	denom2DvsEvt->SetTitle(namename.c_str());
+	denom2DvsEvt->GetXaxis()->SetTitle("Evt number");
+	denom2DvsEvt->GetYaxis()->SetTitle("Chamber position");
+	denom2DvsEvt->GetXaxis()->SetRangeUser(0,nTotEvents);
+	denom2DvsEvt->Draw("colz");
+	denom2DvsEvt->Write(namename.c_str());
+	namename = "Denominator_Vs_Evt_Chambers_Fast_Efficiency.png";
 	Canvas->SaveAs(namename.c_str());
 	Canvas->Clear();
 	
@@ -266,6 +301,19 @@ void macro_fast_efficiency(int run, string configDir)
 	eff1D->Write(namename.c_str());
 	targetLine->Draw("SAME");
 	namename = "Efficiency_Chambers_Fast_Efficiency.png";
+	Canvas->SaveAs(namename.c_str());
+	Canvas->Clear();
+	
+	// Plot Efficiency vs evt number
+	
+	namename = "Efficiency_vs_evt_run_" + to_string(run);
+	eff2DvsEvt->SetTitle(namename.c_str());
+	eff2DvsEvt->GetXaxis()->SetTitle("Evt number");
+	eff2DvsEvt->GetYaxis()->SetTitle("Chamber position");
+	eff2DvsEvt->GetXaxis()->SetRangeUser(0,nTotEvents);
+	eff2DvsEvt->Draw("colz");
+	eff2DvsEvt->Write(namename.c_str());
+	namename = "Efficiency_Vs_Evt_Chambers_Fast_Efficiency.png";
 	Canvas->SaveAs(namename.c_str());
 	Canvas->Clear();
   

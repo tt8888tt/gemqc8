@@ -32,12 +32,16 @@ FastEfficiencyQC8::FastEfficiencyQC8(const edm::ParameterSet& cfg): GEMBaseValid
 	DiEtaCorrespondingRecHits = fs->make<TH1D>("DiEtaCorrespondingRecHits","Delta iEta of corresponding recHits",16,-8,8);
 	
 	// nRecHitsPerEventPerChamber: evolution in time
-	nRecHitsPerEvtPerCh = fs->make<TH3D>("nRecHitsPerEvtPerCh","recHits per ieta per ch vs event (packages of 100evts = 1sec)",100000,0,10000000,30,0,30,8,0,8);
+	nRecHitsPerEvtPerCh = fs->make<TH3D>("nRecHitsPerEvtPerCh","recHits per ieta per ch vs event (packages of 100 evts = 1 sec)",100000,0,10000000,30,0,30,8,0,8);
 	
 	// Numerator and denominator
 	numerator = fs->make<TH1D>("numerator","numerator",30,0,30);
 	denominator = fs->make<TH1D>("denominator","denominator",30,0,30);
 	
+	// Numerator and denominator: evolution in time
+	numeratorPerEvt = fs->make<TH2D>("numeratorPerEvt","numerator per ch vs event (packages of 6k evts = 1 min)",2000,0,12000000,30,-0.5,29.5);
+	denominatorPerEvt = fs->make<TH2D>("denominatorPerEvt","denominator per ch vs event (packages of 6k evts = 1 min)",2000,0,12000000,30,-0.5,29.5);
+		
 	// Tree branches declaration
 	
 	tree = fs->make<TTree>("tree", "Tree for QC8");
@@ -171,24 +175,22 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 		
 		// Define region 'inside' the ieta of the chamber
 		int n_strip = ch.etaPartition(hitID.roll())->nstrips();
-		double min_x = ch.etaPartition(hitID.roll())->centreOfStrip(1).x() + 3.0;
-		double max_x = ch.etaPartition(hitID.roll())->centreOfStrip(n_strip).x() - 3.0;
+		double min_x = ch.etaPartition(hitID.roll())->centreOfStrip(1).x();
+		double max_x = ch.etaPartition(hitID.roll())->centreOfStrip(n_strip).x();
 		
 		if (min_x < max_x)
 		{
-			min_x = min_x + 3.0;
-			max_x = max_x - 3.0;
+			min_x = min_x + 4.5;
+			max_x = max_x - 4.5;
 		}
 		
 		if (max_x < min_x)
 		{
-			min_x = min_x - 3.0;
-			max_x = max_x + 3.0;
+			min_x = min_x - 4.5;
+			max_x = max_x + 4.5;
 		}
 		
-		if ((min_x < recHitLP.x()) and (recHitLP.x() < max_x)
-				/*and (hitID.roll()!=1) and (hitID.roll()!=8)*/
-				)
+		if ((min_x < recHitLP.x()) and (recHitLP.x() < max_x))
 		{
 			fired_ch_reference[chIdRecHit] = true;
 		}
@@ -210,11 +212,10 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 			if (fired_ch_test[i]==true) counter++;
 		}
 		
-		//if (counter<4) continue;
-		
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
 			denominator->Fill(ch+1); // Denominator of corresponding odd chamber +1
+			denominatorPerEvt->Fill(nev,ch+1);
 			
 			if (fired_ch_test[ch+1] == true) // We see hits in the corresponding odd chamber
 			{
@@ -243,7 +244,11 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 					}
 				}
 			}
-			if (numerator_fired == true) numerator->Fill(ch+1); // Numberator of corresponding odd chamber +1
+			if (numerator_fired == true)
+			{
+				numerator->Fill(ch+1); // Numberator of corresponding odd chamber +1
+				numeratorPerEvt->Fill(nev,ch+1);
+			}
 		}
 	}
 	
@@ -254,7 +259,7 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 		if (fired_ch_test[i]==true) counter++;
 	}
 		
-	if (counter >= 4)
+	/*if (counter == 4)
 	{
 		for (int i=0; i<30; i++)
 		{
@@ -264,7 +269,7 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 			}
 		}
 		cout << "------------------------------------------------------------------" << endl;
-	}
+	}*/
 	
 	// Reference: odd chambers, Under test: even chambers
 	for (int ch=1; ch<=29; ch+=2)
@@ -276,13 +281,12 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 			if (fired_ch_test[i]==true) counter++;
 		}
 		
-		//if (counter<4) continue;
-		
 		numerator_fired = false;
 		
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
 			denominator->Fill(ch-1); // Denominator of corresponding odd chamber +1
+			denominatorPerEvt->Fill(nev,ch-1);
 			
 			if (fired_ch_test[ch-1] == true) // We see hits in the corresponding odd chamber
 			{
@@ -311,7 +315,11 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 					}
 				}
 			}
-			if (numerator_fired == true) numerator->Fill(ch-1); // Numberator of corresponding odd chamber +1
+			if (numerator_fired == true)
+			{
+				numerator->Fill(ch-1); // Numberator of corresponding odd chamber +1
+				numeratorPerEvt->Fill(nev,ch-1);
+			}
 		}
 	}
 	

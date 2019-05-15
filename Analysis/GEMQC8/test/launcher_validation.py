@@ -36,7 +36,7 @@ if __name__ == '__main__':
   time.sleep(1)
 
   # Generate geometry files
-  #geometry_files_creator.geomMaker(run_number)
+  geometry_files_creator.geomMaker(run_number,"--yesAlignment")
   time.sleep(1)
   
   # Compiling after the generation of the geometry files
