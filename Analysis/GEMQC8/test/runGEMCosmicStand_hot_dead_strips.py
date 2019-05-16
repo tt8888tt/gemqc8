@@ -42,11 +42,11 @@ SuperChType = runConfig.StandConfiguration
 print(SuperChType)
 
 # Define and find column type. Default is L. If it is found an S in a column, that column type becomes S.
-colType = ['L','L','L']
+colType = ['S','S','S']
 for col in range(0,3):
 	for row in range(0,5):
-		if (SuperChType[col*5+row]=='S'):
-			colType[col] = 'S'
+		if (SuperChType[col*5+row]=='L'):
+			colType[col] = 'L'
 
 print(colType)
 
@@ -113,7 +113,7 @@ process.source = cms.Source(
                             "GEMLocalModeDataSource",
                             fileNames = cms.untracked.vstring ([fpath+x for x in os.listdir(fpath) if x.endswith(".dat")]),
                             skipEvents=cms.untracked.uint32(0),
-                            fedId = cms.untracked.int32(1472),  # which fedID to assign
+                            fedId = cms.untracked.int32(888),  # which fedID to assign
                             hasFerolHeader = cms.untracked.bool(False),
                             runNumber = cms.untracked.int32(run_number),
                             )
@@ -126,9 +126,9 @@ process.options = cms.untracked.PSet(
 from CondCore.CondDB.CondDB_cfi import *
 CondDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb')
 
-#eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
+eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
 
-eMapFile = 'GEMeMap.db'
+#eMapFile = 'GEMeMap.db'
 
 CondDB.connect = cms.string('sqlite_fip:Analysis/GEMQC8/data/EMapFiles/'+eMapFile)
 
@@ -136,8 +136,8 @@ process.GEMCabling = cms.ESSource("PoolDBESSource",
                                   CondDB,
                                   toGet = cms.VPSet(cms.PSet(
                                                              record = cms.string('GEMeMapRcd'),
-																														 tag = cms.string('GEMeMap_v3')
-                                                             #tag = cms.string('GEMeMap_v6')
+																														 #tag = cms.string('GEMeMap_v3')
+                                                             tag = cms.string('GEMeMap_v6')
                                                              )
                                                     )
                                   )
@@ -172,8 +172,6 @@ process.gemRecHits = cms.EDProducer("GEMRecHitProducer",
                                     recAlgo = cms.string('GEMRecHitStandardAlgo'),
                                     gemDigiLabel = cms.InputTag("muonGEMDigis"),
                                     )
-
-fScale = 1.0
 
 process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
 
