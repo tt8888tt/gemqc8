@@ -33,7 +33,6 @@ options.register('mps',
                  VarParsing.VarParsing.varType.int,
                  "List of MPs to process")
 
-
 options.parseArguments()
 
 # The superchambers in the 15 slots
@@ -128,16 +127,12 @@ CondDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/cms/
 
 eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
 
-#eMapFile = 'GEMeMap.db'
-
 CondDB.connect = cms.string('sqlite_fip:Analysis/GEMQC8/data/EMapFiles/'+eMapFile)
 
 process.GEMCabling = cms.ESSource("PoolDBESSource",
                                   CondDB,
                                   toGet = cms.VPSet(cms.PSet(
                                                              record = cms.string('GEMeMapRcd'),
-																														 à
-																														 #tag = cms.string('GEMeMap_v3')
                                                              tag = cms.string('GEMeMap_v6')
                                                              )
                                                     )

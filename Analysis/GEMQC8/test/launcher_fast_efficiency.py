@@ -50,7 +50,7 @@ if __name__ == '__main__':
   time.sleep(1)
 
   # Running the CMSSW code
-  runCommand = "cmsRun runGEMCosmicStand_fast_efficiency.py"
+  runCommand = "cmsRun -n 8 runGEMCosmicStand_fast_efficiency.py"
   running = subprocess.Popen(runCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
   while running.poll() is None:
     line = running.stdout.readline()
