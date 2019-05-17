@@ -74,8 +74,6 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
   
   for (unsigned int fedId=FEDNumbering::MINGEMFEDID; fedId<=FEDNumbering::MAXGEMFEDID; ++fedId) { 
     const FEDRawData& fedData = fed_buffers->FEDData(fedId);
-		
-		std::cout << fedId << std::endl; 
     
     int nWords = fedData.size()/sizeof(uint64_t);
     LogDebug("GEMRawToDigiModule") <<" words " << nWords;
