@@ -14,7 +14,7 @@ using namespace std;
 
 void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
   // Getting the file
-  TString filename = "temp_out_reco_MC_1_0.root";
+  TString filename = "temp_out_reco_MC_3_0.root";
   TFile *infile = TFile::Open(filename, "UPDATE");
   bool opened = infile->IsOpen();
   if(opened == true)
@@ -37,7 +37,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
   };
 
   // Getting the TTree
-  TString direc = "AlignmentValidationQC8/";
+  TString direc = "AlignmentQC8/";
   TTree *datatree = (TTree*)infile->Get(direc+"tree");
 
   //  infile->ls();
@@ -96,7 +96,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
     {
       for (int i_eta=0; i_eta<i_Eta; i_eta++)
     	{
-	  sprintf(histname,"resX_SC_%u/%u_eta_%u",(i_SC%5)+1,(i_SC/5)+1,i_eta+1); //Convention for position of the SuperChamber row[1-5]/column[1-3]_ieta[1-8]
+	  sprintf(histname,"resX_SC_%u_%u_eta_%u",(i_SC%5)+1,(i_SC/5)+1,i_eta+1); //Convention for position of the SuperChamber row[1-5]/column[1-3]_ieta[1-8]
 	  resXperSC[i_SC][i_eta] = new TH1D(histname,"",300,-3,3);
         }
     }
@@ -138,7 +138,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
   
   for (int i_SC=0; i_SC<i_maxSC; i_SC++)
     {
-      sprintf(cnvname,"cnv_SC_%u/%u",(i_SC%5)+1,(i_SC/5)+1);
+      sprintf(cnvname,"cnv_SC_%u_%u",(i_SC%5)+1,(i_SC/5)+1);
       cnvResX[i_SC] = new TCanvas(cnvname,cnvname,0,0,1000,600);
       cnvResX[i_SC]->Divide(4,2);
       for (int i_eta=0; i_eta<i_Eta; i_eta++)
@@ -156,7 +156,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
     	}
       
       cnvResCorrPlot[i_SC] = new TCanvas(cnvname,cnvname,0,0,1000,600);
-      sprintf(histname,"resCorrPlot_SC_%u/%u",(i_SC%5)+1,(i_SC/5)+1);
+      sprintf(histname,"resCorrPlot_SC_%u_%u",(i_SC%5)+1,(i_SC/5)+1);
       TGraphErrors *resCorrPlotSC = new TGraphErrors(i_Eta,Ypos[chidx[i_SC]],resEtaY,0,resEtaYError);
       resCorrPlotSC->SetTitle(histname);
       resCorrPlotSC->SetMarkerSize(1.5);
