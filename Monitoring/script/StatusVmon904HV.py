@@ -92,14 +92,14 @@ while periodIdx <= endIdx:
 	periodBool[ periodIdx ] = 1
 	periodIdx = periodIdx + 1
 
-print periodBool 
+#print periodBool 
 
 #validity limits needed for the query of ELEMENT_ID
 #find the first one and the last one in the bool vector
 firstOne = periodBool.index(1)
 lastOne  = max(loc for loc, val in enumerate(periodBool) if val == 1)
-print "firstOne", firstOne
-print "lastOne", lastOne
+#print "firstOne", firstOne
+#print "lastOne", lastOne
 
 sinceDelimiter = []
 tillDelimiter = []
@@ -140,8 +140,8 @@ elif firstOne > 0 and firstOne < (len(periodBool)-1) and lastOne > 0 and lastOne
 		tillDelimiter.append( mappingChangeDate[ firstOne + idxTill ] )
 
 
-print "sinceDelimiter", sinceDelimiter
-print "tillDelimiter", tillDelimiter
+#print "sinceDelimiter", sinceDelimiter
+#print "tillDelimiter", tillDelimiter
 
 #boards must be 15 (from 0 to 14) because in the DB the board 15 is not declared
 insertedBoards = 15
@@ -160,7 +160,7 @@ for cont in range(int(howManyChambers)):
 	chamberName = chamberName.replace("-","_")
 	chamberList.append(chamberName)
 
-print(chamberList)
+#print(chamberList)
 
 indexB=0
 indexC=0
@@ -335,7 +335,6 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		statusNameList 	= []
 		contMaps = 0
 		for contMaps in range( usedMaps ):
-			#print "contMaps", contMaps
 			imon_name="'cms_gem_dcs_1:CAEN/"+listAllMainframeMappings[startIdx + contMaps][indexTB]+"/"+listAllBoardMappings[startIdx + contMaps][indexTB]+"/"+channel+".actual.iMon'"
 			#this string has to be saved only one time
 			if imonNameList.count( imon_name ) == 1:
@@ -356,7 +355,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 				continue
 			statusNameList.append(status_name)
 			#print (listAllMainframeMappings[startIdx + contMaps][indexTB], " ", listAllBoardMappings[startIdx + contMaps][indexTB], " ", channel)
-		#print "imonNameList", imonNameList
+		print "\nimonNameList", imonNameList
 		print "vomnNameList", vmonNameList
 		print "statusNameList", statusNameList
 	
