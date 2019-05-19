@@ -2,6 +2,7 @@ import cx_Oracle
 import ROOT
 import os
 import time
+from datetime import datetime
 from operator import itemgetter
 from array import array
 
@@ -42,6 +43,106 @@ end_period = "'" + end_period + "'"
 fileName = "QC8_HV_monitor_start_"+start+"_end_"+end+".root"
 f1=ROOT.TFile( fileName,"RECREATE")
 
+#divide the monitoring period in three periods 
+#the limits between period 1 and 2 is defined by the first  date in which we changed the mapping of HV: 03-Apr-2019 13.10
+#the limits between period 2 and 3 is defined by the second date in which we changed the mapping of HV: 15-Apr-2019 08:15
+
+#in the second date only the LV mapping is changed, but the datapoints change. So we define three periods even if we have
+#only two mappings
+
+mappingChangeDate = []
+firstMappingChange 	= datetime( 2019, 04, 03, 13, 10, 00 )
+secondMappingChange 	= datetime( 2019, 04, 15,  8, 15, 00 ) 
+mappingChangeDate.append( firstMappingChange )
+mappingChangeDate.append( secondMappingChange )
+
+startDate = datetime(int(start[:4]), int(start[5:7]), int(start[8:10]), int(start[11:13]), int(start[14:16]), int(start[17:]) )
+endDate	  = datetime(int(end[:4]), int(end[5:7]), int(end[8:10]), int(end[11:13]), int(end[14:16]), int(end[17:]) )
+
+periodBool = []
+numberOfMaps = 3 #date 10-May-2019
+
+#create a vector of numbers full of zero: numbero of zero is equal to the number of maps
+for mapIdx in range(numberOfMaps):
+	periodBool.append(0)
+
+startIdx = -1
+endIdx = -1
+#find the index for mapping start and end
+
+if startDate < mappingChangeDate[0]: 
+	startIdx = 0
+elif (startDate > mappingChangeDate[0] and startDate < mappingChangeDate[1]):
+	startIdx = 1
+elif startDate > mappingChangeDate[1]:
+	startIdx = 2
+#print "startIdx:", startIdx
+
+if endDate < mappingChangeDate[0]: 
+	endIdx = 0
+elif endDate > mappingChangeDate[0] and endDate < mappingChangeDate[1]:
+	endIdx = 1
+elif endDate > mappingChangeDate[1]:
+	endIdx = 2
+#print "endIdx:", endIdx
+
+#decide which periods are active from start and stop index
+periodIdx = startIdx
+while periodIdx <= endIdx:
+	periodBool[ periodIdx ] = 1
+	periodIdx = periodIdx + 1
+
+#print periodBool 
+
+#validity limits needed for the query of ELEMENT_ID
+#find the first one and the last one in the bool vector
+firstOne = periodBool.index(1)
+lastOne  = max(loc for loc, val in enumerate(periodBool) if val == 1)
+#print "firstOne", firstOne
+#print "lastOne", lastOne
+
+sinceDelimiter = []
+tillDelimiter = []
+
+#three cases: 
+#only one period section used
+#fisrt period used
+if firstOne == 0 and lastOne == 0:
+	#we don't need the since delimiter
+	tillDelimiter.append( mappingChangeDate[0] )
+#last period used
+elif firstOne == (len(periodBool) - 1) and lastOne == (len(periodBool)-1):
+	#we don't need the end delimiter
+	sinceDelimiter.append( mappingChangeDate[ len(periodBool)-2 ] )
+#more than one section used starting from the first time region
+#fisrt and others but not the last used
+elif firstOne == 0 and lastOne > 0 and lastOne < (len(periodBool)-1):
+	#we need N till and N-1 since
+	for idxSince in range( periodBool.count(1)-1):
+		sinceDelimiter.append( mappingChangeDate[ idxSince ] )
+	for idxTill in range( periodBool.count(1) ):
+		tillDelimiter.append( mappingChangeDate[ idxTill ] )
+#last and others used but not the first
+elif firstOne > 0 and firstOne < (len(periodBool)-1) and lastOne == (len(periodBool)-1):
+	for idxSince in range( periodBool.count(1) ):
+		sinceDelimiter.append( mappingChangeDate[ idxSince + firstOne-1 ]  )
+	for idxTill in range( periodBool.count(1)-1 ):
+		tillDelimiter.append( mappingChangeDate[ idxTill + firstOne ] )
+#all used ( first, mid and last )
+elif firstOne == 0 and lastOne == ( len(periodBool)-1 ):
+	sinceDelimiter = mappingChangeDate
+	tillDelimiter  = mappingChangeDate
+#only mid used
+elif firstOne > 0 and firstOne < (len(periodBool)-1) and lastOne > 0 and lastOne < (len(periodBool)-1):
+	for idxSince in range( periodBool.count(1) ):
+		sinceDelimiter.append( mappingChangeDate[ firstOne + idxSince -1 ] )
+	for idxTill in range( periodBool.count(1) ):
+		tillDelimiter.append( mappingChangeDate[ firstOne + idxTill ] )
+
+
+#print "sinceDelimiter", sinceDelimiter
+#print "tillDelimiter", tillDelimiter
+
 #boards must be 15 (from 0 to 14) because in the DB the board 15 is not declared
 insertedBoards = 15
 insertedChannels = 14
@@ -59,7 +160,7 @@ for cont in range(int(howManyChambers)):
 	chamberName = chamberName.replace("-","_")
 	chamberList.append(chamberName)
 
-print(chamberList)
+#print(chamberList)
 
 indexB=0
 indexC=0
@@ -91,11 +192,27 @@ ChannelMapList = [ "Top_G3Bot", "Top_G3Top", "Top_G2Bot", "Top_G2Top", "Top_G1Bo
 
 #MainframeMapList and BoardMapList lists follow the order of ChamberMapList
 ChamberMapList = [ "1_1", "1_2", "1_3", "2_1", "2_2", "2_3", "3_1", "3_2", "3_3", "4_1", "4_2", "4_3", "5_1", "5_2", "5_3" ]
-MainframeMapList = [ "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe", "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe" ]
-BoardMapList = [ "board00", "board01", "board02", "board03", "board04", "board05", "board06", "board07", "board08", "board10", "board14", "board15", "board11", "board12", "board13" ]
 
+MainframeMapList1 = [ "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe", "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe" ]
+BoardMapList1 = [ "board00", "board01", "board02", "board03", "board04", "board05", "board06", "board07", "board08", "board09", "board10", "board11", "board12", "board13", "board14" ]
+
+MainframeMapList2 = [ "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe", "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe" ]
+BoardMapList2 = [ "board00", "board01", "board02", "board03", "board04", "board05", "board06", "board07", "board08", "board10", "board14", "board15", "board11", "board12", "board13" ]
+
+MainframeMapList3 = [ "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe",  "904_HV_mainframe", "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe",  "904_Shared_mainframe" ]
+BoardMapList3 = [ "board00", "board01", "board02", "board03", "board04", "board05", "board06", "board07", "board08", "board10", "board14", "board15", "board11", "board12", "board13" ]
 
 channelList = [ "G3Bot", "G3Top", "G2Bot", "G2Top", "G1Bot", "G1Top", "Drift"]
+
+listAllMainframeMappings = []
+listAllMainframeMappings.append( MainframeMapList1 )
+listAllMainframeMappings.append( MainframeMapList2 )
+listAllMainframeMappings.append( MainframeMapList3 )
+
+listAllBoardMappings = []
+listAllBoardMappings.append( BoardMapList1 )
+listAllBoardMappings.append( BoardMapList2 )
+listAllBoardMappings.append( BoardMapList3 )
 
 for indexB in range(len(chamberList)): #loop on the selected boards
 	#create directories
@@ -201,24 +318,50 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			channel = "channel0"+str(indexTC)
 
 		#indexTB is the posiion in the list when the required chamber is found
-		print (MainframeMapList[indexTB], " ", BoardMapList[indexTB], " ", channel)
+		#print (MainframeMapList[indexTB], " ", BoardMapList[indexTB], " ", channel)
 		#print (board, " ", channel)
-		len(chamberList)
-		len(channelList)
+		#len(chamberList)
+		#len(channelList)
 		
 		#print ("counter before query:", counter)
 		
 		# this 3 parameters can be input to the script
-		
-		imon_name="'cms_gem_dcs_1:CAEN/"+MainframeMapList[indexTB]+"/"+BoardMapList[indexTB]+"/"+channel+".actual.iMon'"
-                vmon_name="'cms_gem_dcs_1:CAEN/"+MainframeMapList[indexTB]+"/"+BoardMapList[indexTB]+"/"+channel+".actual.vMon'"
-                status_name="'cms_gem_dcs_1:CAEN/"+MainframeMapList[indexTB]+"/"+BoardMapList[indexTB]+"/"+channel+".actual.status'"
-		#imon_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.iMon'"
-		#vmon_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.vMon'"
-		#status_name="'cms_gem_dcs_1:CAEN/904_HV_mainframe/"+board+"/"+channel+".actual.status'"
+		#Three maps are inserted so we have to choose the right one
+		#create a query string for the maps that must me used
+		#usedMaps tells the number of used maps for the period between start and end, not the number of maps charged in the code (said instead by numberOfMaps)
+		usedMaps = periodBool.count(1)
+		imonNameList	= []
+		vmonNameList 	= []
+		statusNameList 	= []
+		contMaps = 0
+		for contMaps in range( usedMaps ):
+			imon_name="'cms_gem_dcs_1:CAEN/"+listAllMainframeMappings[startIdx + contMaps][indexTB]+"/"+listAllBoardMappings[startIdx + contMaps][indexTB]+"/"+channel+".actual.iMon'"
+			#this string has to be saved only one time
+			if imonNameList.count( imon_name ) == 1:
+				continue
+			imonNameList.append(imon_name)
+
+		for contMaps in range( usedMaps ):
+			vmon_name="'cms_gem_dcs_1:CAEN/"+listAllMainframeMappings[startIdx + contMaps][indexTB]+"/"+listAllBoardMappings[startIdx + contMaps][indexTB]+"/"+channel+".actual.vMon'"
+			#this string has to be saved only one time
+			if vmonNameList.count( vmon_name ) == 1:
+				continue
+			vmonNameList.append(vmon_name)
+
+		for contMaps in range( usedMaps ):
+			status_name="'cms_gem_dcs_1:CAEN/"+listAllMainframeMappings[startIdx + contMaps][indexTB]+"/"+listAllBoardMappings[startIdx + contMaps][indexTB]+"/"+channel+".actual.status'"
+			#this string has to be saved only one time
+			if statusNameList.count( status_name ) == 1:
+				continue
+			statusNameList.append(status_name)
+			#print (listAllMainframeMappings[startIdx + contMaps][indexTB], " ", listAllBoardMappings[startIdx + contMaps][indexTB], " ", channel)
+		print "\nimonNameList", imonNameList
+		print "vomnNameList", vmonNameList
+		print "statusNameList", statusNameList
+	
 
 		#this is the connection to DB, and the contact point to DB should be input to the script 
-		#to avoid the have explicitely the pw in the script (lo schema e' il primo campo, la parte a destra e' il server) 
+		#to avoid the have explicitely the pw in the script (the schema is the first field, then psw and after @ is the server ) 
 		db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R')
 		cur=db.cursor()
 
@@ -232,26 +375,234 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#where ELEMENT_NAME is the row of the column ELEMENT_ID
 
 		# this a tytpical query to extract the ELEMENT_ID from the  ELEMENT_NAME.
-		# iMon element
-		query = "select ELEMENT_ID from ELEMENTS_ALL where ELEMENT_NAME="+imon_name
-		cur.execute(query)
-		imon_id = cur.fetchone()[0];
+		imonIdList = []
+		vmonIdList = []
+		statusIdList = []
+		sinceImonList = []
+		sinceVmonList = []
+		sinceStatusList = []
+		tillImonList = []
+		tillVmonList = []
+		tillStatusList = []
+		imonIDsort = []
+		vmonIDsort = []
+		statusIDsort = []
+		for elementIdIdxImon in range( len(imonNameList) ):
+			# iMon element
+			query = "select ELEMENT_ID, VALID_SINCE, VALID_TILL from ELEMENTS_ALL where ELEMENT_NAME="+imonNameList[ elementIdIdxImon ]
+			cur.execute(query)
+			curImonID = cur
+			for result in curImonID:
+				#check if the lenght of the since and till array are the same
+				#VALID_SINCE is always found in the DB
+				#VALID_TILL is not found for the most recent ELEMENT_ID
+				#in this case I put the end date as its VALID_TILL
+				imonID = result[0]
+				imonIDsince = result[1]	
+				imonIDtill = result[2]
 
-		# vMon element
-		query = "select ELEMENT_ID from ELEMENTS_ALL where ELEMENT_NAME="+vmon_name
-		cur.execute(query)
-		vmon_id = cur.fetchone()[0];
+				if imonIDtill is None:
+					imonIDtill = datetime( 2050, 04, 15,  8, 15, 00 ) 
+
+				imonIdList.append( imonID )
+				sinceImonList.append( imonIDsince )
+				tillImonList.append( imonIDtill )
+
+				internalSortList = ( imonID, imonIDsince, imonIDtill )
+				imonIDsort.append( internalSortList )
+
+		imonIDsort = sorted(imonIDsort, key=lambda elementIDimon: elementIDimon[1])
+
+		#print "imonIDsort ", imonIDsort
 		
-		# status element
-		query = "select ELEMENT_ID from ELEMENTS_ALL where ELEMENT_NAME="+status_name
-		cur.execute(query)
-		status_id = cur.fetchone()[0];
+		#I have to reject the ID that are not necessary for our time period 
+		#write 1 in the period observed in the monitoring
+		firstOneImon = -1
+		lastOneImon = -1
+		imonIDBool = []
+		for idxIdImon in range( len(imonIDsort) ):
+			imonIDBool.append(0)
+			#firstOneImon
+			if startDate > imonIDsort[idxIdImon][1] and startDate < imonIDsort[idxIdImon][2]:
+				firstOneImon = idxIdImon
+			#lastOneImon
+			if endDate > imonIDsort[idxIdImon][1] and endDate < imonIDsort[idxIdImon][2]:
+				lastOneImon = idxIdImon
 
-		print "IMON_ID ", imon_id," VMON_ID ", vmon_id," STATUS_ID ", status_id
+		#print "firstOneImon", firstOneImon
+		#print "lastOneImon", lastOneImon
+
+		#I write one in all the active periods
+		for timesOneFill in range( lastOneImon - firstOneImon + 1 ):
+			imonIDBool[ timesOneFill + firstOneImon ] = 1
+
+		#print "imonIDsort ", imonIDsort
+		
+		imonIDToUse = []
+		for idxIdImon in range( len(imonIDsort) ):
+			if imonIDBool[ idxIdImon ] == 1:
+				imonIDToUse.append( imonIDsort[ idxIdImon ][0] )
+
+		#delete duplicate IDs
+		imonIDToUse = list(dict.fromkeys( imonIDToUse ))
+		print "imonIDToUse", imonIDToUse
+
+
+
+		#find elementID to use for vmon
+		for elementIdIdxVmon in range( len(vmonNameList) ):
+                	# vMon element
+                	query = "select ELEMENT_ID, VALID_SINCE, VALID_TILL from ELEMENTS_ALL where ELEMENT_NAME="+vmonNameList[ elementIdIdxVmon ]
+                	cur.execute(query)
+                	curVmonID = cur
+                	for result in curVmonID:
+                		#check if the lenght of the since and till array are the same
+                		#VALID_SINCE is always found in the DB
+                		#VALID_TILL is not found for the most recent ELEMENT_ID
+                		#in this case I put the end date as its VALID_TILL
+                		vmonID = result[0]
+                		vmonIDsince = result[1]	
+                		vmonIDtill = result[2]
+                                                                                                                                                    
+                		if vmonIDtill is None:
+                			vmonIDtill = datetime( 2050, 04, 15,  8, 15, 00 ) 
+                                                                                                                                                    
+                		vmonIdList.append( vmonID )
+                		sinceVmonList.append( vmonIDsince )
+                		tillVmonList.append( vmonIDtill )
+                                                                                                                                                    
+                		internalSortList = ( vmonID, vmonIDsince, vmonIDtill )
+	        		vmonIDsort.append( internalSortList )
+                                                                                                                                                    
+                vmonIDsort = sorted(vmonIDsort, key=lambda elementIDvmon: elementIDvmon[1])
+                                                                                                                                                    
+                #print "vmonIDsort ", vmonIDsort
+                
+                #I have to reject the ID that are not necessary for our time period 
+                #write 1 in the period observed in the monitoring
+                firstOneVmon = -1
+                lastOneVmon = -1
+                vmonIDBool = []
+                for idxIdVmon in range( len(vmonIDsort) ):
+                	vmonIDBool.append(0)
+                	#firstOneVmon
+                	if startDate > vmonIDsort[idxIdVmon][1] and startDate < vmonIDsort[idxIdVmon][2]:
+                		firstOneVmon = idxIdVmon
+                	#lastOneVmon
+                	if endDate > vmonIDsort[idxIdVmon][1] and endDate < vmonIDsort[idxIdVmon][2]:
+                		lastOneVmon = idxIdVmon
+                                                                                                                                                    
+                #print "firstOneVmon", firstOneVmon
+                #print "lastOneVmon", lastOneVmon
+                                                                                                                                                    
+                #I write one in all the active periods
+                for timesOneFill in range( lastOneVmon - firstOneVmon + 1 ):
+                	vmonIDBool[ timesOneFill + firstOneVmon ] = 1
+                                                                                                                                                    
+                #print "vmonIDsort ", vmonIDsort
+                
+                vmonIDToUse = []
+                for idxIdVmon in range( len(vmonIDsort) ):
+                	if vmonIDBool[ idxIdVmon ] == 1:
+                		vmonIDToUse.append( vmonIDsort[ idxIdVmon ][0] )
+
+                #delete duplicate IDs
+                vmonIDToUse = list(dict.fromkeys( vmonIDToUse ))
+                print "vmonIDToUse", vmonIDToUse
+
+
+
+
+		#find elementID to use for status
+                for elementIdIdxStatus in range( len(statusNameList) ):
+                	# status element
+                	query = "select ELEMENT_ID, VALID_SINCE, VALID_TILL from ELEMENTS_ALL where ELEMENT_NAME="+statusNameList[ elementIdIdxStatus ]
+                	cur.execute(query)
+                	curStatusID = cur
+                	for result in curStatusID:
+                		#check if the lenght of the since and till array are the same
+                		#VALID_SINCE is always found in the DB
+                		#VALID_TILL is not found for the most recent ELEMENT_ID
+                		#in this case I put the end date as its VALID_TILL
+                		statusID = result[0]
+                		statusIDsince = result[1]	
+                		statusIDtill = result[2]
+                                                                                                                                                    
+                		if statusIDtill is None:
+                			statusIDtill = datetime( 2050, 04, 15,  8, 15, 00 ) 
+                                                                                                                                                    
+                		statusIdList.append( statusID )
+                		sinceStatusList.append( statusIDsince )
+                		tillStatusList.append( statusIDtill )
+                                                                                                                                                    
+                		internalSortList = ( statusID, statusIDsince, statusIDtill )
+                		statusIDsort.append( internalSortList )
+                                                                                                                                                    
+                statusIDsort = sorted(statusIDsort, key=lambda elementIDstatus: elementIDstatus[1])
+                                                                                                                                                    
+                #print "statusIDsort ", statusIDsort
+                
+                #I have to reject the ID that are not necessary for our time period 
+                #write 1 in the period observed in the monitoring
+                firstOneStatus = -1
+                lastOneStatus = -1
+                statusIDBool = []
+                for idxIdStatus in range( len(statusIDsort) ):
+                	statusIDBool.append(0)
+                	#firstOneStatus
+                	if startDate > statusIDsort[idxIdStatus][1] and startDate < statusIDsort[idxIdStatus][2]:
+                		firstOneStatus = idxIdStatus
+                	#lastOneStatus
+                	if endDate > statusIDsort[idxIdStatus][1] and endDate < statusIDsort[idxIdStatus][2]:
+                		lastOneStatus = idxIdStatus
+                                                                                                                                                    
+                #print "firstOneStatus", firstOneStatus
+                #print "lastOneStatus", lastOneStatus
+                                                                                                                                                    
+                #I write one in all the active periods
+                for timesOneFill in range( lastOneStatus - firstOneStatus + 1 ):
+                	statusIDBool[ timesOneFill + firstOneStatus ] = 1
+                                                                                                                                                    
+                #print "statusIDsort ", statusIDsort
+                
+                statusIDToUse = []
+                for idxIdStatus in range( len(statusIDsort) ):
+                	if statusIDBool[ idxIdStatus ] == 1:
+                		statusIDToUse.append( statusIDsort[ idxIdStatus ][0] )
+                                                
+                #delete duplicate IDs                                
+                statusIDToUse = list(dict.fromkeys( statusIDToUse ))
+		print "statusIDToUse", statusIDToUse
+
+		
+		#print "imonNameList ", imonIdList
+		#print "sinceImonList ", sinceImonList 
+		#print "tillImonList ", tillImonList
+		#print "vmonNameList ", vmonIdList
+		#print "sinceVmonList ", sinceVmonList
+		#print "tillVmonList ", tillVmonList
+		#print "statusNameList ", statusIdList
+		#print "sinceStatusList ", sinceStatusList
+		#print "tillStatusList ", tillStatusList
+		#print "IMON_ID ", imon_id," VMON_ID ", vmon_id," STATUS_ID ", status_id
 		
 		#do the query to fill the Histos with I
-		#fill current
-		query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(imon_id)+" and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
+		if len( imonIDToUse ) == 0:
+			print "ERROR: len(imonIDToUse)=0"
+			file = open("HVErr.log", "w")                                     			
+                        file.write("ERROR: len(imonIDToUse)=0")
+                        file.close()
+		elif len( imonIDToUse ) == 1:
+			query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(imonIDToUse[0])+" and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
+		elif len( imonIDToUse ) > 1:
+			query = "select TS,VALUE_NUMBER from EVENTHISTORY where ("
+			for strIdx in range ( len( imonIDToUse ) ):
+				query = query + "ELEMENT_ID = "+str( imonIDToUse[ strIdx ] )
+				if ( len( imonIDToUse ) > 1 and strIdx < ( len( imonIDToUse ) - 1 ) ):
+					query = query + " or "
+			query = query + ") and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
+				
+		print query 
 		cur.execute(query)                                                                                                                             
 		curimon=cur
 		imonRec=[]
@@ -420,10 +771,27 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#ImonTgraph1List[counter].Write()	
 		Imontg1.Write()
 
-		#fill Voltage
-		query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(vmon_id)+" and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
-		cur.execute(query)
-		
+
+
+		#do the query to fill the Histos with V
+                if len( vmonIDToUse ) == 0:
+                	print "ERROR: len(vmonIDToUse)=0"
+                	file = open("HVErr.log", "w")                                     			
+                        file.write("ERROR: len(vmonIDToUse)=0")
+                        file.close()
+                elif len( vmonIDToUse ) == 1:
+                	query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(vmonIDToUse[0])+" and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
+                elif len( vmonIDToUse ) > 1:
+                	query = "select TS,VALUE_NUMBER from EVENTHISTORY where ("
+                	for strIdx in range ( len( vmonIDToUse ) ):
+                		query = query + "ELEMENT_ID = "+str( vmonIDToUse[ strIdx ] )
+                		if ( len( vmonIDToUse ) > 1 and strIdx < ( len( vmonIDToUse ) - 1 ) ):
+                			query = query + " or "
+                	query = query + ") and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
+                		
+                print query 
+                cur.execute(query)                                                                                                                             
+
 		#result[0] is the present TS
 		#result[1] is the voltage
 		curvmon=cur
@@ -569,10 +937,28 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 #VmonTgraph1List.append(Vmontg1)
                 #VmonTgraph1List[counter].Write()
 		Vmontg1.Write()
-		
-		#status query
-		query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(status_id)+" and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
-		cur.execute(query)                                                                                                                             
+	
+
+
+		#do the query to fill the Histos with status
+                if len( statusIDToUse ) == 0:
+                	print "ERROR: len(statusIDToUse)=0"
+                	file = open("HVErr.log", "w")                                     			
+                        file.write("ERROR: len(statusIDToUse)=0")
+                        file.close()
+                elif len( statusIDToUse ) == 1:
+                	query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(statusIDToUse[0])+" and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
+                elif len( statusIDToUse ) > 1:
+                	query = "select TS,VALUE_NUMBER from EVENTHISTORY where ("
+                	for strIdx in range ( len( statusIDToUse ) ):
+                		query = query + "ELEMENT_ID = "+str( statusIDToUse[ strIdx ] )
+                		if ( len( statusIDToUse ) > 1 and strIdx < ( len( statusIDToUse ) - 1 ) ):
+                			query = query + " or "
+                	query = query + ") and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
+                		
+                print query 
+                cur.execute(query)                                                                                                                             
+
 		curstat=cur
 		statRec=[]
 		smonOnlyT = array ( 'd' )
