@@ -97,15 +97,14 @@ process.load('RecoLocalMuon.GEMRecHit.gemLocalReco_cff')
 
 # DEFINITION OF THE SUPERCHAMBERS INSIDE THE STAND
 for i in xrange(len(SuperChType)):
-  column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
-  if SuperChType[i]=='L' : size = 'L'
-  if SuperChType[i]=='S' : size = 'S'
-  if SuperChType[i]!='0' :
-    geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
-    print(geomFile)
+    column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
+    if SuperChType[i]=='L' : size = 'L'
+    if SuperChType[i]=='S' : size = 'S'
     if SuperChType[i]!='0' :
-      process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
-      print('-> Appended')
+        geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
+        print(geomFile)
+        process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
+        print('-> Appended')
 
 # Config importation & settings
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.eventsPerJob))
@@ -124,8 +123,7 @@ process.options = cms.untracked.PSet()
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Production Info
-process.configurationMetadata = cms.untracked.PSet(
-                                                   annotation = cms.untracked.string('CosmicMuonGenerator nevts:100'),
+process.configurationMetadata = cms.untracked.PSet(annotation = cms.untracked.string('CosmicMuonGenerator nevts:100'),
                                                    name = cms.untracked.string('Applications'),
                                                    version = cms.untracked.string('$Revision: 1.19 $')
                                                    )
@@ -137,8 +135,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 # Cosmic Muon generator
 process.generator = cms.EDProducer("CosmicGun",
                                    AddAntiParticle = cms.bool(True),
-                                   PGunParameters = cms.PSet(
-                                                             MinPt = cms.double(99.99),
+                                   PGunParameters = cms.PSet(MinPt = cms.double(99.99),
                                                              MaxPt = cms.double(100.01),
                                                              MinPhi = cms.double(3.141592),
                                                              MaxPhi = cms.double(-3.141592),
@@ -162,17 +159,14 @@ process.mix = cms.EDProducer("MixingModule",
                              playback = cms.untracked.bool(False),
                              useCurrentProcessOnly = cms.bool(False),
                              digitizers = cms.PSet(),
-                             
-                             mixObjects = cms.PSet(
-                                                   mixSH = cms.PSet(
-                                                                    crossingFrames = cms.untracked.vstring('MuonGEMHits'),
+
+                             mixObjects = cms.PSet(mixSH = cms.PSet(crossingFrames = cms.untracked.vstring('MuonGEMHits'),
                                                                     input = cms.VInputTag(cms.InputTag("g4SimHits","MuonGEMHits")),
                                                                     type = cms.string('PSimHit'),
                                                                     subdets = cms.vstring('MuonGEMHits'),
                                                                     )
                                                    ),
-                             mixTracks = cms.PSet(
-                                                  input = cms.VInputTag(cms.InputTag("g4SimHits")),
+                             mixTracks = cms.PSet(input = cms.VInputTag(cms.InputTag("g4SimHits")),
                                                   makeCrossingFrame = cms.untracked.bool(True),
                                                   type = cms.string('SimTrack')
                                                   ),
@@ -189,14 +183,14 @@ process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
 
 # Fast Efficiency
 process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
-                                         process.MuonServiceProxy,
-                                         verboseSimHit = cms.untracked.int32(1),
-                                         recHitsInputLabel = cms.InputTag('gemRecHits'),
-                                         maxClusterSize = cms.double(runConfig.maxClusterSize),
-                                         minClusterSize = cms.double(runConfig.minClusterSize),
-                                         nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
-                                         RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
-                                         )
+                                           process.MuonServiceProxy,
+                                           verboseSimHit = cms.untracked.int32(1),
+                                           recHitsInputLabel = cms.InputTag('gemRecHits'),
+                                           maxClusterSize = cms.double(runConfig.maxClusterSize),
+                                           minClusterSize = cms.double(runConfig.minClusterSize),
+                                           nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
+                                           RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
+                                           )
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('fast_efficiency_'+strOutput)
@@ -228,12 +222,11 @@ process.schedule = cms.Schedule(process.generation_step,
                                 process.simulation_step,
                                 process.digitisation_step,
                                 process.reconstruction_step,
-																process.fast_efficiency_step,
+                                process.fast_efficiency_step,
                                 process.endjob_step
                                 )
 
-process.RandomNumberGeneratorService.generator = cms.PSet(
-                                                          initialSeed = cms.untracked.uint32( ( nIdxJob + 1 ) + options.runNum*10000),
+process.RandomNumberGeneratorService.generator = cms.PSet(initialSeed = cms.untracked.uint32( ( nIdxJob + 1 ) + options.runNum*10000),
                                                           engineName = cms.untracked.string('HepJamesRandom')
                                                           )
 process.RandomNumberGeneratorService.simMuonGEMDigis = process.RandomNumberGeneratorService.generator

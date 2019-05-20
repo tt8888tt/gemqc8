@@ -26,7 +26,7 @@ options.register("eventsPerJob",-1,
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
                  "The number of events (in each file)")
-                 
+
 options.register('mps',
                  '',
                  VarParsing.VarParsing.multiplicity.list,
@@ -89,7 +89,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 # DEFINITION OF THE SUPERCHAMBERS INSIDE THE STAND
 for i in xrange(len(SuperChType)):
-  column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
+    column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
   if SuperChType[i]=='L' : size = 'L'
   if SuperChType[i]=='S' : size = 'S'
   if SuperChType[i]!='0' :
@@ -115,11 +115,11 @@ process.source = cms.Source(
                             hasFerolHeader = cms.untracked.bool(False),
                             runNumber = cms.untracked.int32(run_number),
                             )
-			    
+
 process.options = cms.untracked.PSet(
                                      SkipEvent = cms.untracked.vstring('ProductNotFound')
                                      )
-				     
+
 ############## DB file #################
 from CondCore.CondDB.CondDB_cfi import *
 CondDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/cms/DB/conddb')

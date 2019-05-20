@@ -99,12 +99,11 @@ process.load('RecoLocalMuon.GEMRecHit.gemLocalReco_cff')
 
 # DEFINITION OF THE SUPERCHAMBERS INSIDE THE STAND
 for i in range(len(SuperChType)):
-  column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
-  if SuperChType[i]=='L' : size = 'L'
-  if SuperChType[i]=='S' : size = 'S'
-  if SuperChType[i]!='0' : geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
-  if SuperChType[i]!='0' : process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
-#if i!='13' : process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
+    column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
+    if SuperChType[i]=='L' : size = 'L'
+    if SuperChType[i]=='S' : size = 'S'
+    if SuperChType[i]!='0' : geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
+    if SuperChType[i]!='0' : process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
 
 # Config importation & settings
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.eventsPerJob))
@@ -178,7 +177,7 @@ process.mix = cms.EDProducer("MixingModule",
                              playback = cms.untracked.bool(False),
                              useCurrentProcessOnly = cms.bool(False),
                              digitizers = cms.PSet(),
-                             
+
                              mixObjects = cms.PSet(
                                                    mixSH = cms.PSet(
                                                                     crossingFrames = cms.untracked.vstring('MuonGEMHits'),

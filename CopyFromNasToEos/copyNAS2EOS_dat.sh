@@ -54,5 +54,3 @@ echo "All files have been copied!"
 else
 echo "Some files are missing!"
 fi
-
-
