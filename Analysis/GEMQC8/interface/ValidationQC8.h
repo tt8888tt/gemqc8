@@ -65,22 +65,18 @@ public:
   std::vector<std::string> SuperChamType;
   std::vector<double> vecChamType;
   bool makeTrack, isMC;
-  
+
   const GEMGeometry* GEMGeometry_;
-  
-  static double stampToReal(edm::Timestamp time) {
-    return time.unixTime() + time.microsecondOffset()*1e-6;
-  }
-  
+
   std::vector<GEMChamber> gemChambers;
   int n_ch;
   MuonServiceProxy* theService;
   CosmicMuonSmoother* theSmoother;
   KFUpdator* theUpdator;
   edm::EDGetToken InputTagToken_, InputTagToken_RH, InputTagToken_TR, InputTagToken_TS, InputTagToken_TJ, InputTagToken_TI, InputTagToken_TT, InputTagToken_DG, InputTagToken_US;
-  
+
 private:
-  
+
   TH1D *goodVStriggeredEvts;
   TH3D *hitsVFATnum;
   TH3D *hitsVFATdenom;
@@ -93,7 +89,7 @@ private:
   TH1D *residualPhi;
   TH1D *residualEta;
   TH1D *recHitsPerTrack;
-  
+
   TTree *tree;
   int run;
   int lumi;
