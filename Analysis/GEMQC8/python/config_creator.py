@@ -19,7 +19,7 @@ def configMaker(run_number):
 
 	in_name = 'run'
 	for i in range(6-len(run_number)):
-	    in_name = in_name + '0'
+		in_name = in_name + '0'
 	in_name = in_name + run_number + '_Dummy_Dummy_2018.dat'
 
 	out_name = 'out_run_'
@@ -52,24 +52,24 @@ def configMaker(run_number):
 	                      '0','0','0','0','0']
                           
 	with open(infileName) as infile:
-	    for line in infile:
-	        line = line.split('\n')[0]
-	        SCtype = line.split(',')[0]
-	        if (SCtype!='RunNumber' and SCtype!='ChamberName'):
-	            position = line.split(',')[1]
-	            row = int(position.split('/')[0])
-	            column = int(position.split('/')[1])
-	            SCnumber = (5 * (column - 1)) + (row - 1)
-	            StandConfiguration[SCnumber] = (SCtype)[8]			
+		for line in infile:
+			line = line.split('\n')[0]
+			SCtype = line.split(',')[0]
+			if (SCtype!='RunNumber' and SCtype!='ChamberName'):
+				position = line.split(',')[1]
+				row = int(position.split('/')[0])
+				column = int(position.split('/')[1])
+				SCnumber = (5 * (column - 1)) + (row - 1)
+				StandConfiguration[SCnumber] = (SCtype)[8]
 
 	outfile.write('StandConfiguration = [\\\n')
 	for entry in range(15):
-	    if (entry==4 or entry==9):
-	            outfile.write('\'' + StandConfiguration[entry] + '\',\\\n')
-	    elif (entry==14):
-	        outfile.write('\'' + StandConfiguration[entry] + '\']')
-	    else:
-	        outfile.write('\'' + StandConfiguration[entry] + '\',')
+		if (entry==4 or entry==9):
+			outfile.write('\'' + StandConfiguration[entry] + '\',\\\n')
+		elif (entry==14):
+			outfile.write('\'' + StandConfiguration[entry] + '\']')
+		else:
+			outfile.write('\'' + StandConfiguration[entry] + '\',')
 
 	outfile.close()
 
@@ -78,5 +78,5 @@ def configMaker(run_number):
 	print("\n")
 
 if __name__ == '__main__':
-    run_num = sys.argv[1]
-    configMaker(run_num)
+	run_num = sys.argv[1]
+	configMaker(run_num)

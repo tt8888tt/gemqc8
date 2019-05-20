@@ -5,11 +5,11 @@ import os, sys, io
 def conversion(in_name):
 
 	if in_name.endswith('.xls'):
-	    with xlrd.open_workbook(in_name) as infile:
-	        sh = infile.sheet_by_index(0)  # or wb.sheet_by_name('name_of_the_sheet_here')
-	        out_name = in_name[:-4] + '.csv'
-	        if sys.version_info[0] == 2: # python2
-	            with open(out_name, 'wb') as outfile:
+		with xlrd.open_workbook(in_name) as infile:
+			sh = infile.sheet_by_index(0)  # or wb.sheet_by_name('name_of_the_sheet_here')
+			out_name = in_name[:-4] + '.csv'
+			if sys.version_info[0] == 2: # python2
+				with open(out_name, 'wb') as outfile:
 	                c = csv.writer(outfile)
 	                for r in range(sh.nrows):
 	                    c.writerow(sh.row_values(r))
