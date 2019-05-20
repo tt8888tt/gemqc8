@@ -93,8 +93,8 @@ for i in xrange(len(SuperChType)):
   if SuperChType[i]=='L' : size = 'L'
   if SuperChType[i]=='S' : size = 'S'
   if SuperChType[i]!='0' :
-    geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
-    print(geomFile)
+		geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
+		print(geomFile)
 		process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
 		print('-> Appended')
 

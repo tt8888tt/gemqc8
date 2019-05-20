@@ -42,11 +42,11 @@ SuperChType = runConfig.StandConfiguration
 print(SuperChType)
 
 # Define and find column type. Default is L. If it is found an S in a column, that column type becomes S.
-colType = ['L','L','L']
+colType = ['S','S','S']
 for col in range(0,3):
 	for row in range(0,5):
-		if (SuperChType[col*5+row]=='S'):
-			colType[col] = 'S'
+		if (SuperChType[col*5+row]=='L'):
+			colType[col] = 'L'
 
 print(colType)
 
