@@ -53,19 +53,19 @@ print(colType)
 SuperChSeedingLayers = []
 
 for i in range (0,30):
-	SuperChSeedingLayers.append(0)
+    SuperChSeedingLayers.append(0)
 
 for j in range (0,3):
-	for i in range (5*j,5*(j+1)):
-		if (SuperChType[i]!='0'):
-			SuperChSeedingLayers[i*2]=1
-			SuperChSeedingLayers[i*2+1]=3
-			break
-	for i in range (5*(j+1)-1,5*j-1,-1):
-		if (SuperChType[i]!='0'):
-			SuperChSeedingLayers[i*2]=4
-			SuperChSeedingLayers[i*2+1]=2
-			break
+    for i in range (5*j,5*(j+1)):
+        if (SuperChType[i]!='0'):
+            SuperChSeedingLayers[i*2]=1
+            SuperChSeedingLayers[i*2+1]=3
+            break
+    for i in range (5*(j+1)-1,5*j-1,-1):
+        if (SuperChType[i]!='0'):
+            SuperChSeedingLayers[i*2]=4
+            SuperChSeedingLayers[i*2+1]=2
+            break
 
 print(SuperChSeedingLayers)
 
@@ -89,14 +89,14 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 # DEFINITION OF THE SUPERCHAMBERS INSIDE THE STAND
 for i in xrange(len(SuperChType)):
-	column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
-	if SuperChType[i]=='L' : size = 'L'
-	if SuperChType[i]=='S' : size = 'S'
-	if SuperChType[i]!='0' :
-		geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
-		print(geomFile)
-		process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
-		print('-> Appended')
+    column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
+    if SuperChType[i]=='L' : size = 'L'
+    if SuperChType[i]=='S' : size = 'S'
+    if SuperChType[i]!='0' :
+        geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
+        print(geomFile)
+        process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
+        print('-> Appended')
 
 # Config importation & settings
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.eventsPerJob))
@@ -107,18 +107,16 @@ for i in range(6-len(str(run_number))):
 fpath = fpath + str(run_number) + "/"
 
 # Input source
-process.source = cms.Source(
-														"GEMLocalModeDataSource",
-														fileNames = cms.untracked.vstring ([fpath+x for x in os.listdir(fpath) if x.endswith(".dat")]),
-														skipEvents=cms.untracked.uint32(0),
-														fedId = cms.untracked.int32(888),  # which fedID to assign
-														hasFerolHeader = cms.untracked.bool(False),
-														runNumber = cms.untracked.int32(run_number),
-														)
+process.source = cms.Source("GEMLocalModeDataSource",
+                            fileNames = cms.untracked.vstring ([fpath+x for x in os.listdir(fpath) if x.endswith(".dat")]),
+                            skipEvents=cms.untracked.uint32(0),
+                            fedId = cms.untracked.int32(888),  # which fedID to assign
+                            hasFerolHeader = cms.untracked.bool(False),
+                            runNumber = cms.untracked.int32(run_number)
+                            )
 
-process.options = cms.untracked.PSet(
-																		 SkipEvent = cms.untracked.vstring('ProductNotFound')
-																		 )
+process.options = cms.untracked.PSet(SkipEvent = cms.untracked.vstring('ProductNotFound')
+                                     )
 
 ############## DB file #################
 from CondCore.CondDB.CondDB_cfi import *
@@ -129,13 +127,12 @@ eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
 CondDB.connect = cms.string('sqlite_fip:Analysis/GEMQC8/data/EMapFiles/'+eMapFile)
 
 process.GEMCabling = cms.ESSource("PoolDBESSource",
-																	CondDB,
-																	toGet = cms.VPSet(cms.PSet(
-																														 record = cms.string('GEMeMapRcd'),
-																														 tag = cms.string('GEMeMap_v6')
-																														 )
-																										)
-																	)
+                                  CondDB,
+                                  toGet = cms.VPSet(cms.PSet(record = cms.string('GEMeMapRcd'),
+                                                             tag = cms.string('GEMeMap_v6')
+                                                             )
+                                                    )
+                                  )
 ####################################
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
@@ -184,10 +181,9 @@ process.AlignmentTrackRecoQC8 = cms.EDProducer("AlignmentTrackRecoQC8",
                                                SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
                                                #isMC = cms.bool(False),
                                                MuonSmootherParameters = cms.PSet(PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),
-																																								 PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
-																																								 RescalingFactor = cms.double(5.0)
-																																								 )
-																							 )
+                                                                                 PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
+                                                                                 RescalingFactor = cms.double(5.0)
+                                                                                 )
 process.AlignmentTrackRecoQC8.ServiceParameters.GEMLayers = cms.untracked.bool(True)
 process.AlignmentTrackRecoQC8.ServiceParameters.CSCLayers = cms.untracked.bool(False)
 process.AlignmentTrackRecoQC8.ServiceParameters.RPCLayers = cms.bool(False)
@@ -215,14 +211,14 @@ process.AlignmentQC8 = cms.EDProducer('AlignmentQC8',
                                       SuperChamberType = cms.vstring(SuperChType),
                                       SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
                                       MuonSmootherParameters = cms.PSet(PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),
-																																				PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
-																																				RescalingFactor = cms.double(5.0)
-																																				)
-																			)
+                                                                        PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
+                                                                        RescalingFactor = cms.double(5.0)
+                                                                        )
+                                      )
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('alignment_'+strOutput)
-																	 )
+                                   )
 
 # Path and EndPath definitions
 process.rawTOhits_step = cms.Path(process.muonGEMDigis+process.gemRecHits)
@@ -235,7 +231,7 @@ process.schedule = cms.Schedule(process.rawTOhits_step,
                                 process.reconstruction_step,
                                 process.alignment_step,
                                 process.endjob_step
-																)
+                                )
 
 # enable validation event filtering
 process.rawTOhits_step.remove(process.validationEventFilter)

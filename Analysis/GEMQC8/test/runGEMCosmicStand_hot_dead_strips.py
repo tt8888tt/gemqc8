@@ -61,11 +61,11 @@ for j in range (0,3):
             SuperChSeedingLayers[i*2]=1
             SuperChSeedingLayers[i*2+1]=3
             break
-  for i in range (5*(j+1)-1,5*j-1,-1):
-      if (SuperChType[i]!='0'):
-          SuperChSeedingLayers[i*2]=4
-          SuperChSeedingLayers[i*2+1]=2
-          break
+    for i in range (5*(j+1)-1,5*j-1,-1):
+        if (SuperChType[i]!='0'):
+            SuperChSeedingLayers[i*2]=4
+            SuperChSeedingLayers[i*2+1]=2
+            break
 
 print(SuperChSeedingLayers)
 

@@ -37,19 +37,19 @@ SuperChType = ['L','L','L','L','L',\
 SuperChSeedingLayers = []
 
 for i in range (0,30):
-  SuperChSeedingLayers.append(0)
+    SuperChSeedingLayers.append(0)
 
 for j in range (0,3):
-  for i in range (5*j,5*(j+1)):
-    if (SuperChType[i]!='0'):
-      SuperChSeedingLayers[i*2]=1
-      SuperChSeedingLayers[i*2+1]=3
-      break
-  for i in range (5*(j+1)-1,5*j-1,-1):
-    if (SuperChType[i]!='0'):
-      SuperChSeedingLayers[i*2]=4
-      SuperChSeedingLayers[i*2+1]=2
-      break
+    for i in range (5*j,5*(j+1)):
+        if (SuperChType[i]!='0'):
+            SuperChSeedingLayers[i*2]=1
+            SuperChSeedingLayers[i*2+1]=3
+            break
+    for i in range (5*(j+1)-1,5*j-1,-1):
+        if (SuperChType[i]!='0'):
+            SuperChSeedingLayers[i*2]=4
+            SuperChSeedingLayers[i*2+1]=2
+            break
 
 # Alignment of chambers
 trueDx = [0,0,0,0,0,\
@@ -98,12 +98,15 @@ process.load('SimMuon.GEMDigitizer.muonGEMDigi_cff')
 process.load('RecoLocalMuon.GEMRecHit.gemLocalReco_cff')
 
 # DEFINITION OF THE SUPERCHAMBERS INSIDE THE STAND
-for i in range(len(SuperChType)):
+for i in xrange(len(SuperChType)):
     column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
     if SuperChType[i]=='L' : size = 'L'
     if SuperChType[i]=='S' : size = 'S'
-    if SuperChType[i]!='0' : geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
-    if SuperChType[i]!='0' : process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
+    if SuperChType[i]!='0' :
+        geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
+        print(geomFile)
+        process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
+        print('-> Appended')
 
 # Config importation & settings
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.eventsPerJob))
