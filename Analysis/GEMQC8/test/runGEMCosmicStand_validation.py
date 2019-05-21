@@ -62,11 +62,11 @@ for j in range (0,3):
             SuperChSeedingLayers[i*2]=1
             SuperChSeedingLayers[i*2+1]=3
             break
-  for i in range (5*(j+1)-1,5*j-1,-1):
-      if (SuperChType[i]!='0'):
-          SuperChSeedingLayers[i*2]=4
-          SuperChSeedingLayers[i*2+1]=2
-          break
+    for i in range (5*(j+1)-1,5*j-1,-1):
+        if (SuperChType[i]!='0'):
+            SuperChSeedingLayers[i*2]=4
+            SuperChSeedingLayers[i*2+1]=2
+            break
 
 print(SuperChSeedingLayers)
 
@@ -95,9 +95,9 @@ for i in xrange(len(SuperChType)):
     if SuperChType[i]=='S' : size = 'S'
     if SuperChType[i]!='0' :
         geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
-		print(geomFile)
-		process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
-		print('-> Appended')
+        print(geomFile)
+        process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
+        print('-> Appended')
 
 # Config importation & settings
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.eventsPerJob))
