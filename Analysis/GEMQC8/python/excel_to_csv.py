@@ -21,7 +21,7 @@ def conversion(in_name):
 
 	if in_name.endswith('.xlsx'):
 		infile = openpyxl.load_workbook(in_name)
-		sh = infile.activeù
+		sh = infile.active
 		out_name = in_name[:-5] + '.csv'
 		if sys.version_info[0] == 2: # python2
 			with open(out_name, 'wb') as outfile:
