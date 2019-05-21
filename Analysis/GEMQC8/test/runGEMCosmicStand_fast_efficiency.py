@@ -90,10 +90,10 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 # DEFINITION OF THE SUPERCHAMBERS INSIDE THE STAND
 for i in xrange(len(SuperChType)):
     column_row = '_c%d_r%d' % ((i/5)+1, i%5+1)
-  if SuperChType[i]=='L' : size = 'L'
-  if SuperChType[i]=='S' : size = 'S'
-  if SuperChType[i]!='0' :
-		geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
+    if SuperChType[i]=='L' : size = 'L'
+    if SuperChType[i]=='S' : size = 'S'
+    if SuperChType[i]!='0' :
+        geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
 		print(geomFile)
 		process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
 		print('-> Appended')
