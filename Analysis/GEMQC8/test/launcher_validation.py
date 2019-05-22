@@ -33,7 +33,7 @@ if __name__ == '__main__':
         fileToBeConverted = alignmentTablesPath + "StandAlignmentValues_run" + run_number + ".xlsx"
         excel_to_csv.conversion(fileToBeConverted)
 
-        # Generate configuration file
+    # Generate configuration file
     config_creator.configMaker(run_number)
     time.sleep(1)
 
@@ -44,6 +44,7 @@ if __name__ == '__main__':
     # Retrieve start date and time of the run
     startDateTimeFromDB = date_time_runInfoDB.startDateTime(run_number,userDB_add)
     startDateTimeFromDB = startDateTimeFromDB.rsplit(':', 1)[0]
+    startDateTimeFromDB = startDateTimeFromDB.split(' ')[0] + '_' + startDateTimeFromDB.split(' ')[1]
     time.sleep(1)
 
     # Compiling after the generation of the geometry files

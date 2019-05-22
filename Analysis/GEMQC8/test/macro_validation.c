@@ -235,6 +235,63 @@ void macro_validation(int run, string configDir, string startDateTimeRun)
 	}
 	else cout << "Error opening file: " << configName << endl;
 
+	// Calculate endDateTimeRun
+
+	int NumberOfEvents = 0;
+	tree->SetBranchAddress("ev",&NumberOfEvents);
+	tree->GetEntry(nTotEvents-1);
+
+	string endDateTimeRun = startDateTimeRun;
+	string delimiter = "";
+	float avgCosmicRate = 100.0;
+	int approxRunningTimeInMinutes = int((double(NumberOfEvents)/avgCosmicRate)/60.0);
+
+	delimiter = "-";
+	int year = stoi(endDateTimeRun.substr(0, endDateTimeRun.find(delimiter)));
+	endDateTimeRun.erase(0, endDateTimeRun.find(delimiter) + delimiter.length());
+	delimiter = "-";
+	int month = stoi(endDateTimeRun.substr(0, endDateTimeRun.find(delimiter)));
+	endDateTimeRun.erase(0, endDateTimeRun.find(delimiter) + delimiter.length());
+	delimiter = "_";
+	int day = stoi(endDateTimeRun.substr(0, endDateTimeRun.find(delimiter)));
+	endDateTimeRun.erase(0, endDateTimeRun.find(delimiter) + delimiter.length());
+	delimiter = ":";
+	int hour = stoi(endDateTimeRun.substr(0, endDateTimeRun.find(delimiter)));
+	endDateTimeRun.erase(0, endDateTimeRun.find(delimiter) + delimiter.length());
+	int minutes = stoi(endDateTimeRun);
+
+	startDateTimeRun = to_string(year) + "-" + string(2-to_string(month).length(),'0').append(to_string(month)) + "-" + string(2-to_string(day).length(),'0').append(to_string(day)) + " " + string(2-to_string(hour).length(),'0').append(to_string(hour)) + ":" + string(2-to_string(minutes).length(),'0').append(to_string(minutes));
+
+	int plus_hours = int((minutes + approxRunningTimeInMinutes)/60);
+	minutes = (minutes + approxRunningTimeInMinutes)%60;
+	int plus_days = int((hour + plus_hours)/24);
+	hour = (hour + plus_hours)%24;
+	int plus_months = 0;
+	if (month <= 7 && month%2 == 1) {
+		plus_months = int((day + plus_days)/31);
+		day = (day + plus_days)%31;
+	}
+	if (month == 2) {
+		plus_months = int((day + plus_days)/28);
+		day = (day + plus_days)%28;
+	}
+	if (month != 2 && month <= 7 && month%2 == 0) {
+		plus_months = int((day + plus_days)/30);
+		day = (day + plus_days)%30;
+	}
+	if (month >= 8 && month%2 == 0) {
+		plus_months = int((day + plus_days)/31);
+		day = (day + plus_days)%31;
+	}
+	if (month >= 8 && month%2 == 1) {
+		plus_months = int((day + plus_days)/30);
+		day = (day + plus_days)%30;
+	}
+
+	month = month + plus_months;
+
+	endDateTimeRun = to_string(year) + "-" + string(2-to_string(month).length(),'0').append(to_string(month)) + "-" + string(2-to_string(day).length(),'0').append(to_string(day)) + " " + string(2-to_string(hour).length(),'0').append(to_string(hour)) + ":" + string(2-to_string(minutes).length(),'0').append(to_string(minutes));
+
 	// Results for the 30 chambers
 
 	TCanvas *Canvas = new TCanvas("Canvas","Canvas",0,0,1000,800);
@@ -284,57 +341,6 @@ void macro_validation(int run, string configDir, string startDateTimeRun)
 		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
-
-		// Calculate endDateTimeRun 2019-05-14 19:06:32
-
-		string endDateTimeRun = startDateTimeRun;
-		string delimiter = "";
-		float avgCosmicRate = 100.0;
-		int approxRunningTimeInMinutes = int((nTotEvents/avgCosmicRate)/60.0);
-
-		delimiter = "-";
-		int year = stoi(endDateTimeRun.substr(0, s.find(delimiter)));
-		endDateTimeRun.erase(0, s.find(delimiter) + delimiter.length());
-		delimiter = "-";
-		int month = stoi(endDateTimeRun.substr(0, s.find(delimiter)));
-		endDateTimeRun.erase(0, s.find(delimiter) + delimiter.length());
-		delimiter = " ";
-		int day = stoi(endDateTimeRun.substr(0, s.find(delimiter)));
-		endDateTimeRun.erase(0, s.find(delimiter) + delimiter.length());
-		delimiter = ":";
-		int hour = stoi(endDateTimeRun.substr(0, s.find(delimiter)));
-		endDateTimeRun.erase(0, s.find(delimiter) + delimiter.length());
-		int minutes = stoi(endDateTimeRun);
-
-		int plus_hours = int((minutes + approxRunningTimeInMinutes)/60);
-		minutes = (minutes + approxRunningTimeInMinutes)%60;
-		int plus_days = int((hour + plus_hours)/24);
-		hour = (hour + plus_hours)%24;
-		int plus_months = 0;
-		if (month <= 7 && month%2 == 1) {
-			plus_months = int((day + plus_days)/31);
-			day = (day + plus_days)%31;
-		}
-		if (month == 2) {
-			plus_months = int((day + plus_days)/28);
-			day = (day + plus_days)%28;
-		}
-		if (month != 2 && month <= 7 && month%2 == 0) {
-			plus_months = int((day + plus_days)/30);
-			day = (day + plus_days)%30;
-		}
-		if (month >= 8 && month%2 == 0) {
-			plus_months = int((day + plus_days)/31);
-			day = (day + plus_days)%31;
-		}
-		if (month >= 8 && month%2 == 1) {
-			plus_months = int((day + plus_days)/30);
-			day = (day + plus_days)%30;
-		}
-
-		month = month + plus_months;
-
-		endDateTimeRun = to_string(year) + "-" + to_string(month) + "-" + to_string(day) + " " + to_string(hour) + ":" + to_string(minutes);
 
 		// Efficiency results in csv files
 
