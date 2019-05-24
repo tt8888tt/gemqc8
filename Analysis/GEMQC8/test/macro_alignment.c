@@ -85,9 +85,9 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
   // Getting the number of events
   TH1D *hevt = (TH1D*)infile->Get(direc+"hev");
   int evt_tot_number = hevt->GetBinContent(1);
-  
+
   cout << "Number of events = " << evt_tot_number << endl;
-  
+
   // Histogram declaration
   char *histname = new char[20];
   char *histoname = new char[20];
@@ -100,7 +100,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
 	  resXperSC[i_SC][i_eta] = new TH1D(histname,"",300,-3,3);
         }
     }
-  
+
   double resEtaY[i_Eta];
   double resEtaYError[i_Eta];
   int dx_fail=0;
@@ -108,7 +108,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
   char *cnvname = new char[20];
   TCanvas *cnvResX[i_maxSC];
   TCanvas *cnvResCorrPlot[i_maxSC];
-  
+
   double dx[i_maxSC], dx_prev[i_maxSC];
   double rz[i_maxSC], rz_prev[i_maxSC];
   Float_t dx_pre[i_maxC], rz_pre[i_maxC];
@@ -127,15 +127,15 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
       for (int i_SC=0; i_SC<i_maxSC; i_SC++)
 	{
 	  dx_prev[i_SC] = dx_pre[i_SC*2];
- 	  rz_prev[i_SC] = rz_pre[i_SC*2]; 
-	  cout << "prev dx " <<  dx_prev[i_SC]; 
-	  cout << " prev rz " <<  rz_prev[i_SC] << endl; 
+ 	  rz_prev[i_SC] = rz_pre[i_SC*2];
+	  cout << "prev dx " <<  dx_prev[i_SC];
+	  cout << " prev rz " <<  rz_prev[i_SC] << endl;
 	}
     }
-  
+
   // Residuals per SC
   cout << "Starting the analysis of run " << run << endl;
-  
+
   for (int i_SC=0; i_SC<i_maxSC; i_SC++)
     {
       sprintf(cnvname,"cnv_SC_%u_%u",(i_SC%5)+1,(i_SC/5)+1);
@@ -154,7 +154,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
 	  resEtaYError[i_eta] = GaussFit->GetParError(1);
 	  delete GaussFit;
     	}
-      
+
       cnvResCorrPlot[i_SC] = new TCanvas(cnvname,cnvname,0,0,1000,600);
       sprintf(histname,"resCorrPlot_SC_%u_%u",(i_SC%5)+1,(i_SC/5)+1);
       TGraphErrors *resCorrPlotSC = new TGraphErrors(i_Eta,Ypos[chidx[i_SC]],resEtaY,0,resEtaYError);
@@ -164,12 +164,12 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
       resCorrPlotSC->Draw("ap");
       TF1 *LinFit = new TF1("LinFit","pol1",Ypos[chidx[i_SC]][i_Eta-1]-2,Ypos[chidx[i_SC]][0]+2);
       resCorrPlotSC->Fit(LinFit,"Q");
-      resCorrPlotSC->Write(histname);  
+      resCorrPlotSC->Write(histname);
       dx[i_SC] = -LinFit->GetParameter(0);
       rz[i_SC] = -LinFit->GetParameter(1);
       delete LinFit;
   }
-  
+
   cout << "shiftX = [";
   for (int i_SC=0; i_SC<i_maxSC; i_SC++)
     {
@@ -178,7 +178,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
       if (i_SC == 4 || i_SC == 9) cout << "\\" << endl;
       if (i_SC == 14) cout << "]\n" << endl;
     }
-  
+
   cout << "rotationZ = [";
   for (int i_SC=0; i_SC<i_maxSC; i_SC++)
     {
@@ -207,7 +207,7 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
       cerr << partialoutfilename << " is not correctly opened" << endl;
       exit(EXIT_FAILURE);
     }
-  
+
   for (int i_SC=0; i_SC<i_maxSC; i_SC++)
     {
       if(fabs(dx[i_SC])>0.03) dx_fail+=1;
@@ -241,4 +241,3 @@ void macro_alignment(int run, string runPath, TString AlignTablePath, int step){
       exit(EXIT_FAILURE);
     }
 }
-

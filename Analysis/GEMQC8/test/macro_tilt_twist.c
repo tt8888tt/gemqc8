@@ -12,10 +12,10 @@
 
 using namespace std;
 
-void macro_tilt_twist(int run, string runPath, TString AlignTablePath, int step){
+void macro_tilt_twist(int run, string runPath, TString AlignTablePath){
   // Getting the file
-  TString filename = "temp_out_reco_MC_1_0.root";
-  TFile *infile = TFile::Open(filename);
+  TString filename = "temp_out_reco_MC_3_0.root";
+  TFile *infile = TFile::Open(filename, "UPDATE");
   bool opened = infile->IsOpen();
   if(opened == true)
     {
@@ -40,7 +40,7 @@ void macro_tilt_twist(int run, string runPath, TString AlignTablePath, int step)
 
   // Getting the information on chamber type
   ifstream standConfigFile;
-  string configName = "configureRun_cfi.py";
+  string configName = runPath+"/configureRun_cfi.py";
   standConfigFile.open(configName);
   string line, split, equal = " = ";
   vector<string> chType;
@@ -70,7 +70,8 @@ void macro_tilt_twist(int run, string runPath, TString AlignTablePath, int step)
       else  chidx[i_SC]=0;
   }
   // Getting the TTree
-  TTree *datatree = (TTree*)infile->Get("AlignmentValidationQC8/tree");
+  TString direc = "AlignmentQC8/";
+  TTree *datatree = (TTree*)infile->Get(direc+"tree");
   double dx_prev[i_maxSC], rz_prev[i_maxSC];
   Float_t dx_pre[i_maxSC], rz_pre[i_maxSC];
   for (int i_SC=0; i_SC<i_maxSC; i_SC++)
@@ -93,7 +94,6 @@ void macro_tilt_twist(int run, string runPath, TString AlignTablePath, int step)
           cout << " prev rz " <<  rz_prev[i_SC] << endl;
         }
     }
-  TString direc = "AlignmentQC8/";
   // Histogram declaration
   char *histname = new char[20];
   char *histoname = new char[20];
@@ -102,7 +102,7 @@ void macro_tilt_twist(int run, string runPath, TString AlignTablePath, int step)
     {
       for (int i_eta=0; i_eta<i_Eta; i_eta++)
         {
-          sprintf(histname,"Angular distribution (Px/Pz) Column %d iEta%d",i_col+1,i_eta+1);
+          sprintf(histname,"hColEtaPxPz_%d_%d",i_col+1,i_eta+1);
 	  hColEtaPxPZ[i_col][i_eta] = new TH1D(histname,"",300,-3,3);
         }
     }
@@ -116,8 +116,8 @@ void macro_tilt_twist(int run, string runPath, TString AlignTablePath, int step)
     {
       for (int i_eta=0; i_eta<i_Eta; i_eta++)
         {
-	  sprintf(cnvname,"cnv_ColEtaPx/Pz_%d_%d",(i_col)+1,(i_eta)+1);
-          sprintf(histoname,"hColEtaPx/Pz_%d_%d",i_col+1,i_eta+1);
+	  sprintf(cnvname,"cnv_ColEtaPxPz_%d_%d",(i_col)+1,(i_eta)+1);
+          sprintf(histoname,"hColEtaPxPz_%d_%d",i_col+1,i_eta+1);
 	  hColEtaPxPZ[i_col][i_eta]=(TH1D*)infile->Get(direc+histoname);
 	  AngDistrEtaY[i_eta]=hColEtaPxPZ[i_col][i_eta]->GetMean();
 	  AngDistrEtaYError[i_eta]=hColEtaPxPZ[i_col][i_eta]->GetMeanError();
@@ -131,6 +131,7 @@ void macro_tilt_twist(int run, string runPath, TString AlignTablePath, int step)
       angdistrCorrPlotSC->Draw("ap");
       TF1 *LinFit = new TF1("LinFit","pol1",Ypos[chidx[i_col*5]][i_Eta-1]-2,Ypos[chidx[i_col*5]][0]+2);
       angdistrCorrPlotSC->Fit(LinFit,"Q");
+      angdistrCorrPlotSC->Write(histname);
       intercept[i_col] = LinFit->GetParameter(0);
       slope[i_col] = LinFit->GetParameter(1);
       delete LinFit;
@@ -142,16 +143,16 @@ void macro_tilt_twist(int run, string runPath, TString AlignTablePath, int step)
       dx_tilt[i_SC] = intercept[i_SC/5]*(z-z0);
       rz_twist[i_SC] = asin(slope[i_SC/5]*(z-z0));
     }
-  
+
   for (int i_SC=0; i_SC<i_maxSC; i_SC++)
     {
       dx_tilt[i_SC] += dx_prev[i_SC];
       rz_twist[i_SC] += rz_prev[i_SC];
     }
-  
+
   // Writing the output in csv format
   char *ofilename = new char[70];
-  sprintf(ofilename,"../data/StandAligmentTables/StandAlignmentValues_run%d.csv", run);
+  sprintf(ofilename,AlignTablePath+"StandAligmentTables/StandAlignmentValues_run%d.csv", run);
   ofstream oFile(ofilename, std::ios_base::out | std::ios_base::trunc);
   if (oFile.is_open())
     {

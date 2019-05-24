@@ -35,12 +35,12 @@ public:
 	std::vector<std::string> SuperChamType;
 	std::vector<double> vecChamType;
 	bool makeTrack, isMC;
-	
+
 	std::vector<double> trueDx;
 	std::vector<double> trueRz;
 	std::vector<double> shiftX;
 	std::vector<double> rotationZ;
-	
+
 private:
 	const GEMGeometry* GEMGeometry_;
 	std::vector<GEMChamber> gemChambers;
@@ -49,7 +49,7 @@ private:
 	CosmicMuonSmoother* theSmoother;
 	KFUpdator* theUpdator;
 	edm::EDGetToken InputTagToken_, InputTagToken_RH, InputTagToken_TR, InputTagToken_TS, InputTagToken_TJ, InputTagToken_TI, InputTagToken_TT, InputTagToken_DG, InputTagToken_US;
-	
+
 	TH1D *hev;
 	TTree *tree;
 	int run;
@@ -89,7 +89,7 @@ private:
 	float chEtaRecHitY[maxNlayer][maxNeta];
 	float chEtaRecHitZ[maxNlayer][maxNeta];
 	TH1D *hchEtaResidualX[maxNlayer/2][maxNeta];
-	TH1D *hColEtaPxPz[maxNphi][maxNeta];
+	TH1D *hColEtaPyPz[maxNphi][maxNeta];
 	float dx[maxNlayer];
 	float rz[maxNlayer];
 	float tDx[maxNlayer];
@@ -97,4 +97,3 @@ private:
 };
 
 #endif
-
