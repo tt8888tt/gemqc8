@@ -42,7 +42,8 @@ if __name__ == '__main__':
     time.sleep(1)
 
     # Retrieve start date and time of the run
-    startDateTimeFromDB = date_time_runInfoDB.startDateTime(run_number,userDB_add)
+    #startDateTimeFromDB = date_time_runInfoDB.startDateTime(run_number,userDB_add)
+    startDateTimeFromDB = "2019-03-14 09:04:00"
     startDateTimeFromDB = startDateTimeFromDB.rsplit(':', 1)[0]
     startDateTimeFromDB = startDateTimeFromDB.split(' ')[0] + '_' + startDateTimeFromDB.split(' ')[1]
     time.sleep(1)
