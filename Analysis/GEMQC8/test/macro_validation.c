@@ -362,8 +362,17 @@ void macro_validation(int run, string configDir, string startDateTimeRun)
 
 		for (int vfat=0; vfat<24; vfat++)
 		{
-			eff_value = eff1D[c]->GetY()[vfat];
-			error_value = (eff1D[c]->GetEYhigh()[vfat] + eff1D[c]->GetEYlow()[vfat]) / 2.0;
+			int pointIndex = 999;
+	    for (int j = 0; j < 24 ; j++)
+	    {
+	    	if ((eff1D[c]->GetX()[j] - vfat) == 0)
+	    	{
+	    		pointIndex = j;
+	    		break;
+	    	}
+	    }
+			eff_value = eff1D[c]->GetY()[pointIndex];
+			error_value = (eff1D[c]->GetEYhigh()[pointIndex] + eff1D[c]->GetEYlow()[pointIndex]) / 2.0;
 			int eta_partition = 7 - (vfat % 8);
 			double cls_mean = clusterSize1D[c][eta_partition]->GetMean();
 			double cls_sigma = clusterSize1D[c][eta_partition]->GetStdDev();

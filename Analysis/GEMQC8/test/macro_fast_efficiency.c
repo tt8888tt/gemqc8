@@ -333,8 +333,18 @@ void macro_fast_efficiency(int run, string configDir)
     entry = "ChamberName," + chamberName[i] + "\n";
     outfile << entry;
 
-		double eff_value = eff1D->GetY()[i];
-		double error_value = (eff1D->GetEYhigh()[i] + eff1D->GetEYlow()[i]) / 2.0;
+    int pointIndex = 999;
+    for (int j = 0; j < 30 ; j++)
+    {
+    	if ((eff1D->GetX()[j] - (c + 0.5)) == 0)
+    	{
+    		pointIndex = j;
+    		break;
+    	}
+    }
+
+		double eff_value = eff1D->GetY()[pointIndex];
+		double error_value = (eff1D->GetEYhigh()[pointIndex] + eff1D->GetEYlow()[pointIndex]) / 2.0;
 
 		cout << c << ": " << eff_value << " +- " << error_value << endl;
 
@@ -400,6 +410,8 @@ void macro_fast_efficiency(int run, string configDir)
 
 	// Plots of recHits per layer
 
+	Canvas->SetLogz();
+
 	for (int row=0; row<5; row++)
 	{
 		namename = "recHits_Row_" + to_string(row+1) + "_B" + "_run_" + to_string(run);
@@ -429,6 +441,8 @@ void macro_fast_efficiency(int run, string configDir)
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
 	}
+
+	Canvas->SetLogz(0);
 
   infile->Close();
 }
