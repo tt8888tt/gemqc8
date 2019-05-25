@@ -4,11 +4,11 @@ import os, sys, io
 def configMaker(run_number):
 
 	configTablesPath = os.path.abspath("config_creator.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
-	
+
 	runPath = os.path.abspath("config_creator.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
-	
+
 	infileName = configTablesPath + "StandGeometryConfiguration_run" + run_number + ".csv"
-	
+
 	with open(infileName) as infile:
 		for line in infile:
 			line = line.split('\n')[0]
@@ -16,11 +16,6 @@ def configMaker(run_number):
 			if (SCtype=='RunNumber'):
 				if (line.split(',')[1]!=run_number):
 					sys.exit('StandGeometryConfiguration file has something wrong: run rumber not matching...')
-
-	in_name = 'run'
-	for i in range(6-len(run_number)):
-		in_name = in_name + '0'
-	in_name = in_name + run_number + '_Dummy_Dummy_2018.dat'
 
 	out_name = 'out_run_'
 	for i in range(6-len(run_number)):
@@ -33,8 +28,7 @@ def configMaker(run_number):
 
 	outfile.write('RunNumber = ' + run_number + '\n\n')
 
-	outfile.write('# Input and output files name definition\n')
-	outfile.write('InputFileName = \'' + in_name + '\'\n')
+	outfile.write('# Output file name definition\n')
 	outfile.write('OutputFileName = \'' + out_name + '\'\n\n')
 
 	outfile.write('# Parameters definition\n')
@@ -50,7 +44,7 @@ def configMaker(run_number):
 	StandConfiguration = ['0','0','0','0','0',\
 	                      '0','0','0','0','0',\
 	                      '0','0','0','0','0']
-                          
+
 	with open(infileName) as infile:
 		for line in infile:
 			line = line.split('\n')[0]
