@@ -33,7 +33,6 @@ options.register('mps',
                  VarParsing.VarParsing.varType.int,
                  "List of MPs to process")
 
-
 options.parseArguments()
 
 # The superchambers in the 15 slots
