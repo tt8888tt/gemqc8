@@ -10,22 +10,23 @@ if __name__ == '__main__':
     run_number = sys.argv[1]
     xlsx_csv_conversion_flag = sys.argv[2]
 
+    cmsswBase = os.environ['CMSSW_BASE']
     # Different paths definition
-    srcPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/'
-    pyhtonModulesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
-    runPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
-    configTablesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
-    alignmentTablesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
-    resDirPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]
+    srcPath = cmsswBase+'/src'
+    pyhtonModulesPath = srcPath+'/gemqc8/Analysis/GEMQC8/python/'
+    runPath = srcPath+'/gemqc8/Analysis/GEMQC8/test/'
+    configTablesPath = srcPath+'/gemqc8/Analysis/GEMQC8/data/StandConfigurationTables/'
+    alignmentTablesPath = srcPath+'/gemqc8/Analysis/GEMQC8/data/StandAligmentTables/'
+    resDirPath = srcPath 
 
     sys.path.insert(0,pyhtonModulesPath)
 
-    import config_creator
-    import geometry_files_creator
+    import gemqc8.Analysis.config_creator as config_creator
+    import gemqc8.Analysis.geometry_files_creator as geometry_files_creator
 
     # Conversion from excel to csv files
     if (xlsx_csv_conversion_flag == "xlsxTOcsv=ON"):
-        import excel_to_csv
+        import gemqc8.Analysis.test.GEMQC8.excel_to_csv
         fileToBeConverted = configTablesPath + "StandGeometryConfiguration_run" + run_number + ".xlsx"
         excel_to_csv.conversion(fileToBeConverted)
         fileToBeConverted = alignmentTablesPath + "StandAlignmentValues_run" + run_number + ".xlsx"
@@ -75,7 +76,7 @@ if __name__ == '__main__':
     # Create folders for ouput plots per chamber
     import configureRun_cfi as runConfig
     SuperChType = runConfig.StandConfiguration
-    effoutDir = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + outDirName
+    effoutDir = srcPath + outDirName
     for i in range (0,30):
         if (SuperChType[int(i/2)] != '0'):
             plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i)

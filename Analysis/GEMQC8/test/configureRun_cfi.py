@@ -1,7 +1,7 @@
-RunNumber = 123
+RunNumber = 127
 
-# Output files name definition
-OutputFileName = 'out_run_000123.root'
+# Output file name definition
+OutputFileName = 'out_run_000127.root'
 
 # Parameters definition
 minClusterSize = 1
@@ -15,5 +15,5 @@ MulSigmaOnWindow = 5
 # Stand configuration definition
 StandConfiguration = [\
 '0','0','0','0','0',\
-'S','0','S','0','0',\
+'S','S','S','S','S',\
 '0','0','0','0','0']
