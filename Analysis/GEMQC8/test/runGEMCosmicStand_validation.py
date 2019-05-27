@@ -79,7 +79,7 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Analysis.GEMQC8.GeometryGEMCosmicStand_cff')
+process.load('gemqc8.Analysis.GeometryGEMCosmicStand_cff')
 process.load('Configuration.StandardSequences.MagneticField_0T_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
@@ -94,7 +94,7 @@ for i in xrange(len(SuperChType)):
     if SuperChType[i]=='L' : size = 'L'
     if SuperChType[i]=='S' : size = 'S'
     if SuperChType[i]!='0' :
-        geomFile = 'Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
+        geomFile = 'gemqc8/Analysis/GEMQC8/data/GeometryFiles/gem11'+size+column_row+'.xml'
         print(geomFile)
         process.XMLIdealGeometryESSource.geomXMLFiles.append(geomFile)
         print('-> Appended')
@@ -125,7 +125,7 @@ CondDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/cms/
 
 eMapFile = 'GEMeMap_'+colType[0]+colType[1]+colType[2]+'.db'
 
-CondDB.connect = cms.string('sqlite_fip:Analysis/GEMQC8/data/EMapFiles/'+eMapFile)
+CondDB.connect = cms.string('sqlite_fip:gemqc8/Analysis/GEMQC8/data/EMapFiles/'+eMapFile)
 
 process.GEMCabling = cms.ESSource("PoolDBESSource",
                                   CondDB,
