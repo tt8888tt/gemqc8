@@ -15,7 +15,7 @@ def HVQC8Mapping ( chamberName, position, runNumber ):
 
 	query = "select RUN_BEGIN, RUN_END from CMS_GEM_MUON_VIEW.QC8_GEM_CH_VFAT_EFF_VIEW_RH where CHAMBER_NAME ='"+str(chamberName)+"' and RUN_NUMBER='"+str(runNumber)+"'"
 
-	print query
+	#print query
 	cur.execute(query)
 	curStart = cur
 	for result in curStart:
@@ -66,14 +66,14 @@ def HVQC8Mapping ( chamberName, position, runNumber ):
         	periodBool[ periodIdx ] = 1
         	periodIdx = periodIdx + 1
         
-        print periodBool 
+        print "periodBool", periodBool 
 
 	#validity limits needed for the query of ELEMENT_ID
         #find the first one and the last one in the bool vector
         firstOne = periodBool.index(1)
         lastOne  = max(loc for loc, val in enumerate(periodBool) if val == 1)
-        print "firstOne", firstOne
-        print "lastOne", lastOne
+        #print "firstOne", firstOne
+        #print "lastOne", lastOne
 
 
 	position = position.replace("/","_")
@@ -106,18 +106,6 @@ def HVQC8Mapping ( chamberName, position, runNumber ):
         listAllBoardMappings.append( BoardMapList2 )
         listAllBoardMappings.append( BoardMapList3 )
 
-
-
-
-	
-	
-
-
-
-
-
-	
-
 	
 	position = position.replace("/","_")
 
@@ -143,7 +131,7 @@ def HVQC8Mapping ( chamberName, position, runNumber ):
         		continue
         	vmonNameList.append(vmon_name)
 
-	print vmonNameList
+	#print vmonNameList
 
 	
 	return vmonNameList
