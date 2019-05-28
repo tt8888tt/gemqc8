@@ -9,24 +9,30 @@ def HVEffSingleVfat( chamberName, runNumber, vfatNumber ):
 	db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R')
         cur=db.cursor()
 
-	chamberName = "'"+chamberName+"'"
-	query = "select CH_SERIAL_NUMBER, POSITION, RUN_NUMBER from CMS_GEM_MUON_VIEW.QC8_GEM_STAND_GEOMETRY_VIEW_RH where CH_SERIAL_NUMBER="+chamberName+" and RUN_NUMBER="+str(runNumber)
+	#print "chamberName", chamberName, "runNumber", runNumber, "vfatNumber", vfatNumber
+
+	#vfatNumber format: 0 1 2 ... 23
+	query = "select EFFICIENCY, EFFICIENCY_ERROR from CMS_GEM_MUON_VIEW.QC8_GEM_CH_VFAT_EFF_VIEW_RH where CHAMBER_NAME='"+chamberName+"' and RUN_NUMBER="+str(runNumber)+ " and VFAT_POSN="+str(vfatNumber)
         cur.execute(query)
-	curGeom = cur
-	for result in curGeom:
-		chamber_name 	= result[0]
-		position	= result[1] 
-		run_number	= result[2] 
+	curEff = cur
+	for result in curEff:
+		efficiency 	= result[0]
+		effError	= result[1] 
         
+	effList = [efficiency, effError]
         #print "CHAMBER_NAME: ", chamber_name, "POSITION: ", position, "RUN_NUMBER: ", run_number
 
-	return position
+	return effList
 
 
-#call the function
-#HVEffPosQC8Stand("GE1/1-X-L-CERN-0001",1)
-
-
-
+#TEST CODE
+#chNAME = "GE1/1-VII-L-CERN-0001"
+#runNUMBER = 12
+#vfatNUMBER = 4
+#howMANYVFATS = 24
+#HVEffSingleVfat( chNAME, runNUMBER, vfatNUMBER )
+#for vfatNUMBER in range( howMANYVFATS ):
+#	effLIST = HVEffSingleVfat( chNAME, runNUMBER, vfatNUMBER )
+#	print effLIST
 
 
