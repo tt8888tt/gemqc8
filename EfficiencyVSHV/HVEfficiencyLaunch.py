@@ -3,6 +3,7 @@
 
 import HVEfficiencyMonitor
 import ROOT
+import os, sys, io
 from datetime import datetime
 
 #ChambersList
@@ -11,7 +12,9 @@ from datetime import datetime
 #GE1/1-VII-L-CERN-0001	11,12
 #GE1/1-VII-L-CERN-0002	11,12
 
-fileChamber = "ChambersList.txt"
+fileChamber = sys.argv[1]
+
+#fileChamber = "ChambersList.txt"
 
 print ("Efficiency monitor: reading file "+ fileChamber + "\n")
 
