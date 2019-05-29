@@ -60,7 +60,7 @@ def HVEfficiencyMonitor( chamberName, runNumberList ):
 			chamberNameRootObj = chamberNameRootObj.replace( "-", "_" )
                         HVEFFtg1.SetName("Efficiency_vs_HV_"+chamberNameRootObj+"_VFAT"+str(idxVfat))
                         HVEFFtg1.SetTitle("Efficiency_vs_HV_"+chamberNameRootObj+"_VFAT"+str(idxVfat))
-                        HVEFFtg1.GetXaxis().SetTitle("HV [V]")
+                        HVEFFtg1.GetXaxis().SetTitle("Total HV on Chamber [V]")
                         HVEFFtg1.GetYaxis().SetTitle("Efficiency "+chamberName+" "+str(idxVfat))
                         #HVEFFtg1.Draw("ACP")
                                                                                                                  
