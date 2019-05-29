@@ -19,7 +19,7 @@ def conversion(in_name):
 				for r in sh.rows:
 					c.writerow([cell.value for cell in r])
 		print("\n")
-		print("Success: " + in_name + " converted to " + outname)
+		print("Success: " + in_name + " converted to " + out_name)
 		print("\n")
 
 	else:
