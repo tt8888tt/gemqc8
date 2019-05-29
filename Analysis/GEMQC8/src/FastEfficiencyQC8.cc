@@ -19,36 +19,36 @@ FastEfficiencyQC8::FastEfficiencyQC8(const edm::ParameterSet& cfg): GEMBaseValid
 	maxCLS = cfg.getParameter<double>("maxClusterSize");
 	theUpdator = new KFUpdator();
 	time(&rawTime);
-	
+
 	edm::Service<TFileService> fs;
-	
+
 	// Histograms declaration
-	
+
 	recHits3D = fs->make<TH3D>("recHits3D","recHits 3D map",200,-100,100,156,-61,95,83,-12,154); // volume defined by the scintillators
   recHits2DPerLayer = fs->make<TH3D>("recHits2DPerLayer","recHits per layer",400,-100,100,8,0,8,10,0,10);
   clusterSize = fs->make<TH3D>("clusterSize","clusterSize per chamber per eta partition",30,0,30,8,0,8,20,0,20);
 	occupancyIfConfirmedHits = fs->make<TH3D>("occupancyIfConfirmedHits","occupancy per strip if hits found in both the chambers",384,0,384,8,0,8,30,0,30);
 	DxCorrespondingRecHits = fs->make<TH1D>("DxCorrespondingRecHits","Delta x of corresponding recHits",600,-30,30);
 	DiEtaCorrespondingRecHits = fs->make<TH1D>("DiEtaCorrespondingRecHits","Delta iEta of corresponding recHits",16,-8,8);
-	
+
 	// nRecHitsPerEventPerChamber: evolution in time
 	nRecHitsPerEvtPerCh = fs->make<TH3D>("nRecHitsPerEvtPerCh","recHits per ieta per ch vs event (packages of 100 evts = 1 sec)",100000,0,10000000,30,0,30,8,0,8);
-	
+
 	// Numerator and denominator
 	numerator = fs->make<TH1D>("numerator","numerator",30,0,30);
 	denominator = fs->make<TH1D>("denominator","denominator",30,0,30);
-	
+
 	// Numerator and denominator: evolution in time
 	numeratorPerEvt = fs->make<TH2D>("numeratorPerEvt","numerator per ch vs event (packages of 6k evts = 1 min)",2000,0,12000000,30,-0.5,29.5);
 	denominatorPerEvt = fs->make<TH2D>("denominatorPerEvt","denominator per ch vs event (packages of 6k evts = 1 min)",2000,0,12000000,30,-0.5,29.5);
-		
+
 	// Tree branches declaration
-	
+
 	tree = fs->make<TTree>("tree", "Tree for QC8");
 	tree->Branch("run",&run,"run/I");
 	tree->Branch("lumi",&lumi,"lumi/I");
 	tree->Branch("ev",&nev,"ev/I");
-	
+
 	printf("End of FastEfficiencyQC8::FastEfficiencyQC8() at %s\n", asctime(localtime(&rawTime)));
 }
 
@@ -59,7 +59,7 @@ void FastEfficiencyQC8::bookHistograms(DQMStore::IBooker & ibooker, edm::Run con
 	printf("Begin of FastEfficiencyQC8::bookHistograms() at %s\n", asctime(localtime(&rawTime)));
 	GEMGeometry_ = initGeometry(iSetup);
 	if ( GEMGeometry_ == nullptr) return ;
-	
+
 	const std::vector<const GEMSuperChamber*>& superChambers_ = GEMGeometry_->superChambers();
 	for (auto sch : superChambers_)
 	{
@@ -70,9 +70,9 @@ void FastEfficiencyQC8::bookHistograms(DQMStore::IBooker & ibooker, edm::Run con
 		}
 	}
 	n_ch = gemChambers.size();
-	
+
 	time(&rawTime);
-	
+
 	printf("End of FastEfficiencyQC8::bookHistograms() at %s\n", asctime(localtime(&rawTime)));
 }
 
@@ -100,9 +100,9 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 	run = e.id().run();
 	lumi = e.id().luminosityBlock();
 	nev = e.id().event();
-	
+
 	theService->update(iSetup);
-	
+
 	edm::Handle<GEMRecHitCollection> gemRecHits;
 	e.getByToken(this->InputTagToken_RH, gemRecHits);
 	if (!gemRecHits.isValid())
@@ -110,17 +110,17 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 		edm::LogError("gemcrValidation") << "Cannot get strips by Token RecHits Token.\n";
 		return ;
 	}
-	
+
 	// Arrays: have a chamber fired
 	bool fired_ch_test[30];
 	bool fired_ch_reference[30];
-	
+
 	for (int ch=0; ch<30; ch++)
 	{
 		fired_ch_test[ch] = false;
 		fired_ch_reference[ch] = false;
 	}
-	
+
 	// Array of vectors: recHits positions per chamber
 	vector<float> xRecHit[30];
 	vector<int> iEtaRecHit[30];
@@ -128,39 +128,39 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 	vector<int> ClusterSizeRecHit[30];
 	float DxRecHits = 999.9;
 	int DiEtaRecHits = 999.9;
-	
+
 	// recHits loop
 	for (GEMRecHitCollection::const_iterator rechit = gemRecHits->begin(); rechit != gemRecHits->end(); ++rechit)
 	{
 		// calculation of chamber id
 		GEMDetId hitID((*rechit).rawId());
 		int chIdRecHit = hitID.chamberId().chamber() + hitID.chamberId().layer() - 2;
-		
+
 		// cluster size plot and selection
 		clusterSize->Fill(chIdRecHit,hitID.roll()-1,(*rechit).clusterSize());
 		if ((*rechit).clusterSize()<minCLS) continue;
 		if ((*rechit).clusterSize()>maxCLS) continue;
-		
+
 		// recHits plots
 		GlobalPoint recHitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
     recHits3D->Fill(recHitGP.x(),recHitGP.y(),recHitGP.z());
     recHits2DPerLayer->Fill(recHitGP.x(),hitID.roll()-1,chIdRecHit % 10);
 		nRecHitsPerEvtPerCh->Fill(nev,chIdRecHit,hitID.roll()-1);
-		
+
 		// fired chambers
 		fired_ch_test[chIdRecHit] = true;
-		
+
 		// local point of the recHit
 		LocalPoint recHitLP = rechit->localPosition();
-		
+
 		// Filling the details of the recHit per chamber
 		xRecHit[chIdRecHit].push_back(recHitLP.x());
 		iEtaRecHit[chIdRecHit].push_back(hitID.roll());
 		FirstStripRecHit[chIdRecHit].push_back(rechit->firstClusterStrip());
 		ClusterSizeRecHit[chIdRecHit].push_back(rechit->clusterSize());
-		
+
 		// reference hits only if in fiducial area
-		
+
 		// Find which chamber is the one in which we had the hit
 		int index=-1;
   	for (int c=0 ; c<n_ch ; c++)
@@ -170,53 +170,53 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 				index = c;
 			}
   	}
-		
+
 		GEMChamber ch = gemChambers[index];
-		
+
 		// Define region 'inside' the ieta of the chamber
 		int n_strip = ch.etaPartition(hitID.roll())->nstrips();
 		double min_x = ch.etaPartition(hitID.roll())->centreOfStrip(1).x();
 		double max_x = ch.etaPartition(hitID.roll())->centreOfStrip(n_strip).x();
-		
+
 		if (min_x < max_x)
 		{
 			min_x = min_x + 4.5;
 			max_x = max_x - 4.5;
 		}
-		
+
 		if (max_x < min_x)
 		{
 			min_x = min_x - 4.5;
 			max_x = max_x + 4.5;
 		}
-		
+
 		if ((min_x < recHitLP.x()) and (recHitLP.x() < max_x))
 		{
 			fired_ch_reference[chIdRecHit] = true;
 		}
 	}
-	
+
 	// Efficiency check: numerator and denominator
-	
+
 	bool numerator_fired = false; // Flag to check if numerator hits pass the requirements in delta(x) and delta(iEta)
-	
+
 	// Reference: even chambers, Under test: odd chambers
 	for (int ch=0; ch<=28; ch+=2)
 	{
 		numerator_fired = false;
-		
+
 		int counter = 0;
-		
+
 		for (int i=0; i<30; i++)
 		{
 			if (fired_ch_test[i]==true) counter++;
 		}
-		
+
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
 			denominator->Fill(ch+1); // Denominator of corresponding odd chamber +1
 			denominatorPerEvt->Fill(nev,ch+1);
-			
+
 			if (fired_ch_test[ch+1] == true) // We see hits in the corresponding odd chamber
 			{
 				for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
@@ -226,11 +226,11 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 						// Calculate delta x and delta iEta
 						DxRecHits = xRecHit[ch+1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
 						DiEtaRecHits = iEtaRecHit[ch+1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
-						
+
 						//Fill delta x and delta iEta
 						DxCorrespondingRecHits->Fill(DxRecHits);
 						DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
-						
+
 						// Fill occupancy plot
 						if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
 						{
@@ -238,7 +238,7 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 							{
 								occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch+1].at(i_test_ch)+clsize,iEtaRecHit[ch+1].at(i_test_ch)-1,ch+1); // Fill for test
 							}
-							
+
 							numerator_fired = true;
 						}
 					}
@@ -251,14 +251,14 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 			}
 		}
 	}
-	
+
 	int counter = 0;
-		
+
 	for (int i=0; i<30; i++)
 	{
 		if (fired_ch_test[i]==true) counter++;
 	}
-		
+
 	/*if (counter == 4)
 	{
 		for (int i=0; i<30; i++)
@@ -270,24 +270,24 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 		}
 		cout << "------------------------------------------------------------------" << endl;
 	}*/
-	
+
 	// Reference: odd chambers, Under test: even chambers
 	for (int ch=1; ch<=29; ch+=2)
 	{
 		counter = 0;
-		
+
 		for (int i=0; i<30; i++)
 		{
 			if (fired_ch_test[i]==true) counter++;
 		}
-		
+
 		numerator_fired = false;
-		
+
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
 			denominator->Fill(ch-1); // Denominator of corresponding odd chamber +1
 			denominatorPerEvt->Fill(nev,ch-1);
-			
+
 			if (fired_ch_test[ch-1] == true) // We see hits in the corresponding odd chamber
 			{
 				for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
@@ -297,19 +297,19 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 						// Calculate delta x and delta iEta
 						DxRecHits = xRecHit[ch-1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
 						DiEtaRecHits = iEtaRecHit[ch-1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
-						
+
 						//Fill delta x and delta iEta
 						DxCorrespondingRecHits->Fill(DxRecHits);
 						DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
-						
+
 						// Fill occupancy plot
-						if (fabs(DxRecHits) <= 5.0 and abs(DiEtaRecHits) <= 1)
+						if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
 						{
 							for (int clsize = 0; clsize < ClusterSizeRecHit[ch-1].at(i_test_ch); clsize++)
 							{
 								occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch-1].at(i_test_ch)+clsize,iEtaRecHit[ch-1].at(i_test_ch)-1,ch-1); // Fill for test
 							}
-							
+
 							numerator_fired = true;
 						}
 					}
@@ -322,7 +322,6 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 			}
 		}
 	}
-	
+
 	tree->Fill();
 }
-

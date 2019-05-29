@@ -434,7 +434,7 @@ void macro_fast_efficiency(int run, string configDir)
 		recHits2D[(row*2)+1]->GetYaxis()->SetTitle("#eta partition");
 		for (int y = 0; y < 8; y++)
 		{
-			recHits2D[row*2+1]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+			recHits2D[(row*2)+1]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
 		}
 		recHits2D[(row*2)+1]->Draw("colz");
 		namename = "recHits_Row_" + to_string(row+1) + "_T.png";
