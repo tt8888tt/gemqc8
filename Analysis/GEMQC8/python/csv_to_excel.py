@@ -13,11 +13,11 @@ def conversion(in_name):
 		    for row in reader:
 		        ws.append(row)
 
-		out_name = in_name[:-4] + '.xslx'
+		out_name = in_name[:-4] + '.xlsx'
 		wb.save(out_name)
 
 		print("\n")
-		print("Success: " + in_name + " converted to " + outname)
+		print("Success: " + in_name + " converted to " + out_name)
 		print("\n")
 
 	else:
