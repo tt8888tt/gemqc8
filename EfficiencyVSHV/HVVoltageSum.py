@@ -4,6 +4,7 @@
 import HVQC8Mapping
 import HVEffPosQC8Stand 
 import cx_Oracle
+import math
 from datetime import datetime, timedelta
 
 def HVVoltageSum ( firstPartQueryStringList, runNumber, chamberName ):
@@ -114,9 +115,23 @@ def HVVoltageSum ( firstPartQueryStringList, runNumber, chamberName ):
 		#average voltage on this channel
 		if lastBool == False:
 			voltageMedium = voltageSum/voltageCounter
+			#calculate standard deviation for the voltage error on the single channel
+			squares = 0
+			for result in curvmon:
+				voltage = result[1]
+				squares = squares + ( voltage - voltageMedium )**2
+				
+			devStdData = math.sqrt( squares/voltageCounter )
+			#error on media of data is devStdData/sqrt(nData)
+			devStdMediaHVChannel = devStdData/(math.sqrt( voltageCounter ))
+			errHVChannel = devStdMediaHVChannel
 
 		if lastBool == True:
 			voltageMedium = voltageLast
+			
+			#error on HV from voltage monitor vs Output accuracy (CAEN A1515 datasheet)
+			#0.2% +/- 0.2 V +/- 50 ppm/C
+			errHVChannel = 0.002*voltageMedium + 0.2
 	
 		#print "lastBool", lastBool, "voltageMedium", voltageMedium
 		voltageMediumList.append( voltageMedium )
@@ -127,24 +142,33 @@ def HVVoltageSum ( firstPartQueryStringList, runNumber, chamberName ):
 		print "ERROR: expected 7 channels in voltageMediumList, "+str(len( voltageMediumList )) + "provided"
 	
 	voltageTotChamber = 0
+	voltageTotChamberErr = 0
 	for channelIdx in range(len(voltageMediumList)):
 		voltageTotChamber = voltageTotChamber + voltageMediumList[ channelIdx ]
-	#print voltageTotChamber	
+		#totalHVerror
+		voltageTotChamberErr = voltageTotChamberErr + ( errHVChannel )**2
 
-	return voltageTotChamber
+	#sqrt of the sum of squares
+	voltageTotChamberErr = math.sqrt( voltageTotChamberErr )	
+
+	#print voltageTotChamber
+	#print voltageTotChamberErr	
+	voltageTotChamberList = [ voltageTotChamber, voltageTotChamberErr ]
+
+	return voltageTotChamberList
 
 #TEST CODE
-chamberNameTest = "GE1/1-VII-L-CERN-0001"
-runNumberTest = 12
+#chamberNameTest = "GE1/1-VII-L-CERN-0001"
+#runNumberTest = 12
 #chamberNameTest = "GE1/1-VII-L-CERN-0002"
 #chamberNameTest = "GE1/1-VII-L-CERN-0002"
 #runNumberTest = 12
 #print HVEffPosQC8Stand.HVEffPosQC8Stand ( "GE1/1-X-L-CERN-0001",1 )
-pos = HVEffPosQC8Stand.HVEffPosQC8Stand ( chamberNameTest, runNumberTest )
-queryImportStrList = HVQC8Mapping.HVQC8Mapping( chamberNameTest, pos, runNumberTest )
+#pos = HVEffPosQC8Stand.HVEffPosQC8Stand ( chamberNameTest, runNumberTest )
+#queryImportStrList = HVQC8Mapping.HVQC8Mapping( chamberNameTest, pos, runNumberTest )
 
 
 #print queryImportStr
 
-totVOLTCHAMBER = HVVoltageSum ( queryImportStrList, runNumberTest, chamberNameTest )
-print "totVOLTCHAMBER", totVOLTCHAMBER
+#totVOLTCHAMBER = HVVoltageSum ( queryImportStrList, runNumberTest, chamberNameTest )
+#print "totVOLTCHAMBER", totVOLTCHAMBER
