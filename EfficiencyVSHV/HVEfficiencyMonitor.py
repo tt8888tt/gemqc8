@@ -27,18 +27,18 @@ def HVEfficiencyMonitor( chamberName, runNumberList ):
 			pos = HVEffPosQC8Stand.HVEffPosQC8Stand ( chamberName, runNumber )
 			print "Position in QC8 stand: " + pos + " Vfat: " + str(idxVfat)
 			queryImportStrList = HVQC8Mapping.HVQC8Mapping( chamberName, pos, runNumber )
-			print queryImportStrList
+			print "DP first HV channle : ", queryImportStrList
 	
 			#voltage for this chamber
 			totVoltChamberList = HVVoltageSum.HVVoltageSum( queryImportStrList, runNumber, chamberName )
-			print totVoltChamberList
+			print "Total HV on chamber "+ chamberName + " : ", totVoltChamberList
 			
 			totVoltChamber = totVoltChamberList[0]
 			totVoltChamberError = totVoltChamberList[1]
 			
 			#efficiency of this Vfat in this chamber
 			effVfatReturnList = HVEffSingleVfat.HVEffSingleVfat( chamberName, runNumber, idxVfat )
-			print effVfatReturnList		
+			print "Efficiency in each runNumber for vfat "+ str(idxVfat) +" : ", effVfatReturnList		
 			
 			effVfat = effVfatReturnList[0]
 			effVfatError = effVfatReturnList[1]
@@ -48,21 +48,49 @@ def HVEfficiencyMonitor( chamberName, runNumberList ):
 			HVChamberList.append( totVoltChamber )
 			HVChamberErrorList.append( totVoltChamberError )
 
-			#HVEFFtg1 = ROOT.TGraphErrors(n,x,y,ex,ey) x and y are the names of arrays
-                        HVEFFtg1 = ROOT.TGraphErrors(len( effVfatList ), HVChamberList, effVfatList, HVChamberErrorList, effVfatErrorList )
-                        HVEFFtg1.SetLineColor(2)
-                        HVEFFtg1.SetLineWidth(4)
-                        HVEFFtg1.SetMarkerColor(4)
-                        HVEFFtg1.SetMarkerStyle(21)
-                        HVEFFtg1.SetMarkerSize(1)
-			#use a name without - and / for the obljects in the root file
-			chamberNameRootObj = chamberName.replace( "/", "-" )
-			chamberNameRootObj = chamberNameRootObj.replace( "-", "_" )
-                        HVEFFtg1.SetName("Efficiency_vs_HV_"+chamberNameRootObj+"_VFAT"+str(idxVfat))
-                        HVEFFtg1.SetTitle("Efficiency_vs_HV_"+chamberNameRootObj+"_VFAT"+str(idxVfat))
-                        HVEFFtg1.GetXaxis().SetTitle("Total HV on Chamber [V]")
-                        HVEFFtg1.GetYaxis().SetTitle("Efficiency "+chamberName+" "+str(idxVfat))
-                        #HVEFFtg1.Draw("ACP")
+		#only to test the sort
+		#effVfatList[0] = effVfatList[0]
+		#effVfatErrorList[0] = effVfatErrorList[0]+1
+		#HVChamberList[0] = HVChamberList[0]+1
+		#HVChamberErrorList[0] = HVChamberErrorList[0]+1 
+
+
+		#print effVfatList, effVfatErrorList, HVChamberList, HVChamberErrorList
+
+		#the user could insert run numbers for HV which are not sequentially increasing
+		#better to sort the arrays, used to do the TGraphErrors, for increasing voltage
+		
+		effSortList = []
+		for idxElem in range(len( effVfatList )):
+			internalList = [ HVChamberList[ idxElem ], effVfatList[ idxElem ], HVChamberErrorList[ idxElem ], effVfatErrorList[ idxElem ] ]
+			effSortList.append( internalList )
+		#sort by HV
+		effSortList = sorted(effSortList, key=lambda elementEff: elementEff[0])
+		
+		#refill the lists after sorting
+		for idxSort in range( len( effSortList ) ):
+			HVChamberList[ idxSort ] = effSortList[ idxSort ][0]
+			effVfatList[ idxSort ] = effSortList[ idxSort ][1]
+			HVChamberErrorList[ idxSort ] = effSortList[ idxSort ][2]
+			effVfatErrorList[ idxSort ] = effSortList[ idxSort ][3]
+	
+		#print effVfatList, effVfatErrorList, HVChamberList, HVChamberErrorList
+
+		#HVEFFtg1 = ROOT.TGraphErrors(n,x,y,ex,ey) x and y are the names of arrays
+                HVEFFtg1 = ROOT.TGraphErrors(len( effVfatList ), HVChamberList, effVfatList, HVChamberErrorList, effVfatErrorList )
+                HVEFFtg1.SetLineColor(2)
+                HVEFFtg1.SetLineWidth(4)
+                HVEFFtg1.SetMarkerColor(4)
+                HVEFFtg1.SetMarkerStyle(21)
+                HVEFFtg1.SetMarkerSize(1)
+		#use a name without - and / for the obljects in the root file
+		chamberNameRootObj = chamberName.replace( "/", "-" )
+		chamberNameRootObj = chamberNameRootObj.replace( "-", "_" )
+                HVEFFtg1.SetName("Efficiency_vs_HV_"+chamberNameRootObj+"_VFAT"+str(idxVfat))
+                HVEFFtg1.SetTitle("Efficiency_vs_HV_"+chamberNameRootObj+"_VFAT"+str(idxVfat))
+                HVEFFtg1.GetXaxis().SetTitle("Total HV on Chamber [V]")
+                HVEFFtg1.GetYaxis().SetTitle("Efficiency "+chamberName+" "+str(idxVfat))
+                #HVEFFtg1.Draw("ACP")
                                                                                                                  
                 HVEFFtg1.Write()
 
