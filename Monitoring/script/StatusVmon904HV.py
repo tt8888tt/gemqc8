@@ -269,8 +269,10 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#type 5: calib error (10)
 		#type 6: unplugged (11)
 		
-		Smonh1 = ROOT.TH1F("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",9,-1, 8)	
-                Smonh1.GetXaxis().SetTitle("Status cathegory")
+		Smonh1 = ROOT.TH1F("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1", 4100, 0, 4100)	
+		#Smonh1 = ROOT.TH1F("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",9,-1, 8)	
+                #Smonh1.GetXaxis().SetTitle("Status cathegory")
+                Smonh1.GetXaxis().SetTitle("Status code")
                 Smonh1.GetYaxis().SetTitle("counts")
 
 		SmonTh1List.append(Smonh1)
@@ -963,6 +965,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		statRec=[]
 		smonOnlyT = array ( 'd' )
 		smonOnlyS = array ( 'd' )
+		smonDecimalStatus = array ( 'd' )
 		smonOnlyTDate = array ( 'd' )
 		smonOnlyTDateString = []
 		smonOnlyBinStat = []
@@ -979,6 +982,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   #print ( "time", result[0], "status", result[1]  )
 		   #print ("statusbin", bin(int(result[1])))
 		   currentTsSmon = result[0] #put the present TS value in currentTsSmon
+		   decimalStatus = int(result[1])
 		   tot_secondsSmon = (currentTsSmon-startTsSmon).total_seconds()	
 		   #use milli seconds to sort the time vector (at the end)
 		   tot_milliSmon=int(tot_secondsSmon*1000.) 
@@ -1000,15 +1004,22 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   	channelStat = 0 #zero type of status (OFF)
 		   	#print("channel status OFF")
 		   	StatusMeaning = "OFF"
-		   	extensibleStat = extensibleStat + StatusMeaning + " "
+		   	#extensibleStat = extensibleStat + StatusMeaning + " "
 		   	#print(StatusMeaning)
 
 		   if binStat == "0b000000000001": #these are binary numbers
 		   	channelStat = 1 #first type of status (ON)
 		   	#print("channel status ON")
 		   	StatusMeaning = "ON"
-		   	extensibleStat = extensibleStat + StatusMeaning + " "
+		   	#extensibleStat = extensibleStat + StatusMeaning + " "
 		   	#print(StatusMeaning)
+		
+		   cutBinStr = binStat[13:]
+                   if cutBinStr == "0": #if I have OFF
+                   	extensibleStat = extensibleStat + "OFF" + " "
+		   elif cutBinStr == "1": #if I have OFF
+                   	extensibleStat = extensibleStat + "ON" + " "
+
 
 		   #bin produces a string (so the operation >> can be only made only on int)
 		   #I observe the bin number with bin(shift2)
@@ -1121,6 +1132,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   #list S and T for the tgraph status vs time (millisecond int)
 		   smonOnlyT.append(tot_secondsSmon)
 		   smonOnlyS.append(channelStat)
+		   smonDecimalStatus.append( decimalStatus )
 		   smonOnlyTDateString.append(str(currentTsSmon))
 		   smonOnlyMeaningStat.append(extensibleStat)
 		   
@@ -1155,7 +1167,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 
 		   
 		   #th1 for status
-		   SmonTh1List[counter].Fill(channelStat)
+		   #SmonTh1List[counter].Fill(channelStat)
+		   SmonTh1List[counter].Fill(decimalStatus)
    
 		   SmonMeaning = ("StatChamber"+chamberList[indexB]+"_"+channelList[indexC], "time:"+str(result[0]), "Status:"+StatusMeaning )
 		   SmonMeaningList.append(SmonMeaning)
@@ -1186,7 +1199,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#pair the time with status and the meaning list
 		SortList = []
 		for sortCount in range(len(smonOnlyT)):
-			internalList = (smonOnlyT[sortCount], smonOnlyS[sortCount], SmonMeaningList[sortCount], smonOnlyTDate[sortCount], smonOnlyTDateString[sortCount])
+			internalList = (smonOnlyT[sortCount], smonOnlyS[sortCount], SmonMeaningList[sortCount], smonOnlyTDate[sortCount], smonOnlyTDateString[sortCount], smonDecimalStatus[sortCount] )
 			SortList.append(internalList)
 
 		#print(SortList)
@@ -1199,6 +1212,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			SmonMeaningList[refill] = SortList[refill][2]
 			smonOnlyTDate[refill]=SortList[refill][3]
 			smonOnlyTDateString[refill]=SortList[refill][4]
+			smonDecimalStatus[refill] = SortList[refill][5]
 	
 		#print(smonOnlyT)
 		#print(smonOnlyS)
@@ -1229,7 +1243,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#print(smonOnlyT)
 		
 		#Smontg1 = ROOT.TGraph(n,x,y); x and y is the name of arrays with numbers of time and V
-                Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyTDate,smonOnlyS)
+                #Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyTDate,smonOnlyS)
+                Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyTDate,smonDecimalStatus)
                 Smontg1.SetLineColor(2)
                 Smontg1.SetLineWidth(4)
                 Smontg1.SetMarkerColor(4)
@@ -1238,7 +1253,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 Smontg1.SetName("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_time")
                 Smontg1.SetTitle("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_time")
                 #Smontg1.GetXaxis().SetTitle("time [s]")
-                Smontg1.GetYaxis().SetTitle("status cathegory "+chamberList[indexB]+" "+channelList[indexC])
+                #Smontg1.GetYaxis().SetTitle("status cathegory "+chamberList[indexB]+" "+channelList[indexC])
+                Smontg1.GetYaxis().SetTitle("status code "+chamberList[indexB]+" "+channelList[indexC])
                 #Smontg1.Draw("ACP")
 		Smontg1.GetXaxis().SetTimeDisplay(1)
                 Smontg1.GetXaxis().SetTimeFormat("#splitline{%y-%m-%d}{%H:%M:%S}%F1970-01-01 00:00:00")
@@ -1258,17 +1274,20 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 
 		smonRootTimes = ROOT.vector('float')()
 		smonRootTimesDate = ROOT.vector('string')()
+		smonRootDecimalStat = ROOT.vector('string')()
 		smonRootBinStat	= ROOT.vector('string')()
 		smonRootMeaningStat = ROOT.vector('string')()
 		
 		#StatusTree.Branch( 'TS', smonRootTimes )
 		StatusTree.Branch( 'TS', smonRootTimesDate )	
+		StatusTree.Branch( 'DecimalStat', smonRootDecimalStat )	
 		StatusTree.Branch( 'BinaryStat', smonRootBinStat )	
 		StatusTree.Branch( 'MeaningStat', smonRootMeaningStat )	
 
 		for lungh in range(len( smonOnlyT )):
 			smonRootTimes.push_back( smonOnlyT[lungh] )
 			smonRootTimesDate.push_back( smonOnlyTDateString[lungh] )
+			smonRootDecimalStat.push_back( str(smonDecimalStatus[lungh]) )
 			smonRootBinStat.push_back( smonOnlyBinStat[lungh] )
 			smonRootMeaningStat.push_back( smonOnlyMeaningStat[lungh] )
 
@@ -1287,7 +1306,7 @@ print('\n-------------------------Output--------------------------------')
 print(fileName+ " has been created.")
 print("It is organised in directories: to change directory use DIRNAME->cd()")
 print('To draw a TH1 or a TGraph: OBJNAME->Draw()')
-print('To scan the root file use for example:\nHV_StatusTree2_2_Top_G3Bot->Scan("","","colsize=30")')
+print('To scan the root file use for example:\nHV_StatusTree2_2_Top_G3Bot->Scan("","","colsize=26")')
 
 #print("mismatch", mismatch)
 #print("mismatch2", mismatch2)
