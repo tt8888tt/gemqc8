@@ -587,7 +587,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#print "sinceStatusList ", sinceStatusList
 		#print "tillStatusList ", tillStatusList
 		#print "IMON_ID ", imon_id," VMON_ID ", vmon_id," STATUS_ID ", status_id
-		
+	
+	
 		#do the query to fill the Histos with I
 		if len( imonIDToUse ) == 0:
 			print "ERROR: len(imonIDToUse)=0"
@@ -712,9 +713,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			file.write("ERROR: there are no I current data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
 			file.close() 
 			
-			counter = counter + 1
-	
-			continue
+			#counter = counter + 1
+
+			#I put an anomalous current value if there is no data
+			imonOnlyT.append(0.)
+			imonOnlyTDate.append(0.)
+			imonOnlyI.append(-1000000000)
+			#continue
 			
 		#put the imonOnlyTDate in the correct root format
 		#for idxDate in range(len(imonOnlyTDate)):
@@ -773,8 +778,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#ImonTgraph1List[counter].Write()	
 		Imontg1.Write()
 
-
-
+		
 		#do the query to fill the Histos with V
                 if len( vmonIDToUse ) == 0:
                 	print "ERROR: len(vmonIDToUse)=0"
@@ -904,9 +908,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 	file.write("ERROR: there are no HV voltage data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
                 	file.close() 
                 
-			counter = counter + 1 	
+			#counter = counter + 1 	
+			#I put an anomalous voltage value if there is no data
+                        vmonOnlyT.append(0.)
+                        vmonOnlyTDate.append(0.)
+                        vmonOnlyV.append(-1000000000)
                 		
-                	continue
+                	#continue
 
  
                 #rescale the negative times
@@ -1229,9 +1237,16 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 	file.write("ERROR: there are no status data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
                 	file.close() 
                 	
-			counter = counter + 1
-                			
-                	continue
+			#counter = counter + 1
+                	#I put a anomalous status value if there is no data
+			smonOnlyT.append(0.)
+                        smonOnlyTDate.append(0.)
+		        smonOnlyS.append(-1000000000)
+		        smonDecimalStatus.append(-1000000000)
+			smonOnlyTDateString.append("NO TS")
+			smonOnlyMeaningStat.append("NO STATUS")
+			smonOnlyBinStat.append("NOTHING")
+                	#continue
 
 
 	

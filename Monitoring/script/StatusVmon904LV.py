@@ -694,9 +694,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         	file.write("ERROR: there are no I current data for chamber "+ chamberList[indexB]) 
         	file.close() 
         	
-		counter = counter + 1
-        		
-        	continue
+		#counter = counter + 1
+        	#I put an anomalous current value if there is no data	
+	        imonOnlyT.append(0.)
+                imonOnlyTDate.append(0.)
+	        imonOnlyI.append(-1000000000)
+
+        	#continue
 
 
         negativeStartI = imonOnlyT[0]
@@ -855,9 +859,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         	file.write("ERROR: there are no LV voltage data for chamber "+ chamberList[indexB]) 
         	file.close() 
         
-		counter = counter + 1
+		#counter = counter + 1
+		#I put an anomalous voltage value if there is no data
+                vmonOnlyT.append(0.)
+                vmonOnlyTDate.append(0.)
+                vmonOnlyV.append(-1000000000)
         		
-        	continue
+        	#continue
 
 
         negativeStartV = vmonOnlyT[0]
@@ -1254,9 +1262,17 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         	file.write("ERROR: there are no status data for chamber "+ chamberList[indexB]) 
         	file.close() 
         	
-		counter = counter + 1
+		#counter = counter + 1
+		#I put a anomalous status value if there is no data
+                smonOnlyT.append(0.)
+                smonOnlyTDate.append(0.)
+                smonOnlyS.append(-1000000000)
+                smonDecimalStatus.append(-1000000000)
+                smonOnlyTDateString.append("NO TS")
+                smonOnlyMeaningStat.append("NO STATUS")
+                smonOnlyBinStat.append("NOTHING")
 
-        	continue
+        	#continue
 
 
         negativeStart = smonOnlyT[0]
