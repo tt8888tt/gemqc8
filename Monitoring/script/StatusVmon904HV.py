@@ -1048,7 +1048,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   		StatusMeaning = "RUP"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
-		   	elif cutBinStr[0] == "1": #if I have RDW
+		   	if cutBinStr[0] == "1": #if I have RDW
 		   		StatusMeaning = "RDW"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
@@ -1068,11 +1068,11 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                                 StatusMeaning = "OVC"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
-                        elif cutBinStr[1] == "1": #if I have OVV
+                        if cutBinStr[1] == "1": #if I have OVV
                                 StatusMeaning = "OVV"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
-		   	elif cutBinStr[0] == "1": #if I have UVV
+		   	if cutBinStr[0] == "1": #if I have UVV
 		   		StatusMeaning = "UVV"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
@@ -1092,15 +1092,15 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                                 StatusMeaning = "Ext Trip"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
-                        elif cutBinStr[2] == "1": #if I have Max V
+                        if cutBinStr[2] == "1": #if I have Max V
                                 StatusMeaning = "Max V"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
-                        elif cutBinStr[1] == "1": #if I have Ext Disable
+                        if cutBinStr[1] == "1": #if I have Ext Disable
                                 StatusMeaning = "Ext Disable"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
-		   	elif cutBinStr[0] == "1": #if I have Int Trip
+		   	if cutBinStr[0] == "1": #if I have Int Trip
                                 StatusMeaning = "Int Trip"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)

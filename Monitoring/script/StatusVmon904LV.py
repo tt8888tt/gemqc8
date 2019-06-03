@@ -1023,11 +1023,11 @@ for indexB in range(len(chamberList)): #loop on the selected boards
            		StatusMeaning = "OVC"
            		extensibleStat = extensibleStat + StatusMeaning + " "
            		#print(StatusMeaning)
-           	elif cutBinStr[1] == "1": #if I have OVV
+           	if cutBinStr[1] == "1": #if I have OVV
            		StatusMeaning = "OVV"
            		extensibleStat = extensibleStat + StatusMeaning + " "
            		#print(StatusMeaning)
-		elif cutBinStr[0] == "1": #if I have UVV
+		if cutBinStr[0] == "1": #if I have UVV
                 	StatusMeaning = "UVV"
                 	extensibleStat = extensibleStat + StatusMeaning + " "
                 	#print(StatusMeaning)
@@ -1059,7 +1059,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
            		StatusMeaning = "OHVMax"
            		extensibleStat = extensibleStat + StatusMeaning + " "
            		#print(StatusMeaning)
-           	elif cutBinStr[0] == "1": #if I have INTTRIP
+           	if cutBinStr[0] == "1": #if I have INTTRIP
            		StatusMeaning = "InTrip"
            		extensibleStat = extensibleStat + StatusMeaning + " "
            		#print(StatusMeaning)
