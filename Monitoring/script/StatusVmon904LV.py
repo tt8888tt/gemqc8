@@ -18,9 +18,9 @@ from array import array
 
 #test with board 4 channel 2 : 2-2-Top
 
-sta_period = raw_input("Insert start time in format YYYY-MM-DD HH:mm:ss\n")
+sta_period = raw_input("Insert UTC start time in format YYYY-MM-DD HH:mm:ss\n")
 type(sta_period)
-end_period = raw_input("Insert end time in format YYYY-MM-DD HH:mm:ss\n")
+end_period = raw_input("Insert UTC end time in format YYYY-MM-DD HH:mm:ss\n")
 type(end_period)
 
 #to remove ' and space
@@ -40,7 +40,7 @@ end_period = "'" + end_period + "'"
 #print(end_period)
 
 # I also include some root histogram in case some plot are needed..
-fileName = "QC8_LV_monitor_start_"+start+"_end_"+end+".root"
+fileName = "QC8_LV_monitor_UTC_start_"+start+"_end_"+end+".root"
 f1=ROOT.TFile( fileName,"RECREATE")
 
 #divide the monitoring period in three periods 
@@ -717,8 +717,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         Imontg1.SetMarkerColor(4)
         Imontg1.SetMarkerStyle(21)
         Imontg1.SetMarkerSize(1)
-        Imontg1.SetName("LV_ImonChamber"+chamberList[indexB]+"_time")
-        Imontg1.SetTitle("LV_ImonChamber"+chamberList[indexB]+"_time")
+        Imontg1.SetName("LV_ImonChamber"+chamberList[indexB]+"_UTC_time")
+        Imontg1.SetTitle("LV_ImonChamber"+chamberList[indexB]+"_UTC_time")
         #Imontg1.GetXaxis().SetTitle("time [s]")
         Imontg1.GetYaxis().SetTitle("Imon "+chamberList[indexB]+" [A]")
         #Imontg1.Draw("ACP")
@@ -882,8 +882,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         Vmontg1.SetMarkerColor(4)
         Vmontg1.SetMarkerStyle(21)
         Vmontg1.SetMarkerSize(1)
-        Vmontg1.SetName("LV_VmonChamber"+chamberList[indexB]+"_time")
-        Vmontg1.SetTitle("LV_VmonChamber"+chamberList[indexB]+"_time")
+        Vmontg1.SetName("LV_VmonChamber"+chamberList[indexB]+"_UTC_time")
+        Vmontg1.SetTitle("LV_VmonChamber"+chamberList[indexB]+"_UTC_time")
         #Vmontg1.GetXaxis().SetTitle("time [s]")
         Vmontg1.GetYaxis().SetTitle("Vmon "+chamberList[indexB]+" [V]")
         #Vmontg1.Draw("ACP")
@@ -1289,8 +1289,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
         Smontg1.SetMarkerColor(4)
         Smontg1.SetMarkerStyle(21)
         Smontg1.SetMarkerSize(1)
-        Smontg1.SetName("LV_StatusChamber"+chamberList[indexB]+"_time")
-        Smontg1.SetTitle("LV_StatusChamber"+chamberList[indexB]+"_time")
+        Smontg1.SetName("LV_StatusChamber"+chamberList[indexB]+"_UTC_time")
+        Smontg1.SetTitle("LV_StatusChamber"+chamberList[indexB]+"_UTC_time")
         #Smontg1.GetXaxis().SetTitle("time [s]")
         #Smontg1.GetYaxis().SetTitle("status cathegory "+chamberList[indexB])
         Smontg1.GetYaxis().SetTitle("status code "+chamberList[indexB])
@@ -1344,7 +1344,7 @@ print( fileName + " has been created.")
 print("It is organised in directories: to change directory use DIRNAME->cd()")
 print('To draw a TH1 or a TGraph: OBJNAME->Draw()')
 print('To scan the root file use for example:\nLV_StatusTree2_2_Top->Scan("","","colsize=26")')
-
+print("ALL MONITOR TIMES ARE IN UTC, DCS TIMES ARE IN CET")
 
 #print("mismatch", mismatch)
 #print("mismatch2", mismatch2)
