@@ -7,17 +7,17 @@ import ROOT
 def HVEfficiencyMonitor( chamberName, runNumberList ):
 	print ( chamberName, runNumberList )
 
-	#connect to the DB to find position of the chamber, and run number  in the table 
+	#connect to the DB to find position of the chamber, and run number  in the table
 	db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R')
-        cur=db.cursor()
+	cur = db.cursor()
 
 	chamberName = "'"+chamberName+"'"
 	query = "select CH_SERIAL_NUMBER, POSITION, RUN_NUMBER from CMS_GEM_MUON_VIEW.QC8_GEM_STAND_GEOMETRY_VIEW_RH where CH_SERIAL_NUMBER="+chamberName+" and RUN_NUMBER="+"1"
-        cur.execute(query)
+    cur.execute(query)
 	curGeom = cur
 	for result in curGeom:
 		chamber_name 	= result[0]
-		position	= result[1] 
-		run_number	= result[2] 
-        
+		position	= result[1]
+		run_number	= result[2]
+
         print "CHAMBER_NAME: ", chamber_name, "POSITION: ", position, "RUN_NUMBER: ", run_number

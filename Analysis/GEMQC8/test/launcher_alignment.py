@@ -74,7 +74,7 @@ if __name__ == '__main__':
   while scramming.poll() is None:
     line = scramming.stdout.readline()
     print(line)
-    print scramming.stdout.read()
+  print scramming.stdout.read()
   scramming.communicate()
   time.sleep(1)
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
   cores = 6
 
   # Generate geometry files
-  geometry_files_creator.geomMaker(run_number, "--noAlignement")
+  geometry_files_creator.geomMaker(run_number, "--noAlignment")
   time.sleep(1)
 
   while not(stop_align or step>5):
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     i += 1
 
     # Generate geometry files
-    geometry_files_creator.geomMaker(run_number, "--yesAlignement")
+    geometry_files_creator.geomMaker(run_number, "--yesAlignment")
     time.sleep(1)
 
   # Running the CMSSW code for the last step of alignment

@@ -2,6 +2,23 @@ import cx_Oracle
 import datetime
 import sys
 
+def printRow(r,fout):
+   for i in r:
+      fout.write(" ")
+      #print type(i)
+      if type(i) is str:
+         fout.write(i)
+      elif type(i) is int:
+         fout.write("{0}".format(i))
+      elif type(i) is float:
+         fout.write("{0:0.5f}".format(i))
+      else:
+         print type(i)
+         fout.write("{0}".format(type(i)))
+   fout.write("\n")
+# end of printRow
+
+
 def dumpTable(db,tableName,fout,runnumber):
    query = "select * from {0}".format(tableName)
    #print "{0}".format(type(runnumber))
@@ -72,7 +89,3 @@ printRow(names,f)
 #   f.write(" {0}".format(n))
 
 f.close()
-
-if __name__ == '__main__':
-    input_file = sys.argv[1]
-    conversion(input_file)
