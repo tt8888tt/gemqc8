@@ -7,7 +7,7 @@ from datetime import datetime
 import HVEffPosQC8Stand
 
 def HVQC8Mapping ( chamberName, position, runNumber ):
-	print ( chamberName, position, runNumber )
+	#print ( chamberName, position, runNumber )
 
 	#take the run number and get the start and end date from the table CMS_GEM_MUON_VIEW.QC8_GEM_CH_VFAT_EFF_VIEW_RH
 	db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R')	
@@ -22,7 +22,7 @@ def HVQC8Mapping ( chamberName, position, runNumber ):
 		startDate = result[0]
 		endDate = result[1]
 
-	print "startDate", startDate, "endDate", endDate
+	print "runNumber: "+ str( runNumber ) +" | startDate: "+ str( startDate ) +" | endDate"+ str( endDate )
 
 
 
