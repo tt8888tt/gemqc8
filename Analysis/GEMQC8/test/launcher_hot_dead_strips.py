@@ -94,11 +94,6 @@ if __name__ == '__main__':
     movingToDir.communicate()
     time.sleep(1)
 
-    mvToDirCommand = "mv " + out_name + " " + resDirPath+outDirName + "/" + out_name
-    movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
-    movingToDir.communicate()
-    time.sleep(1)
-
     # Efficiency computation & output
     effCommand = "root -l -q " + runPath + "macro_hot_dead_strips.c(" + run_number + ",\"" + configTablesPath + "\")"
     efficiency = subprocess.Popen(effCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
