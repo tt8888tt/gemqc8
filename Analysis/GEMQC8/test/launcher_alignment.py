@@ -89,19 +89,6 @@ if __name__ == '__main__':
   time.sleep(1)
 
   while not(stop_align or step>5):
-    '''
-    # Running the CMSSW code
-    poll = Poll(cores)
-    poll.map(cmsRunner , range(cores))
-    poll.close()
-    poll.join()
-
-    # Merging the outfile
-    haddCommand = "hadd " runConfig.OutputFileName+ ' ' +runConfig.OutputFileName.split('.root')[0]+'_part*.root'
-    hadd = subprocess.Popen(haddCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
-    hadd.communicate()
-    time.sleep(1)
-    '''
     cmsRunner(cores)
     #  # Creating folder outside the CMMSW release to put the output files and plots
     outDirName = "Results_QC8_alignment_run_"+run_number
