@@ -52,11 +52,26 @@ def HVVoltageSum ( firstPartQueryStringList, runNumber, chamberName ):
 			
 		#retrieve HV data for a single HV channel ( HV data are in table ELEMENTS_ALL ) 
 		vmon_name = firstPartQueryString[:-2]+ str(lastTwoChar) + ".actual.vMon'"
-        	query = "select ELEMENT_ID from ELEMENTS_ALL where ELEMENT_NAME="+vmon_name
+
+		#check if VALID_TILL is NULL
+		query = "select ELEMENT_ID, VALID_SINCE, VALID_TILL from ELEMENTS_ALL where ELEMENT_NAME="+vmon_name+ " and VALID_SINCE < to_date ('"+str(run_begin)+"','YYYY-MM-DD HH24:MI:SS') and ( (VALID_TILL > to_date ('"+str(run_end)+"','YYYY-MM-DD HH24:MI:SS') and VALID_TILL IS NOT NULL) or ( VALID_TILL IS NULL ) )"
 		#print query
-	        cur.execute(query)
-        	vmon_id = cur.fetchone()[0];
-        
+		cur.execute(query)
+		curSince = cur
+		curSinceLen = 0 
+		for result in curSince:
+			vmon_id = result[0]
+			curSinceLen = curSinceLen + 1
+
+		if curSinceLen >1:
+			print "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+			print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+			print "ERROR: more than one HV ELEMENT_ID"
+			print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+			print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n"
+
+        	#vmon_id = cur.fetchone()[0];
+        	
 		#print "VMON_ID ", vmon_id
         
         	query = "select TS,VALUE_NUMBER from EVENTHISTORY where ELEMENT_ID = "+str(vmon_id) +" and TS > to_date ('"+str(run_begin)+"','YYYY-MM-DD HH24:MI:SS') and TS < to_date ('"+str(run_end)+"','YYYY-MM-DD HH24:MI:SS')"
