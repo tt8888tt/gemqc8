@@ -323,7 +323,7 @@ void macro_fast_efficiency(int run, string configDir)
 
     // Efficiency results in csv files
 
-    string outFileName = "Fast_Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + ".csv";
+    string outFileName = "Fast_Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + "_ToDB.csv";
     outfile.open(outFileName);
 
     string entry = "";

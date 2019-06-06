@@ -344,7 +344,7 @@ void macro_validation(int run, string configDir, string startDateTimeRun)
 
 		// Efficiency results in csv files
 
-		string outFileName = "Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + ".csv";
+		string outFileName = "Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + "_ToDB.csv";
 		outfile.open(outFileName);
 		double eff_value, error_value;
 		string entry = "";
