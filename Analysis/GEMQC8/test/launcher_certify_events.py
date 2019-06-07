@@ -11,12 +11,12 @@ if __name__ == '__main__':
     xlsx_csv_conversion_flag = sys.argv[2]
 
     # Different paths definition
-    srcPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/'
-    pyhtonModulesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
-    runPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
-    configTablesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
-    alignmentTablesPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
-    resDirPath = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0]
+    srcPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0]+'QC8Test/src/'
+    pyhtonModulesPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
+    runPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
+    configTablesPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
+    alignmentTablesPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
+    resDirPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0]
 
     sys.path.insert(0,pyhtonModulesPath)
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     time.sleep(1)
 
     # Running the CMSSW code
-    runCommand = "cmsRun -n 8 runGEMCosmicStand_fast_efficiency.py"
+    runCommand = "cmsRun -n 8 runGEMCosmicStand_certify_events.py"
     running = subprocess.Popen(runCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
     while running.poll() is None:
         line = running.stdout.readline()
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     time.sleep(1)
 
     #  # Creating folder outside the CMMSW release to put the output files and plots
-    outDirName = "Results_QC8_fast_efficiency_run_"+run_number
+    outDirName = "Results_QC8_certify_events_run_"+run_number
     #---# Remove old version if want to recreate
     if (os.path.exists(resDirPath+outDirName)):
         rmDirCommand = "rm -rf "+outDirName
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     # Create folders for ouput plots per chamber
     import configureRun_cfi as runConfig
     SuperChType = runConfig.StandConfiguration
-    effoutDir = os.path.abspath("launcher_fast_efficiency.py").split('QC8Test')[0] + outDirName
+    effoutDir = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + outDirName
     for i in range (0,30):
         if (SuperChType[int(i/2)] != '0'):
             plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i)
@@ -89,13 +89,13 @@ if __name__ == '__main__':
         out_name = out_name + '0'
     out_name = out_name + run_number + '.root'
 
-    mvToDirCommand = "mv fast_efficiency_" + out_name + " " + resDirPath+outDirName + "/fast_efficiency_" + out_name
+    mvToDirCommand = "mv certify_events_" + out_name + " " + resDirPath+outDirName + "/certify_events_" + out_name
     movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
     movingToDir.communicate()
     time.sleep(1)
 
     # Efficiency computation & output
-    effCommand = "root -l -q " + runPath + "macro_fast_efficiency.c(" + run_number + ",\"" + configTablesPath + "\")"
+    effCommand = "root -l -q " + runPath + "macro_certify_events.c(" + run_number + ",\"" + configTablesPath + "\")"
     efficiency = subprocess.Popen(effCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
     while efficiency.poll() is None:
         line = efficiency.stdout.readline()
