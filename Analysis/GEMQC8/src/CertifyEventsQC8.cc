@@ -25,7 +25,7 @@ CertifyEventsQC8::CertifyEventsQC8(const edm::ParameterSet& cfg): GEMBaseValidat
 	// Histograms declaration
 
 	// nRecHitsPerEventPerChamber: evolution in time
-	nRecHitsPerEvtPerCh = fs->make<TH2D>("nRecHitsPerEvtPerCh","recHits per ieta per ch vs event (packages of 100 evts = 1 sec)",100000,0,10000000,30,0,30);
+	nRecHitsPerEvtPerCh = fs->make<TH2D>("nRecHitsPerEvtPerCh","recHits per ieta per ch vs event (packages of 1000 evts = 10 sec)",10000,0,10000000,30,0,30);
 
 	// Tree branches declaration
 

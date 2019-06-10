@@ -55,9 +55,9 @@ void macro_certify_events(int run, string configDir)
 	for (unsigned int ch=0; ch<30; ch++)
 	{
 		sprintf(name,"NrecHitsVsEvent_ch_%u",ch);
-		NrecHitsPerChVsEvt[ch] = new TH1D(name,"",100000,0,10000000);
+		NrecHitsPerChVsEvt[ch] = new TH1D(name,"",10000,0,10000000);
 
-		for (int evt=0; evt<100000; evt++)
+		for (int evt=0; evt<10000; evt++)
 		{
 			NrecHitsPerChVsEvt[ch]->SetBinContent((evt+1),recHitsVsEvt->GetBinContent(evt+1,ch+1));
 		}
@@ -120,15 +120,11 @@ void macro_certify_events(int run, string configDir)
 		namename = "NrecHitsVsEvt_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		NrecHitsPerChVsEvt[c]->SetTitle(namename.c_str());
 		NrecHitsPerChVsEvt[c]->GetXaxis()->SetTitle("Evt Number");
-		NrecHitsPerChVsEvt[c]->GetYaxis()->SetTitle("ieta");
-		for (int y = 0; y < 8; y++)
-		{
-			NrecHitsPerChVsEvt[c]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
-		}
+		NrecHitsPerChVsEvt[c]->GetYaxis()->SetTitle("nRecHits");
 		NrecHitsPerChVsEvt[c]->GetXaxis()->SetRangeUser(0,nTotEvents);
-		NrecHitsPerChVsEvt[c]->Draw("colz");
+		NrecHitsPerChVsEvt[c]->Draw();
 		NrecHitsPerChVsEvt[c]->Write(namename.c_str());
-		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/NrecHitsVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "NrecHitsVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
   }

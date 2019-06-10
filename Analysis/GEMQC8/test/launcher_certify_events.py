@@ -72,17 +72,6 @@ if __name__ == '__main__':
     resDir.communicate()
     time.sleep(1)
 
-    # Create folders for ouput plots per chamber
-    import configureRun_cfi as runConfig
-    SuperChType = runConfig.StandConfiguration
-    effoutDir = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + outDirName
-    for i in range (0,30):
-        if (SuperChType[int(i/2)] != '0'):
-            plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i)
-            plotsDirChamber = subprocess.Popen(plotsDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
-            plotsDirChamber.communicate()
-    time.sleep(1)
-
     # Selecting the correct output file, changing the name and moving to the output folder
     out_name = 'out_run_'
     for i in range(6-len(run_number)):
