@@ -1,6 +1,6 @@
 import os, sys, io
 
-import map from rawIDmapping
+from rawIDmapping import map
 
 def SwMappingHotDeadStrips(run_number,mask_reason):
 

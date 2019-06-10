@@ -77,7 +77,7 @@ const GEMGeometry* CertifyEventsQC8::initGeometry(edm::EventSetup const & iSetup
 }
 
 CertifyEventsQC8::~CertifyEventsQC8() {
-	printf("\n\nFast Efficiency Successfully Done!\n\n");
+	printf("\n\nCertify Events Successfully Done!\n\n");
 }
 
 void CertifyEventsQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup)
@@ -108,7 +108,6 @@ void CertifyEventsQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetu
 		if ((*rechit).clusterSize()>maxCLS) continue;
 
 		// recHits plots
-		GlobalPoint recHitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
 		nRecHitsPerEvtPerCh->Fill(nev,chIdRecHit);
 	}
 

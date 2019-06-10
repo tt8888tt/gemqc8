@@ -135,7 +135,7 @@ void macro_certify_events(int run, string configDir)
 
 	// csv file with certified events per chamber
 
-	string outFileName = "Fast_Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + "_ToDB.csv";
+	string outFileName = "CertifiedEvents_run" + to_string(run) + ".csv";
 	outfile.open(outFileName);
 
 	string entry = "";
@@ -147,7 +147,7 @@ void macro_certify_events(int run, string configDir)
   {
     int c = chamberPos[i];
 
-		entry = to_strign(c) + ",";
+		entry = to_string(c) + ",";
 
 		// HERE ADD THE CERTIFIED EVENTS INTERVALS
 
