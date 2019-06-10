@@ -55,9 +55,9 @@ void macro_certify_events(int run, string configDir)
 	for (unsigned int ch=0; ch<30; ch++)
 	{
 		sprintf(name,"NrecHitsVsEvent_ch_%u",ch);
-		NrecHitsPerChVsEvt[ch] = new TH1D(name,"",10000,0,10000000);
+		NrecHitsPerChVsEvt[ch] = new TH1D(name,"",40000,0,12000000);
 
-		for (int evt=0; evt<10000; evt++)
+		for (int evt=0; evt<40000; evt++)
 		{
 			NrecHitsPerChVsEvt[ch]->SetBinContent((evt+1),recHitsVsEvt->GetBinContent(evt+1,ch+1));
 		}
