@@ -16,6 +16,8 @@ if __name__ == '__main__':
     runPath = os.path.abspath("launcher_hot_dead_strips.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
     configTablesPath = os.path.abspath("launcher_hot_dead_strips.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
     alignmentTablesPath = os.path.abspath("launcher_hot_dead_strips.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
+    deadStripsTablesPath = os.path.abspath("launcher_hot_dead_strips.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/DeadStripsTables/'
+    hotStripsTablesPath = os.path.abspath("launcher_hot_dead_strips.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/HotStripsTables/'
     resDirPath = os.path.abspath("launcher_hot_dead_strips.py").split('QC8Test')[0]
 
     sys.path.insert(0,pyhtonModulesPath)
@@ -102,4 +104,16 @@ if __name__ == '__main__':
         print(line)
     print efficiency.stdout.read()
     efficiency.communicate()
+    time.sleep(1)
+
+    # Moving the output of the root analysis to the folder in GEMQC8/data/..
+    out_name = 'DeadStrips_run' + run_number + '_ToDB.csv'
+    mvToDirCommand = "cp " + effoutDir + "/" + out_name + " " + deadStripsTablesPath + out_name
+    movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
+    movingToDir.communicate()
+    time.sleep(1)
+    out_name = 'HotStrips_run' + run_number + '_ToDB.csv'
+    mvToDirCommand = "cp " + effoutDir + "/" + out_name + " " + hotStripsTablesPath + out_name
+    movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
+    movingToDir.communicate()
     time.sleep(1)

@@ -16,6 +16,7 @@ if __name__ == '__main__':
     runPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
     configTablesPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandConfigurationTables/'
     alignmentTablesPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
+    certEvtsTablesPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/CertifiedEvents/'
     resDirPath = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0]
 
     sys.path.insert(0,pyhtonModulesPath)
@@ -92,4 +93,11 @@ if __name__ == '__main__':
         print(line)
     print efficiency.stdout.read()
     efficiency.communicate()
+    time.sleep(1)
+
+    # Moving the output of the root analysis to the folder in GEMQC8/data/..
+    out_name = 'CertifiedEvents_run' + run_number + '.csv'
+    mvToDirCommand = "cp " + effoutDir + "/" + out_name + " " + certEvtsTablesPath + out_name
+    movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
+    movingToDir.communicate()
     time.sleep(1)

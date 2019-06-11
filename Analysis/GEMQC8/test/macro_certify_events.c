@@ -107,6 +107,9 @@ void macro_certify_events(int run, string configDir)
 
   // Results for the 30 chambers
 
+  vector<int> beginBadEvt[chamberPos.size()];
+  vector<int> endBadEvt[chamberPos.size()];
+
   TCanvas *Canvas = new TCanvas("Canvas","Canvas",0,0,1000,800);
 
   ofstream outfile;
@@ -126,6 +129,35 @@ void macro_certify_events(int run, string configDir)
 		NrecHitsPerChVsEvt[c]->Write(namename.c_str());
 		namename = "NrecHitsVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
+
+    // Here looking for events with tripped chamber
+    int binToEvt = 300;
+    int binBegin = 0, binEnd = 0;
+
+    for (binBegin = 0; binBegin < 40000; binBegin++)
+    {
+      if (NrecHitsPerChVsEvt[c]->GetBinContent(binBegin+1) < 8)
+      {
+        cout << "Bad event: binBegin!" << endl;
+        for (binEnd = (binBegin+1); binEnd < 40000; binEnd++)
+        {
+          if (NrecHitsPerChVsEvt[c]->GetBinContent(binEnd+1) > 8)
+          {
+            cout << "Bad event: binEnd!" << endl;
+            break;
+          }
+        }
+        if ((binEnd-binBegin) >= 2)
+        {
+          if (binBegin < 2) beginBadEvt[i].push_back(0 * binToEvt);
+          if (binBegin >= 2) beginBadEvt[i].push_back((binBegin-2) * binToEvt);
+          if (binEnd <= (40000-2)) endBadEvt[i].push_back((binEnd+2) * binToEvt);
+          if (binEnd > (40000-2)) endBadEvt[i].push_back(40000 * binToEvt);
+        }
+        binBegin = binEnd;
+      }
+    }
+
 		Canvas->Clear();
   }
 
@@ -145,7 +177,11 @@ void macro_certify_events(int run, string configDir)
 
 		entry = to_string(c) + ",";
 
-		// HERE ADD THE CERTIFIED EVENTS INTERVALS
+    for (unsigned int badIntervals = 0; badIntervals < beginBadEvt[i].size(); badIntervals++)
+    {
+      entry += to_string(beginBadEvt[i].at(badIntervals)) + "-" + to_string(endBadEvt[i].at(badIntervals));
+      if (badIntervals != (beginBadEvt[i].size()-1)) entry += ",";
+    }
 
 		entry += "\n";
 
