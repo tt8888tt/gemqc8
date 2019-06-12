@@ -167,6 +167,7 @@ process.gemRecHits = cms.EDProducer("GEMRecHitProducer",
 process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
 
 # Fast Efficiency - Get certified events from file
+pyhtonModulesPath = os.path.abspath("runGEMCosmicStand_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
 sys.path.insert(1,pyhtonModulesPath)
 from readCertEvtsFromFile import GetCertifiedEvents
 certEvts = GetCertifiedEvents(run_number)

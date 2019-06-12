@@ -115,10 +115,11 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 	// Get the events when a chamber was tripping
 	string delimiter = "";
 	string line = "";
+	string interval = "";
 	int ch, beginEvt, endEvt;
 	vector<int> beginTripEvt[30];
 	vector<int> endTripEvt[30];
-	for (int i = 0; i < TripEventsPerCh.size(); i++)
+	for (unsigned int i = 0; i < TripEventsPerCh.size(); i++)
 	{
 		line = TripEventsPerCh[i];
 
@@ -147,6 +148,14 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 			}
 			delimiter = ",";
 			line.erase(0, line.find(delimiter) + delimiter.length());
+		}
+	}
+
+	for (int ch = 0; ch < 30; ch++)
+	{
+		for (unsigned int i = 0; i < beginTripEvt[ch].size(); i++)
+		{
+			cout << ch << " " << beginTripEvt[ch].at(i) << " " << endTripEvt[ch].at(i) << endl;
 		}
 	}
 
@@ -254,7 +263,7 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
 			bool validEvent = true;
-			for (int i = 0; i < beginEvent.size(); i++)
+			for (unsigned int i = 0; i < beginTripEvt[ch+1].size(); i++)
 			{
 				if (beginTripEvt[ch+1].at(i) <= nev && nev <= endTripEvt[ch+1].at(i))
 				{
@@ -337,9 +346,9 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
 			bool validEvent = true;
-			for (int i = 0; i < beginEvent.size(); i++)
+			for (unsigned int i = 0; i < beginTripEvt[ch-1].size(); i++)
 			{
-				if (beginTripEvt[ch+1].at(i) <= nev && nev <= endTripEvt[ch+1].at(i))
+				if (beginTripEvt[ch-1].at(i) <= nev && nev <= endTripEvt[ch-1].at(i))
 				{
 					validEvent = false;
 				}
