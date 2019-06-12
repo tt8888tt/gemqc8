@@ -1,6 +1,6 @@
 # gemqc8
 ```bash
-scram p -n QC8Test CMSSW CMSSW_10_6_0_pre4
+scram p -n QC8Test CMSSW CMSSW_10_6_0
 cd QC8Test/src
 cmsenv
 git clone git@github.com:giovanni-mocellin/gemqc8.git
