@@ -48,6 +48,8 @@
 
 #include "RecoMuon/CosmicMuonProducer/interface/HeaderForQC8.h"
 
+#include <algorithm>
+
 #include <TFile.h>
 #include <TTree.h>
 
@@ -64,6 +66,7 @@ public:
   double maxCLS, minCLS, maxRes, trackChi2, trackResY, trackResX, MulSigmaOnWindow;
   std::vector<std::string> SuperChamType;
   std::vector<double> vecChamType;
+  std::vector<std::string> TripEventsPerCh;
   bool makeTrack, isMC;
 
   const GEMGeometry* GEMGeometry_;

@@ -17,7 +17,7 @@ FastEfficiencyQC8::FastEfficiencyQC8(const edm::ParameterSet& cfg): GEMBaseValid
 	theService = new MuonServiceProxy(serviceParameters);
 	minCLS = cfg.getParameter<double>("minClusterSize");
 	maxCLS = cfg.getParameter<double>("maxClusterSize");
-	TripEventsPerCh = cfg.getParameter<vector<std::string>>("tripEvents");
+	TripEventsPerCh = cfg.getParameter<vector<string>>("tripEvents");
 	theUpdator = new KFUpdator();
 	time(&rawTime);
 
@@ -148,14 +148,6 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 			}
 			delimiter = ",";
 			line.erase(0, line.find(delimiter) + delimiter.length());
-		}
-	}
-
-	for (int ch = 0; ch < 30; ch++)
-	{
-		for (unsigned int i = 0; i < beginTripEvt[ch].size(); i++)
-		{
-			cout << ch << " " << beginTripEvt[ch].at(i) << " " << endTripEvt[ch].at(i) << endl;
 		}
 	}
 

@@ -28,6 +28,7 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   maxRes = cfg.getParameter<double>("maxResidual");
   SuperChamType = cfg.getParameter<vector<string>>("SuperChamberType");
   vecChamType = cfg.getParameter<vector<double>>("SuperChamberSeedingLayers");
+  TripEventsPerCh = cfg.getParameter<vector<string>>("tripEvents");
   edm::ParameterSet smootherPSet = cfg.getParameter<edm::ParameterSet>("MuonSmootherParameters");
   theSmoother = new CosmicMuonSmoother(smootherPSet, theService);
   theUpdator = new KFUpdator();

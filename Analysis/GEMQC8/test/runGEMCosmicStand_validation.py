@@ -198,7 +198,11 @@ process.GEMCosmicMuonForQC8.ServiceParameters.GEMLayers = cms.untracked.bool(Tru
 process.GEMCosmicMuonForQC8.ServiceParameters.CSCLayers = cms.untracked.bool(False)
 process.GEMCosmicMuonForQC8.ServiceParameters.RPCLayers = cms.bool(False)
 
-fScale = 1.0
+# Fast Efficiency - Get certified events from file
+pyhtonModulesPath = os.path.abspath("runGEMCosmicStand_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
+sys.path.insert(1,pyhtonModulesPath)
+from readCertEvtsFromFile import GetCertifiedEvents
+certEvts = GetCertifiedEvents(run_number)
 
 # Validation
 process.ValidationQC8 = cms.EDProducer('ValidationQC8',
@@ -222,6 +226,7 @@ process.ValidationQC8 = cms.EDProducer('ValidationQC8',
                                        isMC = cms.bool(False),
                                        SuperChamberType = cms.vstring(SuperChType),
                                        SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
+                                       tripEvents = cms.vstring(certEvts),
                                        MuonSmootherParameters = cms.PSet(PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),
                                                                          PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
                                                                          RescalingFactor = cms.double(5.0)
