@@ -178,7 +178,7 @@ process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
                                          recHitsInputLabel = cms.InputTag('gemRecHits'),
                                          maxClusterSize = cms.double(runConfig.maxClusterSize),
                                          minClusterSize = cms.double(runConfig.minClusterSize),
-                                         tripEvents = cms.untracked.vstring(certEvts),
+                                         tripEvents = cms.vstring(certEvts),
                                          nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
                                          RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
                                          )
