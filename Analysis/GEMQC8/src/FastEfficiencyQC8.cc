@@ -17,6 +17,7 @@ FastEfficiencyQC8::FastEfficiencyQC8(const edm::ParameterSet& cfg): GEMBaseValid
 	theService = new MuonServiceProxy(serviceParameters);
 	minCLS = cfg.getParameter<double>("minClusterSize");
 	maxCLS = cfg.getParameter<double>("maxClusterSize");
+	TripEventsPerCh = cfg.getParameter<vector<std::string>>("tripEvents");
 	theUpdator = new KFUpdator();
 	time(&rawTime);
 
@@ -109,6 +110,44 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 	{
 		edm::LogError("gemcrValidation") << "Cannot get strips by Token RecHits Token.\n";
 		return ;
+	}
+
+	// Get the events when a chamber was tripping
+	string delimiter = "";
+	string line = "";
+	int ch, beginEvt, endEvt;
+	vector<int> beginTripEvt[30];
+	vector<int> endTripEvt[30];
+	for (int i = 0; i < TripEventsPerCh.size(); i++)
+	{
+		line = TripEventsPerCh[i];
+
+		delimiter = ",";
+		ch = stoi(line.substr(0, line.find(delimiter)));
+		line.erase(0, line.find(delimiter) + delimiter.length());
+
+		int numberOfIntervals = count(line.begin(), line.end(), ',') + 1; // intervals are number of separators + 1
+		for (int badInterv = 0; badInterv < numberOfIntervals; badInterv++)
+		{
+			delimiter = ",";
+			interval = line.substr(0, line.find(delimiter));
+			delimiter = "-";
+			beginEvt = stoi(interval.substr(0, interval.find(delimiter)));
+			interval.erase(0, interval.find(delimiter) + delimiter.length());
+			endEvt = stoi(interval);
+			if (beginEvt < endEvt)
+			{
+				beginTripEvt[ch].push_back(beginEvt);
+				endTripEvt[ch].push_back(endEvt);
+			}
+			if (endEvt < beginEvt)
+			{
+				beginTripEvt[ch].push_back(endEvt);
+				endTripEvt[ch].push_back(beginEvt);
+			}
+			delimiter = ",";
+			line.erase(0, line.find(delimiter) + delimiter.length());
+		}
 	}
 
 	// Arrays: have a chamber fired
@@ -214,40 +253,52 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
-			denominator->Fill(ch+1); // Denominator of corresponding odd chamber +1
-			denominatorPerEvt->Fill(nev,ch+1);
-
-			if (fired_ch_test[ch+1] == true) // We see hits in the corresponding odd chamber
+			bool validEvent = true;
+			for (int i = 0; i < beginEvent.size(); i++)
 			{
-				for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
+				if (beginTripEvt[ch+1].at(i) <= nev && nev <= endTripEvt[ch+1].at(i))
 				{
-					for (unsigned int i_test_ch = 0; i_test_ch < xRecHit[ch+1].size(); i_test_ch++)
+					validEvent = false;
+				}
+			}
+
+			if (validEvent)
+			{
+				denominator->Fill(ch+1); // Denominator of corresponding odd chamber +1
+				denominatorPerEvt->Fill(nev,ch+1);
+
+				if (fired_ch_test[ch+1] == true) // We see hits in the corresponding odd chamber
+				{
+					for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
 					{
-						// Calculate delta x and delta iEta
-						DxRecHits = xRecHit[ch+1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
-						DiEtaRecHits = iEtaRecHit[ch+1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
-
-						//Fill delta x and delta iEta
-						DxCorrespondingRecHits->Fill(DxRecHits);
-						DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
-
-						// Fill occupancy plot
-						if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
+						for (unsigned int i_test_ch = 0; i_test_ch < xRecHit[ch+1].size(); i_test_ch++)
 						{
-							for (int clsize = 0; clsize < ClusterSizeRecHit[ch+1].at(i_test_ch); clsize++)
-							{
-								occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch+1].at(i_test_ch)+clsize,iEtaRecHit[ch+1].at(i_test_ch)-1,ch+1); // Fill for test
-							}
+							// Calculate delta x and delta iEta
+							DxRecHits = xRecHit[ch+1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
+							DiEtaRecHits = iEtaRecHit[ch+1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
 
-							numerator_fired = true;
+							//Fill delta x and delta iEta
+							DxCorrespondingRecHits->Fill(DxRecHits);
+							DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
+
+							// Fill occupancy plot
+							if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
+							{
+								for (int clsize = 0; clsize < ClusterSizeRecHit[ch+1].at(i_test_ch); clsize++)
+								{
+									occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch+1].at(i_test_ch)+clsize,iEtaRecHit[ch+1].at(i_test_ch)-1,ch+1); // Fill for test
+								}
+
+								numerator_fired = true;
+							}
 						}
 					}
 				}
-			}
-			if (numerator_fired == true)
-			{
-				numerator->Fill(ch+1); // Numberator of corresponding odd chamber +1
-				numeratorPerEvt->Fill(nev,ch+1);
+				if (numerator_fired == true)
+				{
+					numerator->Fill(ch+1); // Numberator of corresponding odd chamber +1
+					numeratorPerEvt->Fill(nev,ch+1);
+				}
 			}
 		}
 	}
@@ -285,40 +336,52 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
-			denominator->Fill(ch-1); // Denominator of corresponding odd chamber +1
-			denominatorPerEvt->Fill(nev,ch-1);
-
-			if (fired_ch_test[ch-1] == true) // We see hits in the corresponding odd chamber
+			bool validEvent = true;
+			for (int i = 0; i < beginEvent.size(); i++)
 			{
-				for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
+				if (beginTripEvt[ch+1].at(i) <= nev && nev <= endTripEvt[ch+1].at(i))
 				{
-					for (unsigned int i_test_ch = 0; i_test_ch < xRecHit[ch-1].size(); i_test_ch++)
+					validEvent = false;
+				}
+			}
+
+			if (validEvent)
+			{
+				denominator->Fill(ch-1); // Denominator of corresponding odd chamber +1
+				denominatorPerEvt->Fill(nev,ch-1);
+
+				if (fired_ch_test[ch-1] == true) // We see hits in the corresponding odd chamber
+				{
+					for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
 					{
-						// Calculate delta x and delta iEta
-						DxRecHits = xRecHit[ch-1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
-						DiEtaRecHits = iEtaRecHit[ch-1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
-
-						//Fill delta x and delta iEta
-						DxCorrespondingRecHits->Fill(DxRecHits);
-						DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
-
-						// Fill occupancy plot
-						if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
+						for (unsigned int i_test_ch = 0; i_test_ch < xRecHit[ch-1].size(); i_test_ch++)
 						{
-							for (int clsize = 0; clsize < ClusterSizeRecHit[ch-1].at(i_test_ch); clsize++)
-							{
-								occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch-1].at(i_test_ch)+clsize,iEtaRecHit[ch-1].at(i_test_ch)-1,ch-1); // Fill for test
-							}
+							// Calculate delta x and delta iEta
+							DxRecHits = xRecHit[ch-1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
+							DiEtaRecHits = iEtaRecHit[ch-1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
 
-							numerator_fired = true;
+							//Fill delta x and delta iEta
+							DxCorrespondingRecHits->Fill(DxRecHits);
+							DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
+
+							// Fill occupancy plot
+							if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
+							{
+								for (int clsize = 0; clsize < ClusterSizeRecHit[ch-1].at(i_test_ch); clsize++)
+								{
+									occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch-1].at(i_test_ch)+clsize,iEtaRecHit[ch-1].at(i_test_ch)-1,ch-1); // Fill for test
+								}
+
+								numerator_fired = true;
+							}
 						}
 					}
 				}
-			}
-			if (numerator_fired == true)
-			{
-				numerator->Fill(ch-1); // Numberator of corresponding odd chamber +1
-				numeratorPerEvt->Fill(nev,ch-1);
+				if (numerator_fired == true)
+				{
+					numerator->Fill(ch-1); // Numberator of corresponding odd chamber +1
+					numeratorPerEvt->Fill(nev,ch-1);
+				}
 			}
 		}
 	}

@@ -48,6 +48,8 @@
 
 #include "RecoMuon/CosmicMuonProducer/interface/HeaderForQC8.h"
 
+#include <algorithm>
+
 #include <TFile.h>
 #include <TTree.h>
 
@@ -64,6 +66,7 @@ public:
   std::vector<GEMChamber> gemChambers;
   int n_ch;
   double maxCLS, minCLS;
+  std::vector<std::string> TripEventsPerCh;
   MuonServiceProxy* theService;
   CosmicMuonSmoother* theSmoother;
   KFUpdator* theUpdator;
