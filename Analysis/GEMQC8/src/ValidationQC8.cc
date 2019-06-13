@@ -171,6 +171,45 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
   }
 
+  // Get the events when a chamber was tripping
+	string delimiter = "";
+	string line = "";
+	string interval = "";
+	int ch, beginEvt, endEvt;
+	vector<int> beginTripEvt[30];
+	vector<int> endTripEvt[30];
+	for (unsigned int i = 0; i < TripEventsPerCh.size(); i++)
+	{
+		line = TripEventsPerCh[i];
+
+		delimiter = ",";
+		ch = stoi(line.substr(0, line.find(delimiter)));
+		line.erase(0, line.find(delimiter) + delimiter.length());
+
+		int numberOfIntervals = count(line.begin(), line.end(), ',') + 1; // intervals are number of separators + 1
+		for (int badInterv = 0; badInterv < numberOfIntervals; badInterv++)
+		{
+			delimiter = ",";
+			interval = line.substr(0, line.find(delimiter));
+			delimiter = "-";
+			beginEvt = stoi(interval.substr(0, interval.find(delimiter)));
+			interval.erase(0, interval.find(delimiter) + delimiter.length());
+			endEvt = stoi(interval);
+			if (beginEvt < endEvt)
+			{
+				beginTripEvt[ch].push_back(beginEvt);
+				endTripEvt[ch].push_back(endEvt);
+			}
+			if (endEvt < beginEvt)
+			{
+				beginTripEvt[ch].push_back(endEvt);
+				endTripEvt[ch].push_back(beginEvt);
+			}
+			delimiter = ",";
+			line.erase(0, line.find(delimiter) + delimiter.length());
+		}
+	}
+
   theService->update(iSetup);
 
   // digis
@@ -393,51 +432,63 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
           int index = findIndex(ch.id());
           int vfat = findVFAT(tlp.x(), min_x, max_x);
 
-          testTrajHitX[index] = gtrp.x();
-          testTrajHitY[index] = gtrp.y();
-          testTrajHitZ[index] = gtrp.z();
-          hitsVFATdenom->Fill(vfat-1,mRoll-1,index);
+          bool validEvent = true;
+    			for (unsigned int i = 0; i < beginTripEvt[index].size(); i++)
+    			{
+    				if (beginTripEvt[index].at(i) <= nev && nev <= endTripEvt[index].at(i))
+    				{
+    					validEvent = false;
+    				}
+    			}
 
-          g_nNumTrajHit++;
-          nTrajHit++;
-
-          // Check if there's a matching recHit in the test chamber (tmpRecHit)
-
-          double maxR = 99.9;
-          shared_ptr<MuonTransientTrackingRecHit> tmpRecHit;
-
-          for (auto hit : testRecHits)
+          if (validEvent)
           {
-            GEMDetId hitID(hit->rawId());
-            if (hitID.chamberId() != ch.id()) continue;
+            testTrajHitX[index] = gtrp.x();
+            testTrajHitY[index] = gtrp.y();
+            testTrajHitZ[index] = gtrp.z();
+            hitsVFATdenom->Fill(vfat-1,mRoll-1,index);
 
-            GlobalPoint hitGP = hit->globalPosition();
+            g_nNumTrajHit++;
+            nTrajHit++;
 
-            if (fabs(hitGP.x() - gtrp.x()) > maxRes) continue;
-            if (fabs(hitID.roll() - mRoll) > 1) continue;
+            // Check if there's a matching recHit in the test chamber (tmpRecHit)
 
-            // Choosing the closest one
+            double maxR = 99.9;
+            shared_ptr<MuonTransientTrackingRecHit> tmpRecHit;
 
-            double deltaR = (hitGP - gtrp).mag();
-            if (deltaR < maxR)
+            for (auto hit : testRecHits)
             {
-              tmpRecHit = hit;
-              maxR = deltaR;
+              GEMDetId hitID(hit->rawId());
+              if (hitID.chamberId() != ch.id()) continue;
+
+              GlobalPoint hitGP = hit->globalPosition();
+
+              if (fabs(hitGP.x() - gtrp.x()) > maxRes) continue;
+              if (fabs(hitID.roll() - mRoll) > 1) continue;
+
+              // Choosing the closest one
+
+              double deltaR = (hitGP - gtrp).mag();
+              if (deltaR < maxR)
+              {
+                tmpRecHit = hit;
+                maxR = deltaR;
+              }
             }
-          }
 
-          if(tmpRecHit)
-          {
-            Global3DPoint recHitGP = tmpRecHit->globalPosition();
-            confTestHitX[index] = recHitGP.x();
-            confTestHitY[index] = recHitGP.y();
-            confTestHitZ[index] = recHitGP.z();
-            hitsVFATnum->Fill(vfat-1,mRoll-1,index);
-            nTrajRecHit++;
-            g_nNumMatched++;
+            if(tmpRecHit)
+            {
+              Global3DPoint recHitGP = tmpRecHit->globalPosition();
+              confTestHitX[index] = recHitGP.x();
+              confTestHitY[index] = recHitGP.y();
+              confTestHitZ[index] = recHitGP.z();
+              hitsVFATnum->Fill(vfat-1,mRoll-1,index);
+              nTrajRecHit++;
+              g_nNumMatched++;
 
-            residualPhi->Fill(recHitGP.x()-gtrp.x());
-            residualEta->Fill(recHitGP.y()-gtrp.y());
+              residualPhi->Fill(recHitGP.x()-gtrp.x());
+              residualEta->Fill(recHitGP.y()-gtrp.y());
+            }
           }
         }
         continue;
