@@ -154,11 +154,33 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 	// Arrays: have a chamber fired
 	bool fired_ch_test[30];
 	bool fired_ch_reference[30];
+	bool validEvent[30];
 
 	for (int ch=0; ch<30; ch++)
 	{
 		fired_ch_test[ch] = false;
 		fired_ch_reference[ch] = false;
+		validEvent[ch] = false;
+	}
+
+	for (int ch=0; ch<30; ch++)
+	{
+		for (unsigned int i = 0; i < beginTripEvt[ch].size(); i++)
+		{
+			if (beginTripEvt[ch].at(i) <= nev && nev <= endTripEvt[ch].at(i))
+			{
+				if (ch%2 == 0)
+				{
+					validEvent[ch] = false;
+					validEvent[ch+1] = false;
+				}
+				if (ch%2 == 1)
+				{
+					validEvent[ch] = false;
+					validEvent[ch-1] = false;
+				}
+			}
+		}
 	}
 
 	// Array of vectors: recHits positions per chamber
@@ -176,63 +198,66 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 		GEMDetId hitID((*rechit).rawId());
 		int chIdRecHit = hitID.chamberId().chamber() + hitID.chamberId().layer() - 2;
 
-		// cluster size plot and selection
-		clusterSize->Fill(chIdRecHit,hitID.roll()-1,(*rechit).clusterSize());
-		if ((*rechit).clusterSize()<minCLS) continue;
-		if ((*rechit).clusterSize()>maxCLS) continue;
+		if (validEvent[chIdRecHit])
+		{
+			// cluster size plot and selection
+			clusterSize->Fill(chIdRecHit,hitID.roll()-1,(*rechit).clusterSize());
+			if ((*rechit).clusterSize()<minCLS) continue;
+			if ((*rechit).clusterSize()>maxCLS) continue;
 
-		// recHits plots
-		GlobalPoint recHitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
-    recHits3D->Fill(recHitGP.x(),recHitGP.y(),recHitGP.z());
-    recHits2DPerLayer->Fill(recHitGP.x(),hitID.roll()-1,chIdRecHit % 10);
-		nRecHitsPerEvtPerCh->Fill(nev,chIdRecHit,hitID.roll()-1);
+			// recHits plots
+			GlobalPoint recHitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
+	    recHits3D->Fill(recHitGP.x(),recHitGP.y(),recHitGP.z());
+	    recHits2DPerLayer->Fill(recHitGP.x(),hitID.roll()-1,chIdRecHit % 10);
+			nRecHitsPerEvtPerCh->Fill(nev,chIdRecHit,hitID.roll()-1);
 
-		// fired chambers
-		fired_ch_test[chIdRecHit] = true;
+			// fired chambers
+			fired_ch_test[chIdRecHit] = true;
 
-		// local point of the recHit
-		LocalPoint recHitLP = rechit->localPosition();
+			// local point of the recHit
+			LocalPoint recHitLP = rechit->localPosition();
 
-		// Filling the details of the recHit per chamber
-		xRecHit[chIdRecHit].push_back(recHitLP.x());
-		iEtaRecHit[chIdRecHit].push_back(hitID.roll());
-		FirstStripRecHit[chIdRecHit].push_back(rechit->firstClusterStrip());
-		ClusterSizeRecHit[chIdRecHit].push_back(rechit->clusterSize());
+			// Filling the details of the recHit per chamber
+			xRecHit[chIdRecHit].push_back(recHitLP.x());
+			iEtaRecHit[chIdRecHit].push_back(hitID.roll());
+			FirstStripRecHit[chIdRecHit].push_back(rechit->firstClusterStrip());
+			ClusterSizeRecHit[chIdRecHit].push_back(rechit->clusterSize());
 
-		// reference hits only if in fiducial area
+			// reference hits only if in fiducial area
 
-		// Find which chamber is the one in which we had the hit
-		int index=-1;
-  	for (int c=0 ; c<n_ch ; c++)
-  	{
-    	if ((gemChambers[c].id().chamber() + gemChambers[c].id().layer() - 2) == chIdRecHit)
+			// Find which chamber is the one in which we had the hit
+			int index=-1;
+	  	for (int c=0 ; c<n_ch ; c++)
+	  	{
+	    	if ((gemChambers[c].id().chamber() + gemChambers[c].id().layer() - 2) == chIdRecHit)
+				{
+					index = c;
+				}
+	  	}
+
+			GEMChamber ch = gemChambers[index];
+
+			// Define region 'inside' the ieta of the chamber
+			int n_strip = ch.etaPartition(hitID.roll())->nstrips();
+			double min_x = ch.etaPartition(hitID.roll())->centreOfStrip(1).x();
+			double max_x = ch.etaPartition(hitID.roll())->centreOfStrip(n_strip).x();
+
+			if (min_x < max_x)
 			{
-				index = c;
+				min_x = min_x + 4.5;
+				max_x = max_x - 4.5;
 			}
-  	}
 
-		GEMChamber ch = gemChambers[index];
+			if (max_x < min_x)
+			{
+				min_x = min_x - 4.5;
+				max_x = max_x + 4.5;
+			}
 
-		// Define region 'inside' the ieta of the chamber
-		int n_strip = ch.etaPartition(hitID.roll())->nstrips();
-		double min_x = ch.etaPartition(hitID.roll())->centreOfStrip(1).x();
-		double max_x = ch.etaPartition(hitID.roll())->centreOfStrip(n_strip).x();
-
-		if (min_x < max_x)
-		{
-			min_x = min_x + 4.5;
-			max_x = max_x - 4.5;
-		}
-
-		if (max_x < min_x)
-		{
-			min_x = min_x - 4.5;
-			max_x = max_x + 4.5;
-		}
-
-		if ((min_x < recHitLP.x()) and (recHitLP.x() < max_x))
-		{
-			fired_ch_reference[chIdRecHit] = true;
+			if ((min_x < recHitLP.x()) and (recHitLP.x() < max_x))
+			{
+				fired_ch_reference[chIdRecHit] = true;
+			}
 		}
 	}
 
@@ -254,52 +279,40 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
-			bool validEvent = true;
-			for (unsigned int i = 0; i < beginTripEvt[ch+1].size(); i++)
-			{
-				if (beginTripEvt[ch+1].at(i) <= nev && nev <= endTripEvt[ch+1].at(i))
-				{
-					validEvent = false;
-				}
-			}
+			denominator->Fill(ch+1); // Denominator of corresponding odd chamber +1
+			denominatorPerEvt->Fill(nev,ch+1);
 
-			if (validEvent)
+			if (fired_ch_test[ch+1] == true) // We see hits in the corresponding odd chamber
 			{
-				denominator->Fill(ch+1); // Denominator of corresponding odd chamber +1
-				denominatorPerEvt->Fill(nev,ch+1);
-
-				if (fired_ch_test[ch+1] == true) // We see hits in the corresponding odd chamber
+				for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
 				{
-					for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
+					for (unsigned int i_test_ch = 0; i_test_ch < xRecHit[ch+1].size(); i_test_ch++)
 					{
-						for (unsigned int i_test_ch = 0; i_test_ch < xRecHit[ch+1].size(); i_test_ch++)
+						// Calculate delta x and delta iEta
+						DxRecHits = xRecHit[ch+1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
+						DiEtaRecHits = iEtaRecHit[ch+1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
+
+						//Fill delta x and delta iEta
+						DxCorrespondingRecHits->Fill(DxRecHits);
+						DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
+
+						// Fill occupancy plot
+						if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
 						{
-							// Calculate delta x and delta iEta
-							DxRecHits = xRecHit[ch+1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
-							DiEtaRecHits = iEtaRecHit[ch+1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
-
-							//Fill delta x and delta iEta
-							DxCorrespondingRecHits->Fill(DxRecHits);
-							DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
-
-							// Fill occupancy plot
-							if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
+							for (int clsize = 0; clsize < ClusterSizeRecHit[ch+1].at(i_test_ch); clsize++)
 							{
-								for (int clsize = 0; clsize < ClusterSizeRecHit[ch+1].at(i_test_ch); clsize++)
-								{
-									occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch+1].at(i_test_ch)+clsize,iEtaRecHit[ch+1].at(i_test_ch)-1,ch+1); // Fill for test
-								}
-
-								numerator_fired = true;
+								occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch+1].at(i_test_ch)+clsize,iEtaRecHit[ch+1].at(i_test_ch)-1,ch+1); // Fill for test
 							}
+
+							numerator_fired = true;
 						}
 					}
 				}
-				if (numerator_fired == true)
-				{
-					numerator->Fill(ch+1); // Numberator of corresponding odd chamber +1
-					numeratorPerEvt->Fill(nev,ch+1);
-				}
+			}
+			if (numerator_fired == true)
+			{
+				numerator->Fill(ch+1); // Numberator of corresponding odd chamber +1
+				numeratorPerEvt->Fill(nev,ch+1);
 			}
 		}
 	}
@@ -337,52 +350,40 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 
 		if (fired_ch_reference[ch] == true) // We see hits in even chamber
 		{
-			bool validEvent = true;
-			for (unsigned int i = 0; i < beginTripEvt[ch-1].size(); i++)
-			{
-				if (beginTripEvt[ch-1].at(i) <= nev && nev <= endTripEvt[ch-1].at(i))
-				{
-					validEvent = false;
-				}
-			}
+			denominator->Fill(ch-1); // Denominator of corresponding odd chamber +1
+			denominatorPerEvt->Fill(nev,ch-1);
 
-			if (validEvent)
+			if (fired_ch_test[ch-1] == true) // We see hits in the corresponding odd chamber
 			{
-				denominator->Fill(ch-1); // Denominator of corresponding odd chamber +1
-				denominatorPerEvt->Fill(nev,ch-1);
-
-				if (fired_ch_test[ch-1] == true) // We see hits in the corresponding odd chamber
+				for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
 				{
-					for (unsigned int i_ref_ch = 0; i_ref_ch < xRecHit[ch].size(); i_ref_ch++)
+					for (unsigned int i_test_ch = 0; i_test_ch < xRecHit[ch-1].size(); i_test_ch++)
 					{
-						for (unsigned int i_test_ch = 0; i_test_ch < xRecHit[ch-1].size(); i_test_ch++)
+						// Calculate delta x and delta iEta
+						DxRecHits = xRecHit[ch-1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
+						DiEtaRecHits = iEtaRecHit[ch-1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
+
+						//Fill delta x and delta iEta
+						DxCorrespondingRecHits->Fill(DxRecHits);
+						DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
+
+						// Fill occupancy plot
+						if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
 						{
-							// Calculate delta x and delta iEta
-							DxRecHits = xRecHit[ch-1].at(i_test_ch) - xRecHit[ch].at(i_ref_ch);
-							DiEtaRecHits = iEtaRecHit[ch-1].at(i_test_ch) - iEtaRecHit[ch].at(i_ref_ch);
-
-							//Fill delta x and delta iEta
-							DxCorrespondingRecHits->Fill(DxRecHits);
-							DiEtaCorrespondingRecHits->Fill(DiEtaRecHits);
-
-							// Fill occupancy plot
-							if (fabs(DxRecHits) <= 6.0 and abs(DiEtaRecHits) <= 1)
+							for (int clsize = 0; clsize < ClusterSizeRecHit[ch-1].at(i_test_ch); clsize++)
 							{
-								for (int clsize = 0; clsize < ClusterSizeRecHit[ch-1].at(i_test_ch); clsize++)
-								{
-									occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch-1].at(i_test_ch)+clsize,iEtaRecHit[ch-1].at(i_test_ch)-1,ch-1); // Fill for test
-								}
-
-								numerator_fired = true;
+								occupancyIfConfirmedHits->Fill(FirstStripRecHit[ch-1].at(i_test_ch)+clsize,iEtaRecHit[ch-1].at(i_test_ch)-1,ch-1); // Fill for test
 							}
+
+							numerator_fired = true;
 						}
 					}
 				}
-				if (numerator_fired == true)
-				{
-					numerator->Fill(ch-1); // Numberator of corresponding odd chamber +1
-					numeratorPerEvt->Fill(nev,ch-1);
-				}
+			}
+			if (numerator_fired == true)
+			{
+				numerator->Fill(ch-1); // Numberator of corresponding odd chamber +1
+				numeratorPerEvt->Fill(nev,ch-1);
 			}
 		}
 	}
