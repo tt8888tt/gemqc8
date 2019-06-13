@@ -160,7 +160,7 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 	{
 		fired_ch_test[ch] = false;
 		fired_ch_reference[ch] = false;
-		validEvent[ch] = false;
+		validEvent[ch] = true;
 	}
 
 	for (int ch=0; ch<30; ch++)
