@@ -22,7 +22,7 @@ options.register("runNum",run_number,
                  VarParsing.VarParsing.varType.int,
                  "Run number")
 
-options.register("eventsPerJob",-1,
+options.register("eventsPerJob",50000,
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
                  "The number of events (in each file)")
@@ -181,6 +181,12 @@ process.simSiStripDigis = cms.EDAlias()
 
 process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
 
+# Fast Efficiency - Get certified events from file
+pyhtonModulesPath = os.path.abspath("runGEMCosmicStand_fast_efficiency.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
+sys.path.insert(1,pyhtonModulesPath)
+from readCertEvtsFromFile import GetCertifiedEvents
+certEvts = GetCertifiedEvents(run_number)
+
 # Fast Efficiency
 process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
                                            process.MuonServiceProxy,
@@ -188,6 +194,7 @@ process.FastEfficiencyQC8 = cms.EDProducer('FastEfficiencyQC8',
                                            recHitsInputLabel = cms.InputTag('gemRecHits'),
                                            maxClusterSize = cms.double(runConfig.maxClusterSize),
                                            minClusterSize = cms.double(runConfig.minClusterSize),
+                                           tripEvents = cms.vstring(certEvts),
                                            nBinGlobalZR = cms.untracked.vdouble(200,200,200,150,180,250),
                                            RangeGlobalZR = cms.untracked.vdouble(564,572,786,794,786,802,110,260,170,350,100,350)
                                            )
