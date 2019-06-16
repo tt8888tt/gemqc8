@@ -1,4 +1,5 @@
 # gemqc8
+If you want to analyse QC8 real data:
 ```bash
 scram p -n QC8Test CMSSW CMSSW_10_6_0
 cd QC8Test/src
