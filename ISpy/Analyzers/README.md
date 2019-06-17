@@ -35,9 +35,13 @@ To use:
 ```
 
 Dataformat for ispy is '.ig' file. Each run will return below file,  
-qc8_$num.ig: Event display with Track, Hit, Detector with hit.
+
+qc8_$num.ig: Event display with Track, Hit, Detector with hit.  
+
 qc8-geometry.ig: QC8 Geometry without any event information.
 
+
 * Load the ouput file in http://cern.ch/ispy-webgl  
+
 But GEM dectector geometry is not currently readable in official page. To read QC8 Geometry, please download https://github.com/tt8888tt/ispy-webgl in local and open 'index.html' and load the file.
 
