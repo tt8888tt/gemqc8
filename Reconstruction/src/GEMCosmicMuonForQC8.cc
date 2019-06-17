@@ -23,6 +23,8 @@
 #include "RecoMuon/CosmicMuonProducer/interface/CosmicMuonSmoother.h"
 #include "RecoMuon/StandAloneTrackFinder/interface/StandAloneMuonSmoother.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
+//#include "RecoTracker/TransientTrackingRecHit/interface/Traj2TrackHits.h"
+
 #include "TrackingTools/KalmanUpdators/interface/KFUpdator.h"
 
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
@@ -243,8 +245,47 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
                       ftsAtVtx->charge(),
                       ftsAtVtx->curvilinearError());
    
-    reco::TrackExtra tx;
-    
+    //sets the outermost and innermost TSOSs
+    TrajectoryStateOnSurface outertsos;
+    TrajectoryStateOnSurface innertsos;
+    unsigned int innerId, outerId;
+
+    // ---  NOTA BENE: the convention is to sort hits and measurements "along the momentum".
+    // This is consistent with innermost and outermost labels only for tracks from LHC collision
+    if (bestTrajectory.direction() == alongMomentum) {
+      outertsos = bestTrajectory.lastMeasurement().updatedState();
+      innertsos = bestTrajectory.firstMeasurement().updatedState();
+      outerId = bestTrajectory.lastMeasurement().recHit()->geographicalId().rawId();
+      innerId = bestTrajectory.firstMeasurement().recHit()->geographicalId().rawId();
+    } else {
+      outertsos = bestTrajectory.firstMeasurement().updatedState();
+      innertsos = bestTrajectory.lastMeasurement().updatedState();
+      outerId = bestTrajectory.firstMeasurement().recHit()->geographicalId().rawId();
+      innerId = bestTrajectory.lastMeasurement().recHit()->geographicalId().rawId();
+    }
+    //build the TrackExtra
+    GlobalPoint gv = outertsos.globalParameters().position();
+    GlobalVector gp = outertsos.globalParameters().momentum();
+    math::XYZVector outmom(gp.x(), gp.y(), gp.z());
+    math::XYZPoint outpos(gv.x(), gv.y(), gv.z());
+    gv = innertsos.globalParameters().position();
+    gp = innertsos.globalParameters().momentum();
+    math::XYZVector inmom(gp.x(), gp.y(), gp.z());
+    math::XYZPoint inpos(gv.x(), gv.y(), gv.z());
+
+    auto tx = reco::TrackExtra(outpos,
+                               outmom,
+                               true,
+                               inpos,
+                               inmom,
+                               true,
+                               outertsos.curvilinearError(),
+                               outerId,
+                               innertsos.curvilinearError(),
+                               innerId,
+                               bestSeed.direction(),
+                               bestTrajectory.seedRef());
+
     //adding rec hits
     Trajectory::RecHitContainer transHits = bestTrajectory.recHits();
     unsigned int nHitsAdded = 0;
@@ -254,10 +295,15 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
       trackingRecHitCollection->push_back( singleHit );  
       ++nHitsAdded;
     }
-    
     tx.setHits(recHitCollectionRefProd, recHitsIndex, nHitsAdded);
     recHitsIndex += nHitsAdded;
     
+    //reco::TrackExtra::TrajParams trajParams;
+    //reco::TrackExtra::Chi2sFive chi2s;
+    //Traj2TrackHits t2t;
+    //t2t(bestTrajectory, *trackingRecHitCollection, trajParams, chi2s);
+    //tx.setTrajParams(std::move(trajParams), std::move(chi2s));
+
     trackExtraCollection->push_back(tx);
     
     reco::TrackExtraRef trackExtraRef(trackExtraCollectionRefProd, trackExtraIndex++ );
