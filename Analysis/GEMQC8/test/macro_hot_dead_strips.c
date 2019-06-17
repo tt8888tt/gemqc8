@@ -129,7 +129,7 @@ void macro_hot_dead_strips(int run, string configDir)
     chamberPos.push_back(ChPos);
   }
 
-  // Identification of value for being a dead (0) or hot (above 4 sigmas) strip per chamber
+  // Identification of value for being a dead (0) or hot (above 5 sigmas) strip per chamber
 
   long int DeadStripLimitValue[30];
   long int HotStripLimitValue[30];
@@ -156,8 +156,8 @@ void macro_hot_dead_strips(int run, string configDir)
     digisPerStripPerCh[c]->Fit(GaussFit,"Q");
     GaussFit->Draw("SAME");
 
-    if ( (GaussFit->GetParameter(1) + 4*GaussFit->GetParameter(2)) > 0 )
-    	HotStripLimitValue[c] = int(GaussFit->GetParameter(1) + 4*GaussFit->GetParameter(2)); // Centroid of the gaussian + 4 sigmas
+    if ( (GaussFit->GetParameter(1) + 5*GaussFit->GetParameter(2)) > 0 )
+    	HotStripLimitValue[c] = int(GaussFit->GetParameter(1) + 5*GaussFit->GetParameter(2)); // Centroid of the gaussian + 5 sigmas
 
     digisPerStripPerCh[c]->Write(namename.c_str());
     namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Digi_PerStrip_PerCh_" + to_string(chamberPos[i]) + ".png";
